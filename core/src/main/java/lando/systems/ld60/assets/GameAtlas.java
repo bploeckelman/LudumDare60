@@ -6,13 +6,13 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.zendogames.zenlib.assets.Asset;
 import com.zendogames.zenlib.assets.AtlasType;
 
-public enum SpriteAtlas implements AtlasType {
+public enum GameAtlas implements AtlasType {
     SPRITES("sprites/sprites.atlas");
 
     private final Asset<TextureAtlas> asset;
     private final String path;
 
-    SpriteAtlas(String path) {
+    GameAtlas(String path) {
         this.path = path;
         this.asset = new Asset<>(this);
     }

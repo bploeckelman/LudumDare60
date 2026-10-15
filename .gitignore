@@ -1,5 +1,6 @@
 ## Project:
 assets/imgui.ini
+assets/maps/ld60.tiled-session
 assets/sprites/*
 !assets/sprites/.gitkeep
 

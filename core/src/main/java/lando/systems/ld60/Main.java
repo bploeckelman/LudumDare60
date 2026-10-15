@@ -5,8 +5,9 @@ import com.zendogames.zenlib.ZenFlag;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.imgui.ImGuiGdx;
 import com.zendogames.zenlib.screens.ZenScreen;
-import lando.systems.ld60.assets.SpriteAtlas;
-import lando.systems.ld60.screens.TestScreen;
+import lando.systems.ld60.assets.GameMap;
+import lando.systems.ld60.assets.GameAtlas;
+import lando.systems.ld60.screens.ExampleScreen;
 
 public class Main extends ZenGame {
 
@@ -21,7 +22,8 @@ public class Main extends ZenGame {
         //ZenFlag.LOG_DEBUG.enable();
         //ZenFlag.LOG_INPUT.enable();
         //ZenFlag.DEBUG_FRAME_POOL.enable();
-        assets.register(SpriteAtlas.values());
+        assets.register(GameMap.values());
+        assets.register(GameAtlas.values());
     }
 
     @Override public ZenConfig config() {
@@ -30,7 +32,7 @@ public class Main extends ZenGame {
 
     @Override
     protected ZenScreen createFirstScreen() {
-        return new TestScreen(this);
+        return new ExampleScreen(this);
     }
 
     @Override
