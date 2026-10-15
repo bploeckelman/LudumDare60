@@ -1,5 +1,7 @@
 ## Project:
 assets/imgui.ini
+assets/sprites/*
+!assets/sprites/.gitkeep
 
 ## Gradle:
 .gradle/

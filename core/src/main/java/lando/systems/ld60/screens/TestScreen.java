@@ -16,6 +16,7 @@ import com.zendogames.zenlib.ecs.components.Name;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.systems.AnimationSystem;
 import com.zendogames.zenlib.render.WorldView;
+import lando.systems.ld60.assets.SpriteAtlas;
 
 public class TestScreen extends BaseScreen {
 
@@ -35,8 +36,11 @@ public class TestScreen extends BaseScreen {
         super(game, /*withCollision*/ false);
         addCommonSystems();
 
+        // For consistency with library provided ZenAtlas starting filter
+        SpriteAtlas.SPRITES.setFilter(filter, filter);
+
         worldCamera.position.set(VIEW_WIDTH / 2f, VIEW_HEIGHT / 2f, 0f);
-        layoutGrid();
+        buildLevel();
 
         actions.add("filter", Input.Keys.F, this::toggleFilter)
                 .add("scale",  Input.Keys.S, this::cycleScale)
@@ -46,6 +50,12 @@ public class TestScreen extends BaseScreen {
                 });
     }
 
+    private void buildLevel() {
+        world.clear();
+        layoutGrid();
+        factory.libgdx(0, 0, 378 / 4, 63 / 4);
+    }
+
     /** Grid pitch in world units: a frame and a half at the current scale. */
     private int pitch() {
         return FRAME * scale * 3 / 2;
@@ -53,7 +63,6 @@ public class TestScreen extends BaseScreen {
 
     /** One entity per {@link ZenAnimHero}, rows top to bottom, each frame standing on the lower third of its cell. */
     private void layoutGrid() {
-        world.clear();
         cells.clear();
 
         var anims = ZenAnimHero.values();
@@ -86,12 +95,13 @@ public class TestScreen extends BaseScreen {
     private void toggleFilter() {
         filter = (filter == Texture.TextureFilter.Nearest) ? Texture.TextureFilter.Linear : Texture.TextureFilter.Nearest;
         ZenAtlas.SPRITES.setFilter(filter, filter);
+        SpriteAtlas.SPRITES.setFilter(filter, filter);
         Log.info(TAG, "atlas filter %s", filter);
     }
 
     private void cycleScale() {
         scale = (scale >= 4) ? 1 : scale * 2;
-        layoutGrid();
+        buildLevel();
     }
 
     @Override

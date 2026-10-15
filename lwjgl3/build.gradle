@@ -1,4 +1,3 @@
-
 buildscript {
   repositories {
     gradlePluginPortal()
@@ -8,6 +7,7 @@ buildscript {
     if(enableGraalNative == 'true') {
       classpath "org.graalvm.buildtools.native:org.graalvm.buildtools.native.gradle.plugin:0.9.28"
     }
+    classpath "com.github.tommyettinger:libgdx-texturepacker:$texturePackerOnlyVersion"
   }
 }
 plugins {
@@ -185,6 +185,21 @@ construo {
 tasks.register('dist') {
   dependsOn 'jar'
 }
+
+import com.badlogic.gdx.tools.texturepacker.TexturePacker
+
+// Packs sprites/ into the library atlas that ZenAtlas.SPRITES loads from the classpath
+tasks.register('texturePacker') {
+  def spritesDir = file("${rootProject.projectDir}/sprites")
+  def atlasDir   = file("${rootProject.projectDir}/assets/sprites")
+  inputs.dir(spritesDir)
+  outputs.dir(atlasDir)
+  doLast {
+    TexturePacker.processIfModified(spritesDir.path, atlasDir.path, 'sprites')
+  }
+}
+processResources.dependsOn texturePacker
+tasks.matching { it.name == 'sourcesJar' }.configureEach { dependsOn texturePacker }
 
 distributions {
   main {
