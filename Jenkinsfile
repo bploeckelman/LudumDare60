@@ -52,7 +52,9 @@ pipeline {
 //        }
         stage("HTML - TeaVM") {
             steps {
-                sh './gradlew teavm:build'
+                sh './gradlew teavm:gdx_teavm_web_js_release_build'
+                sh './gradlew teavm:gdx_teavm_web_wasm_release_build'
+
             }
         }
 
@@ -78,9 +80,14 @@ pipeline {
 //                                                        remoteDirectory: "${env.REMOTE_DIR}",
 //                                                ),
                                                 sshTransfer(
-                                                        sourceFiles: "teavm/build/dist/webapp/**",
-                                                        removePrefix: "teavm/build/dist/webapp/",
-                                                        remoteDirectory: "${env.REMOTE_DIR}/teavm",
+                                                        sourceFiles: "teavm/dist/js/release/webapp/**",
+                                                        removePrefix: "teavm/dist/js/release/webapp/",
+                                                        remoteDirectory: "${env.REMOTE_DIR}/teavm/js",
+                                                ),
+                                                sshTransfer(
+                                                        sourceFiles: "teavm/dist/wasm/release/webapp/**",
+                                                        removePrefix: "teavm/dist/wasm/release/webapp/",
+                                                        remoteDirectory: "${env.REMOTE_DIR}/teavm/wasm",
                                                 )
                                         ]
                                 )
