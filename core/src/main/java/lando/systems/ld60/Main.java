@@ -1,5 +1,6 @@
 package lando.systems.ld60;
 
+import com.kotcrab.vis.ui.VisUI;
 import com.zendogames.zenlib.ZenConfig;
 import com.zendogames.zenlib.ZenFlag;
 import com.zendogames.zenlib.ZenGame;
@@ -7,7 +8,7 @@ import com.zendogames.zenlib.imgui.ImGuiGdx;
 import com.zendogames.zenlib.screens.ZenScreen;
 import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.assets.GameAtlas;
-import lando.systems.ld60.screens.ExampleScreen;
+import lando.systems.ld60.screens.IntroScreen;
 
 public class Main extends ZenGame {
 
@@ -22,9 +23,20 @@ public class Main extends ZenGame {
         //ZenFlag.LOG_DEBUG.enable();
         //ZenFlag.LOG_INPUT.enable();
         //ZenFlag.DEBUG_FRAME_POOL.enable();
+        if (!VisUI.isLoaded()) {
+            VisUI.load(VisUI.SkinScale.X2);
+        }
         assets.register(GameMap.values());
         assets.register(GameAtlas.values());
         // test
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (VisUI.isLoaded()) {
+            VisUI.dispose();
+        }
     }
 
     @Override public ZenConfig config() {
@@ -33,7 +45,7 @@ public class Main extends ZenGame {
 
     @Override
     protected ZenScreen createFirstScreen() {
-        return new ExampleScreen(this);
+        return new IntroScreen(this);
     }
 
     @Override
