@@ -8,17 +8,10 @@ import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
-import com.zendogames.zenlib.FramePool;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ZenGame;
-import com.zendogames.zenlib.assets.ZenAnimHero;
 import com.zendogames.zenlib.assets.ZenAtlas;
 import com.zendogames.zenlib.ecs.Entity;
-import com.zendogames.zenlib.ecs.components.Animator;
-import com.zendogames.zenlib.ecs.components.Name;
-import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.Tilemap;
 import com.zendogames.zenlib.ecs.systems.*;
 import com.zendogames.zenlib.render.CameraFollow;
@@ -44,7 +37,6 @@ public class ExampleScreen extends BaseScreen {
     static final int COLUMNS     = 5;
     static final int FRAME       = 16;   // the hero frames are 16x16
 
-    final Array<Entity> cells = new Array<>();
     final ContactSystem contactSystem;
     final CameraFollow cameraFollow;
     final MapObjectSpawner spawner;
@@ -90,7 +82,7 @@ public class ExampleScreen extends BaseScreen {
         debugViews.add(DebugViews.sensors(world));
         debugViews.add(DebugViews.timers(world));
         actions.add("filter", Input.Keys.F, this::toggleFilter)
-                .add("scale",  Input.Keys.S, this::cycleScale)
+                .add("scale",  Input.Keys.O, this::cycleScale)
                 .add("pause",  Input.Keys.P, () -> {
                     var animSystem = world.getSystem(AnimationSystem.class);
                     animSystem.enabled = !animSystem.enabled;
@@ -99,8 +91,6 @@ public class ExampleScreen extends BaseScreen {
 
     private void buildLevel() {
         world.clear();
-        layoutGrid();
-        factory.libgdx(0, 0, 378 / 4, 63 / 4);
 
         player = null;
         tilemap = new Tilemap(GameMap.EXAMPLE.get());
@@ -113,42 +103,6 @@ public class ExampleScreen extends BaseScreen {
 
         Log.info(TAG, "built level: %dx%d tiles, %d layers, %d objects, hero %s",
                 tilemap.cols, tilemap.rows, tilemap.layers.size, tilemap.objects.size, player == null ? "none" : player.toString());
-    }
-
-    /** Grid pitch in world units: a frame and a half at the current scale. */
-    private int pitch() {
-        return FRAME * scale * 3 / 2;
-    }
-
-    /** One entity per {@link ZenAnimHero}, rows top to bottom, each frame standing on the lower third of its cell. */
-    private void layoutGrid() {
-        cells.clear();
-
-        var anims = ZenAnimHero.values();
-        var rows  = (anims.length + COLUMNS - 1) / COLUMNS;
-        var pitch = pitch();
-        var left  = (VIEW_WIDTH  - COLUMNS * pitch) / 2;
-        var top   = (VIEW_HEIGHT + rows    * pitch) / 2;
-
-        for (int i = 0; i < anims.length; i++) {
-            var anim = anims[i];
-            var col  = i % COLUMNS;
-            var row  = i / COLUMNS;
-            var x    = left + col * pitch + pitch / 2;
-            var y    = top  - (row + 1) * pitch + pitch / 3;
-
-            // Origin at the frame's bottom center, like the hero, so the scale grows about the feet
-            var animator = new Animator(anim, FRAME / 2f, 0);
-            animator.defaultScale.set(scale, scale);
-            animator.scale.set(scale, scale);
-
-            var entity = world.createEntity()
-                    .add(new Name(anim.name().toLowerCase()))
-                    .add(new Position(x, y))
-                    .add(animator);
-            cells.add(entity);
-        }
-        Log.debug(TAG, "laid out %d animations at %dx", anims.length, scale);
     }
 
     private void toggleFilter() {
@@ -177,26 +131,6 @@ public class ExampleScreen extends BaseScreen {
             cameraFollow.follow(mapCenter);
         }
         cameraFollow.update(dt);
-    }
-
-    /** Names in window pixels under each cell, so the font stays legible at any world scale. */
-    @Override
-    protected void renderUI() {
-        super.renderUI();
-
-        var font   = game.defaultFont;
-        var layout = game.layout;
-        var below  = pitch() / 4f;
-        batch.setProjectionMatrix(windowCamera.combined);
-        batch.begin();
-        for (int i = 0; i < cells.size; i++) {
-            var e   = cells.get(i);
-            var pos = Position.get(e);
-            var at  = worldView.project(pos.x, pos.y - below, FramePool.vec2(0, 0));
-            layout.setText(font, Name.of(e), Color.WHITE, 0, Align.center, false);
-            font.draw(batch, layout, at.x, at.y);
-        }
-        batch.end();
     }
 
     // ------------------------------------------------------------------------
