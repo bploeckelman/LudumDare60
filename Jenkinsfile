@@ -80,13 +80,13 @@ pipeline {
 //                                                        remoteDirectory: "${env.REMOTE_DIR}",
 //                                                ),
                                                 sshTransfer(
-                                                        sourceFiles: "teavm/dist/js/release/webapp/**",
-                                                        removePrefix: "teavm/dist/js/release/webapp/",
+                                                        sourceFiles: "teavm/build/dist/js/release/webapp/**",
+                                                        removePrefix: "teavm/build/dist/js/release/webapp/",
                                                         remoteDirectory: "${env.REMOTE_DIR}/teavm/js",
                                                 ),
                                                 sshTransfer(
-                                                        sourceFiles: "teavm/dist/wasm/release/webapp/**",
-                                                        removePrefix: "teavm/dist/wasm/release/webapp/",
+                                                        sourceFiles: "teavm/build/dist/wasm/release/webapp/**",
+                                                        removePrefix: "teavm/build/dist/wasm/release/webapp/",
                                                         remoteDirectory: "${env.REMOTE_DIR}/teavm/wasm",
                                                 )
                                         ]
