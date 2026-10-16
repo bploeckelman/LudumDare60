@@ -63,7 +63,18 @@ subprojects {
     mavenCentral()
     // You may want to remove the following line if you have errors downloading dependencies.
     mavenLocal()
-    maven { url = 'https://jitpack.io' }
+    maven {
+      url = 'https://jitpack.io'
+      // TODO: temp fix to make zenlib library sources available to game project
+      //  to fix for all consumers, in zenlib build.gradle:
+      //  // JitPack rewrites the Gradle module file and breaks its sources variant; the POM alone is enough
+      //  tasks.withType(GenerateModuleMetadata).configureEach { enabled = false }
+      metadataSources {
+        mavenPom()
+        artifact()
+        ignoreGradleMetadataRedirection()
+      }
+    }
     maven {
       // jImGui/jParser snapshot builds frozen in zenlib's repository, see its vendor/README.md
       url = 'https://raw.githubusercontent.com/zendo-games/zenlib/main/vendor/maven'
