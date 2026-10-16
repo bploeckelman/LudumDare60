@@ -24,7 +24,6 @@ public class Main extends ZenGame {
         //ZenFlag.DEBUG_FRAME_POOL.enable();
         assets.register(GameMap.values());
         assets.register(GameAtlas.values());
-        // new test
     }
 
     @Override public ZenConfig config() {
