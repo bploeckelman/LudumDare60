@@ -30,6 +30,7 @@ dependencies {
 
 gdxTeaVM {
   assets.from(rootProject.files('assets'))
+  classpathAssets("com/kotcrab/vis/ui/skin")
 
   /// You can add additional classes or packages that need reflection here.
   reflection.add("com.kotcrab.vis.ui.widget")
