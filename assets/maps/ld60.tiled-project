@@ -16,12 +16,6 @@
             "id": 11,
             "members": [
                 {
-                    "name": "direction",
-                    "propertyType": "direction",
-                    "type": "string",
-                    "value": "right"
-                },
-                {
                     "name": "height",
                     "type": "float",
                     "value": 2
@@ -224,12 +218,6 @@
             "id": 10,
             "members": [
                 {
-                    "name": "direction",
-                    "propertyType": "direction",
-                    "type": "string",
-                    "value": "right"
-                },
-                {
                     "name": "gravity",
                     "type": "bool",
                     "value": false
@@ -275,10 +263,9 @@
             "id": 6,
             "members": [
                 {
-                    "name": "direction",
-                    "propertyType": "direction",
+                    "name": "unused",
                     "type": "string",
-                    "value": "right"
+                    "value": ""
                 }
             ],
             "name": "walker",
