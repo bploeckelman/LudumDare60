@@ -9,9 +9,12 @@ import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 
+import java.util.function.Supplier;
+
 public class IntroScreen extends ZenScreen {
 
     private static final String TAG = IntroScreen.class.getSimpleName();
+
     private static final float BUTTON_WIDTH  = 320f;
     private static final float BUTTON_HEIGHT = 64f;
     private static final float BUTTON_MARGIN = 16f;
@@ -24,7 +27,8 @@ public class IntroScreen extends ZenScreen {
         var table = new VisTable();
         table.setFillParent(true);
         table.add(title).padBottom(BUTTON_MARGIN * 3).row();
-        table.add(buttonWithOnClick("Game", this::startGame)).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(buttonWithOnClick("Example: Platformer", () -> start(() -> new ExamplePlatformer(game)))).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(buttonWithOnClick("Example: Overhead",   () -> start(() -> new ExampleOverhead(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(new VisTextButton("Settings")).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(new VisTextButton("Credits")).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         uiStage.addActor(table);
@@ -38,9 +42,10 @@ public class IntroScreen extends ZenScreen {
         });
     }
 
-    private void startGame() {
+    /** The screen is built only once the guard passes, so a double click cannot create two. */
+    private void start(Supplier<ZenScreen> screen) {
         if (transitioning) return;
         transitioning = true;
-        game.setScreen(new ExampleScreen(game), ScreenTransitionEffectType.random());
+        game.setScreen(screen.get(), ScreenTransitionEffectType.random());
     }
 }

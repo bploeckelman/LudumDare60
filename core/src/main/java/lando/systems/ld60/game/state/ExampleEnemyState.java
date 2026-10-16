@@ -1,10 +1,12 @@
 package lando.systems.ld60.game.state;
 
+import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.Input;
 import com.zendogames.zenlib.ecs.components.Mover;
 import com.zendogames.zenlib.ecs.components.Sensor;
 import com.zendogames.zenlib.ecs.movement.platformer.PlatformerMotion;
+import com.zendogames.zenlib.ecs.movement.topdown.TopDownMotion;
 import com.zendogames.zenlib.state.State;
 import com.zendogames.zenlib.state.StateMachine;
 import lando.systems.ld60.game.Factory;
@@ -42,5 +44,28 @@ public enum ExampleEnemyState implements State<Entity> {
             sensor.facing = input.moveX;
             return this;
         }
+    },
+    PATROL {
+        /**
+         * Walks a straight line and turns around at a wall. Overhead there is no gravity and no edge to
+         * fall off, so the one signal is the motion's {@code wallX}/{@code wallY}: a SOLID one pixel
+         * ahead on the axis it steers along. (Not {@code xHit}/{@code yHit}: the motion holds a mover
+         * that steers into an adjacent wall at rest, so no blocked pixel is ever attempted.)
+         */
+        @Override
+        public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
+            var input = Input.get(e);
+            var mover = Mover.get(e);
+            if (mover.is(PlatformerMotion.class)) {
+                Log.warn(TAG, "patrol only applies for a mover with top-down motion, %s has platformer motion", e);
+                return this;
+            }
+            var motion = mover.motion(TopDownMotion.class);
+            if (motion.wallX != 0 && motion.wallX == input.moveX) input.moveX = -input.moveX;
+            if (motion.wallY != 0 && motion.wallY == input.moveY) input.moveY = -input.moveY;
+            return this;
+        }
     };
+
+    private static final String TAG = ExampleEnemyState.class.getSimpleName();
 }

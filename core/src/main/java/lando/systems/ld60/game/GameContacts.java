@@ -111,18 +111,24 @@ public class GameContacts implements ContactResponder {
             return;
         }
 
-        var mover = Mover.get(hero);
-        if (mover.is(TopDownMotion.class)) {
-            return;
-        }
-
-        var other      = contact.other();
-        var otherPos   = Position.get(other);
-        var heroPos    = Position.get(hero);
-        var heroMotion = Mover.get(hero).motion(PlatformerMotion.class);
-        var toward     = Integer.signum(otherPos.x - heroPos.x);
-        if (toward != 0) {
-            heroMotion.facing = toward;
+        // Face the attacker, so the HURT state knows which way 'away' is
+        var mover    = Mover.get(hero);
+        var other    = contact.other();
+        var otherPos = Position.get(other);
+        var heroPos  = Position.get(hero);
+        int dx = otherPos.x - heroPos.x;
+        int dy = otherPos.y - heroPos.y;
+        if (mover.is(PlatformerMotion.class)) {
+            if (dx != 0) {
+                var motion = mover.motion(PlatformerMotion.class);
+                motion.facing = Integer.signum(dx);
+            }
+        } else if (mover.is(TopDownMotion.class) && (dx != 0 || dy != 0)) {
+            var motion = mover.motion(TopDownMotion.class);
+            // horizontal movement wins a tie for facing
+            var xAxis = Math.abs(dx) >= Math.abs(dy);
+            if (xAxis) { motion.faceX = Integer.signum(dx); motion.faceY = 0; }
+            else       { motion.faceX = 0; motion.faceY = Integer.signum(dy); }
         }
         Behavior.get(hero).request(ExamplePlayerState.HURT);
         Log.info(TAG, "%s hurt by %s", Name.of(hero), Name.of(other));

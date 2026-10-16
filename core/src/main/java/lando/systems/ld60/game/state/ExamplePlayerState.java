@@ -1,10 +1,12 @@
 package lando.systems.ld60.game.state;
 
+import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.assets.ZenAnimHero;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.*;
 import com.zendogames.zenlib.ecs.movement.platformer.PlatformerMode;
 import com.zendogames.zenlib.ecs.movement.platformer.PlatformerMotion;
+import com.zendogames.zenlib.ecs.movement.topdown.TopDownMotion;
 import com.zendogames.zenlib.input.InputControls;
 import com.zendogames.zenlib.state.State;
 import com.zendogames.zenlib.state.StateMachine;
@@ -16,23 +18,39 @@ public enum ExamplePlayerState implements State<Entity> {
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
             var animator = Animator.get(e);
             var mover    = Mover.get(e);
-            if (!mover.is(PlatformerMotion.class)) return this;
 
-            var motion = mover.motion(PlatformerMotion.class);
-            animator.facing = motion.facing;
-            if (Sensor.has(e)) Sensor.get(e).facing = motion.facing;
-            if (motion.grounded && !motion.jumped) {
-                var running = Math.abs(mover.xVel) > 1f;
-                animator.play(running ? ZenAnimHero.RUN : ZenAnimHero.IDLE);
+            // Top down movement updates are simple, handle them here
+            if (mover.is(TopDownMotion.class)) {
+                var motion = mover.motion(TopDownMotion.class);
+                if (motion.faceX != 0) {
+                    animator.facing = motion.faceX; // left/right flip, up/down keep last horizontal facing
+                }
+                animator.play(mover.isMoving() ? ZenAnimHero.RUN : ZenAnimHero.IDLE);
+                return this;
             }
 
-            if (motion.dropping) { animator.play(ZenAnimHero.IDLE); }
-            if (motion.jumped)   { animator.play(ZenAnimHero.JUMP); animator.scale.set(0.8f, 1.2f); }
-            if (motion.landed)   { animator.play(ZenAnimHero.IDLE); animator.scale.set(1.2f, 0.8f); }
+            // Otherwise, apply platformer movement updates if appropriate
+            if (mover.is(PlatformerMotion.class)) {
+                var motion = mover.motion(PlatformerMotion.class);
 
-            if (motion.mode == PlatformerMode.LEDGE) { animator.play(ZenAnimHero.IDLE); }
-            if (motion.mode == PlatformerMode.DASH)  { animator.play(ZenAnimHero.RUN); animator.scale.set(1.3f, 0.7f); }
+                animator.facing = motion.facing;
+                if (Sensor.has(e)) Sensor.get(e).facing = motion.facing;
+                if (motion.grounded && !motion.jumped) {
+                    var running = Math.abs(mover.xVel) > 1f;
+                    animator.play(running ? ZenAnimHero.RUN : ZenAnimHero.IDLE);
+                }
 
+                if (motion.dropping) { animator.play(ZenAnimHero.IDLE); }
+                if (motion.jumped)   { animator.play(ZenAnimHero.JUMP); animator.scale.set(0.8f, 1.2f); }
+                if (motion.landed)   { animator.play(ZenAnimHero.IDLE); animator.scale.set(1.2f, 0.8f); }
+
+                if (motion.mode == PlatformerMode.LEDGE) { animator.play(ZenAnimHero.IDLE); }
+                if (motion.mode == PlatformerMode.DASH)  { animator.play(ZenAnimHero.RUN); animator.scale.set(1.3f, 0.7f); }
+
+                return this;
+            }
+
+            Log.warn(TAG, "unhandled mover motion type in player state for %s: %s", e, mover.motion.getClass().getSimpleName());
             return this;
         }
     },
@@ -40,10 +58,17 @@ public enum ExamplePlayerState implements State<Entity> {
         @Override
         public void enter(StateMachine<Entity> m, Entity e) {
             var mover = Mover.get(e);
-            if (!mover.is(PlatformerMotion.class)) return;
 
-            var motion = mover.motion(PlatformerMotion.class);
-            motion.launch(mover, -motion.facing, /*dist*/ 1.5f, /*height*/ 1f, /*lock*/ 1f);
+            if (mover.is(PlatformerMotion.class)) {
+                // launch away from attacker in an arc
+                var motion = mover.motion(PlatformerMotion.class);
+                motion.launch(mover, -motion.facing, /*dist*/ 2f, /*height*/ 1.5f, /*lock*/ 1f);
+            } else if (mover.is(TopDownMotion.class)) {
+                // shoved straight away from the attacker at full speed; update() keeps steering that way
+                var motion = mover.motion(TopDownMotion.class);
+                mover.xVel = -motion.faceX * motion.tuning.maxSpeed();
+                mover.yVel = -motion.faceY * motion.tuning.maxSpeed();
+            }
 
             var animator = Animator.get(e);
             animator.start(ZenAnimHero.HURT);
@@ -54,6 +79,14 @@ public enum ExamplePlayerState implements State<Entity> {
 
         @Override
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
+            var mover = Mover.get(e);
+            if (mover.is(TopDownMotion.class)) {
+                // the keyboard wrote Input already (INPUT runs before DECIDE): steer along the shove instead,
+                // which the motion zeroes at a wall, so the player stops there and stays stopped
+                var input = Input.get(e);
+                input.moveX = (int) Math.signum(mover.xVel);
+                input.moveY = (int) Math.signum(mover.yVel);
+            }
             return Animator.get(e).isComplete() ? NORMAL : this;
         }
 
@@ -76,6 +109,8 @@ public enum ExamplePlayerState implements State<Entity> {
         }
     }
     ;
+
+    private static final String TAG = ExamplePlayerState.class.getSimpleName();
 
     @Override
     public State<Entity> update(StateMachine<Entity> stateMachine, Entity entity, float v) {

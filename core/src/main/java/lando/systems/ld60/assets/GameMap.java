@@ -7,7 +7,9 @@ import com.zendogames.zenlib.assets.Asset;
 import com.zendogames.zenlib.assets.MapType;
 
 public enum GameMap implements MapType {
-    EXAMPLE("maps/00-example.tmx");
+      EXAMPLE_PLATFORMER ("maps/00-example-platformer.tmx")
+    , EXAMPLE_TOP_DOWN   ("maps/00-example-top-down.tmx")
+    ;
 
     /** Class property defaults come from here; every map shares the one project. */
     private static final String PROJECT = "maps/ld60.tiled-project";

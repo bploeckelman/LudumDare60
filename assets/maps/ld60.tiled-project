@@ -295,6 +295,24 @@
             "useAs": [
                 "object"
             ]
+        },
+        {
+            "color": "#ffff5500",
+            "drawFill": true,
+            "id": 14,
+            "members": [
+                {
+                    "name": "direction",
+                    "propertyType": "direction",
+                    "type": "string",
+                    "value": "right"
+                }
+            ],
+            "name": "patrol",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
         }
     ]
 }

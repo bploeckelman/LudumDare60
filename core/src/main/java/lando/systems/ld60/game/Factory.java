@@ -15,6 +15,8 @@ import com.zendogames.zenlib.ecs.movement.Motion;
 import com.zendogames.zenlib.ecs.movement.platformer.PlatformerMode;
 import com.zendogames.zenlib.ecs.movement.platformer.PlatformerMotion;
 import com.zendogames.zenlib.ecs.movement.platformer.PlatformerTuning;
+import com.zendogames.zenlib.ecs.movement.topdown.TopDownMotion;
+import com.zendogames.zenlib.ecs.movement.topdown.TopDownTuning;
 import com.zendogames.zenlib.input.InputControls;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import lando.systems.ld60.game.components.Health;
@@ -29,6 +31,7 @@ public class Factory {
     public static final int UNIT = 16;
 
     // Tiled class names: spawner keys, one per factory method below
+    public static final String MARKER     = "marker"; // point objects that other objects reference (teleporter / leaper target); spawns nothing
     public static final String PLAYER     = "player";
     public static final String BOUNCER    = "bouncer";
     public static final String JUMPTHRU   = "jumpthru";
@@ -40,23 +43,26 @@ public class Factory {
     public static final String LEAPER     = "leaper";
     public static final String SHOOTER    = "shooter";
     public static final String BALL       = "ball";
-    public static final String MARKER     = "marker"; // point objects that other objects reference (teleporter / leaper target); spawns nothing
+    public static final String PATROL     = "patrol";       // simple enemy for overhead example
 
     /** Seconds a bullet flies before it expires on its own. */
     public static final float BULLET_LIFETIME = 3f;
 
-     /**
-      * The grounded enemies' movement: a slow walk that stops almost at once, barely steerable in
-      * the air, the player's jump numbers so gravity matches, no jump helpers and no abilities.
-      */
-     static final PlatformerTuning ENEMY_TUNING = new PlatformerTuning(
-             UNIT,
-             3, 0.3f, 0.05f,         // ground: speed (tiles/s), accel time, stop time
-             1, 0.5f, 0.3f, 22,      // air: speed, accel time, stop time, max fall speed
-             5, 0.38f,               // jump: apex height (tiles), time to peak; only its gravity is used
-             2.5f, 2f,               // gravity multipliers: jump cut, fall
-             0f, 0f,                 // jump helpers: none, nothing presses jump
-             PlatformerTuning.Abilities.NONE);
+    /**
+     * The grounded enemies' movement: a slow walk that stops almost at once, barely steerable in
+     * the air, the player's jump numbers so gravity matches, no jump helpers and no abilities.
+     */
+    static final PlatformerTuning ENEMY_TUNING = new PlatformerTuning(
+            UNIT,
+            3, 0.3f, 0.05f,         // ground: speed (tiles/s), accel time, stop time
+            1, 0.5f, 0.3f, 22,      // air: speed, accel time, stop time, max fall speed
+            5, 0.38f,               // jump: apex height (tiles), time to peak; only its gravity is used
+            2.5f, 2f,               // gravity multipliers: jump cut, fall
+            0f, 0f,                 // jump helpers: none, nothing presses jump
+            PlatformerTuning.Abilities.NONE);
+
+    /** The top-down enemies' movement: half the player's speed, a slow start, stops very quickly. */
+    static final TopDownTuning PATROL_TUNING = new TopDownTuning(UNIT, 3, 0.3f, 0.05f);
 
     private final World world;
     private final TextureRegion pixel;
@@ -70,12 +76,21 @@ public class Factory {
     // From map objects: read the Tiled class members here, then build the plain way
     // ------------------------------------------------------------------------
 
-    public Entity player(MapObject object) {
+    public Entity platformerPlayer(MapObject object) {
         int x = TiledProps.x(object);
         int y = TiledProps.y(object);
         int w = TiledProps.width(object);
         int cx = x + w / 2;
-        return player(cx, y);
+        return platformerPlayer(cx, y);
+    }
+
+    public Entity overheadPlayer(MapObject object) {
+        int x = TiledProps.x(object);
+        int y = TiledProps.y(object);
+        int w = TiledProps.width(object);
+        // TODO: probably get height and set pos as cx,cy so origin is center instead of bottom-center
+        int cx = x + w / 2;
+        return overheadPlayer(cx, y);
     }
 
     public Entity bouncer(MapObject object) {
@@ -184,11 +199,20 @@ public class Factory {
          return ball(region, x, y, dir, speed, height);
      }
 
+     public Entity patrol(MapObject object) {
+         var region = TiledProps.region(object);
+         int x      = TiledProps.x(object);
+         int y      = TiledProps.y(object);
+         var dir    = TiledProps.enumOf(object, "direction", Direction.class);
+         // TODO: send position as center x,y instead?
+         return patrol(region, x, y, dir);
+     }
+
     // ------------------------------------------------------------------------
     // Plain builders: usable from DebugActions.arm(...) at the pointer
     // ------------------------------------------------------------------------
 
-    public Entity player(int x, int y) {
+    public Entity platformerPlayer(int x, int y) {
         var ledgeGrab = PlatformerTuning.Abilities.LedgeGrab.PUSH;
         var tuning = new PlatformerTuning(
                 UNIT,                   // unit -> pixels, base unit that tuning params are authored in (often tile size)
@@ -212,6 +236,28 @@ public class Factory {
                 .add(new Mover(new PlatformerMotion(tuning)))
                 .add(new Input(inputControls))
                 .add(Collider.capsule(GameMask.PLAYER, -4, 0, 8, 16)
+                        .blockedBy(GameMask.SOLID)
+                        .detects(GameMask.ENEMY, GameMask.TRIGGER, GameMask.HAZARD));
+    }
+
+    public Entity overheadPlayer(int x, int y) {
+        var controls = InputControls.wasd(com.badlogic.gdx.Input.Keys.SPACE);
+        var tuning = new TopDownTuning(
+                UNIT,    // authoring unit -> pixels
+                6,       // speed (tiles/sec, same for every direction)
+                0.08f,   // accel time
+                0.08f);  // stop time
+
+        return world.createEntity()
+                .add(new Name("player"))
+                .add(new Position(x, y))
+                .add(new Health(3))
+                .add(new Contacts())
+                .add(new Input(controls))
+                .add(new Animator(ZenAnimHero.IDLE, 8, 0))
+                .add(new Behavior(ExamplePlayerState.NORMAL))
+                .add(new Mover(new TopDownMotion(tuning)))
+                .add(Collider.rect(GameMask.PLAYER, -4, 0, 8, 8) // feet: sprite's top half may overlap a wall behind it
                         .blockedBy(GameMask.SOLID)
                         .detects(GameMask.ENEMY, GameMask.TRIGGER, GameMask.HAZARD));
     }
@@ -423,5 +469,21 @@ public class Factory {
                  .add(Collider.circ(GameMask.ENEMY, UNIT / 2f, UNIT / 2f, UNIT / 2f).blockedBy(GameMask.SOLID))
                  .add(image)
                  .add(mover);
+     }
+
+     public Entity patrol(TextureRegion region, int x, int y, Direction dir) {
+         var input = new Input();
+         input.moveX = dir.dx;
+         input.moveY = dir.dy;
+
+         return world.createEntity()
+                 .tag(GameTags.ENEMY)
+                 .add(new Name("patrol"))
+                 .add(new Position(x, y))
+                 .add(new Image(region, UNIT, UNIT))
+                 .add(new Behavior(ExampleEnemyState.PATROL))
+                 .add(new Mover(new TopDownMotion(PATROL_TUNING)))
+                 .add(Collider.rect(GameMask.ENEMY, 0, 0, UNIT, UNIT).blockedBy(GameMask.SOLID))
+                 .add(input);
      }
 }
