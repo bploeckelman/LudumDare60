@@ -11,6 +11,34 @@
     ],
     "propertyTypes": [
         {
+            "color": "#ffffaaff",
+            "drawFill": true,
+            "id": 11,
+            "members": [
+                {
+                    "name": "direction",
+                    "propertyType": "direction",
+                    "type": "string",
+                    "value": "right"
+                },
+                {
+                    "name": "height",
+                    "type": "float",
+                    "value": 2
+                },
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "value": 3
+                }
+            ],
+            "name": "ball",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
             "color": "#ffffaa00",
             "drawFill": true,
             "id": 2,
@@ -41,6 +69,77 @@
             "valuesAsFlags": false
         },
         {
+            "color": "#ffffff00",
+            "drawFill": true,
+            "id": 7,
+            "members": [
+                {
+                    "name": "amplitude",
+                    "type": "float",
+                    "value": 1
+                },
+                {
+                    "name": "direction",
+                    "propertyType": "direction",
+                    "type": "string",
+                    "value": "right"
+                },
+                {
+                    "name": "period",
+                    "type": "float",
+                    "value": 1
+                },
+                {
+                    "name": "range",
+                    "type": "float",
+                    "value": 0
+                },
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "value": 4
+                }
+            ],
+            "name": "flyer",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
+            "color": "#ffaaff00",
+            "drawFill": true,
+            "id": 8,
+            "members": [
+                {
+                    "name": "direction",
+                    "propertyType": "direction",
+                    "type": "string",
+                    "value": "right"
+                },
+                {
+                    "name": "dist",
+                    "type": "float",
+                    "value": 2
+                },
+                {
+                    "name": "height",
+                    "type": "float",
+                    "value": 1.5
+                },
+                {
+                    "name": "period",
+                    "type": "float",
+                    "value": 2
+                }
+            ],
+            "name": "jumper",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
             "color": "#ff00aaff",
             "drawFill": true,
             "id": 5,
@@ -53,6 +152,50 @@
                 }
             ],
             "name": "jumpthru",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
+            "color": "#ff55ff7f",
+            "drawFill": true,
+            "id": 9,
+            "members": [
+                {
+                    "name": "height",
+                    "type": "float",
+                    "value": 1
+                },
+                {
+                    "name": "period",
+                    "type": "float",
+                    "value": 2
+                },
+                {
+                    "name": "target",
+                    "type": "object",
+                    "value": 0
+                }
+            ],
+            "name": "leaper",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
+            "color": "#ff0055ff",
+            "drawFill": true,
+            "id": 12,
+            "members": [
+                {
+                    "name": "unused",
+                    "type": "bool",
+                    "value": false
+                }
+            ],
+            "name": "marker",
             "type": "class",
             "useAs": [
                 "object"
@@ -76,6 +219,39 @@
             ]
         },
         {
+            "color": "#ffaa0000",
+            "drawFill": true,
+            "id": 10,
+            "members": [
+                {
+                    "name": "direction",
+                    "propertyType": "direction",
+                    "type": "string",
+                    "value": "right"
+                },
+                {
+                    "name": "gravity",
+                    "type": "bool",
+                    "value": false
+                },
+                {
+                    "name": "interval",
+                    "type": "float",
+                    "value": 2
+                },
+                {
+                    "name": "speed",
+                    "type": "float",
+                    "value": 6
+                }
+            ],
+            "name": "shooter",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
             "color": "#ffff0000",
             "drawFill": true,
             "id": 3,
@@ -88,6 +264,46 @@
                 }
             ],
             "name": "spike",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
+            "color": "#ffff007f",
+            "drawFill": true,
+            "id": 6,
+            "members": [
+                {
+                    "name": "direction",
+                    "propertyType": "direction",
+                    "type": "string",
+                    "value": "right"
+                }
+            ],
+            "name": "walker",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
+            "color": "#ffff55ff",
+            "drawFill": true,
+            "id": 13,
+            "members": [
+                {
+                    "name": "dwell",
+                    "type": "float",
+                    "value": 2
+                },
+                {
+                    "name": "target",
+                    "type": "object",
+                    "value": 0
+                }
+            ],
+            "name": "teleporter",
             "type": "class",
             "useAs": [
                 "object"

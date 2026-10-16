@@ -1,4 +1,4 @@
-package lando.systems.ld60.game;
+package lando.systems.ld60.game.state;
 
 import com.zendogames.zenlib.assets.ZenAnimHero;
 import com.zendogames.zenlib.ecs.Entity;

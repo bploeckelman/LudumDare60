@@ -298,7 +298,7 @@
  </tile>
  <tile id="76" type="crate">
   <properties>
-   <property name="collision" value="full"/>
+   <property name="shape" value="full"/>
   </properties>
  </tile>
  <tile id="77" type="teleporter">

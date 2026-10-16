@@ -4,8 +4,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.PolylineMapObject;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.zendogames.zenlib.Log;
@@ -17,15 +15,12 @@ import com.zendogames.zenlib.ecs.systems.*;
 import com.zendogames.zenlib.render.CameraFollow;
 import com.zendogames.zenlib.render.WorldView;
 import com.zendogames.zenlib.tilemap.MapObjectSpawner;
-import com.zendogames.zenlib.tilemap.TiledProps;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.assets.GameAtlas;
 import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameContacts;
 import lando.systems.ld60.game.GameMask;
-
-import java.util.List;
 
 public class ExampleScreen extends BaseScreen {
 
@@ -51,9 +46,10 @@ public class ExampleScreen extends BaseScreen {
     public ExampleScreen(ZenGame game) {
         super(game, /*withCollision*/ true);
         this.mapCenter = new Vector2();
-        this.contactSystem = new ContactSystem(collision, new GameContacts());
+        this.contactSystem = new ContactSystem(collision, new GameContacts(world, factory));
 
         world.addSystem(new InputSystem(inputProcessor));
+        world.addSystem(new SensorSystem(collision));
         world.addSystem(new TimerSystem());
         world.addSystem(new BehaviorSystem());
         world.addSystem(new LifetimeSystem());
@@ -73,6 +69,13 @@ public class ExampleScreen extends BaseScreen {
                 .on(Factory.JUMPTHRU,   (map, obj) -> factory.jumpthru(obj))
                 .on(Factory.SPIKE,      (map, obj) -> factory.spike(obj))
                 .on(Factory.TELEPORTER, (map, obj) -> factory.teleporter(obj))
+                .on(Factory.WALKER,     (map, obj) -> factory.walker(obj))
+                .on(Factory.FLYER,      (map, obj) -> factory.flyer(obj))
+                .on(Factory.JUMPER,     (map, obj) -> factory.jumper(obj))
+                .on(Factory.LEAPER,     (map, obj) -> factory.leaper(obj))
+                .on(Factory.SHOOTER,    (map, obj) -> factory.shooter(obj))
+                .on(Factory.BALL,       (map, obj) -> factory.ball(obj))
+                .on(Factory.MARKER,     (map, obj) -> {})
         ;
 
         buildLevel();

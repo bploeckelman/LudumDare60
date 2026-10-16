@@ -5,14 +5,24 @@ import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.collision.Contact;
 import com.zendogames.zenlib.collision.ContactResponder;
 import com.zendogames.zenlib.ecs.Entity;
+import com.zendogames.zenlib.ecs.World;
 import com.zendogames.zenlib.ecs.components.*;
 import com.zendogames.zenlib.ecs.movement.platformer.PlatformerMotion;
 import com.zendogames.zenlib.ecs.movement.topdown.TopDownMotion;
 import lando.systems.ld60.game.components.Trigger;
+import lando.systems.ld60.game.state.ExamplePlayerState;
 
 public class GameContacts implements ContactResponder {
 
     private static final String TAG = GameContacts.class.getSimpleName();
+
+    private final World world;
+    private final Factory factory;
+
+    public GameContacts(World world, Factory factory) {
+        this.world   = world;
+        this.factory = factory;
+    }
 
     @Override
     public void respond(Contact contact) {
@@ -106,14 +116,30 @@ public class GameContacts implements ContactResponder {
             return;
         }
 
-        var heroMotion = Mover.get(hero).motion(PlatformerMotion.class);
+        var other      = contact.other();
+        var otherPos   = Position.get(other);
         var heroPos    = Position.get(hero);
-        var otherPos   = Position.get(contact.other());
+        var heroMotion = Mover.get(hero).motion(PlatformerMotion.class);
         var toward     = Integer.signum(otherPos.x - heroPos.x);
         if (toward != 0) {
             heroMotion.facing = toward;
         }
         Behavior.get(hero).request(ExamplePlayerState.HURT);
-        Log.info(TAG, "%s hurt by %s", Name.of(hero), Name.of(contact.other()));
+        Log.info(TAG, "%s hurt by %s", Name.of(hero), Name.of(other));
+
+        if (other.hasTag(GameTags.PROJECTILE)) {
+            var renderable = (Renderable) null;
+            if      (Image.has(other))    renderable = Image.get(other);
+            else if (Animator.has(other)) renderable = Animator.get(other);
+
+            int xOffset = 0;
+            int yOffset = 0;
+            if (renderable != null) {
+                xOffset = (int) renderable.origin.x;
+                yOffset = (int) renderable.origin.y;
+            }
+            factory.pop(otherPos.x - xOffset, otherPos.y - yOffset);
+            world.despawn(other);
+        }
     }
 }
