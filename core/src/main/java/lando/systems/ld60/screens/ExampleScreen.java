@@ -21,6 +21,7 @@ import com.zendogames.zenlib.tilemap.TiledProps;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.assets.GameAtlas;
 import lando.systems.ld60.assets.GameMap;
+import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameContacts;
 import lando.systems.ld60.game.GameMask;
 
@@ -67,10 +68,11 @@ public class ExampleScreen extends BaseScreen {
         worldCamera.position.set(VIEW_WIDTH / 2f, VIEW_HEIGHT / 2f, 0f);
 
         this.spawner = new MapObjectSpawner()
-                .on("player",   this::spawnPlayer)
-                .on("bouncer",  this::spawnBouncer)
-                .on("jumpthru", this::spawnJumpthru)
-                .on("spike",    this::spawnSpike)
+                .on(Factory.PLAYER,     (map, obj) -> respawnPlayer(obj))
+                .on(Factory.BOUNCER,    (map, obj) -> factory.bouncer(obj))
+                .on(Factory.JUMPTHRU,   (map, obj) -> factory.jumpthru(obj))
+                .on(Factory.SPIKE,      (map, obj) -> factory.spike(obj))
+                .on(Factory.TELEPORTER, (map, obj) -> factory.teleporter(obj))
         ;
 
         buildLevel();
@@ -81,9 +83,11 @@ public class ExampleScreen extends BaseScreen {
         debugViews.add(DebugViews.behaviors(world));
         debugViews.add(DebugViews.sensors(world));
         debugViews.add(DebugViews.timers(world));
-        actions.add("filter", Input.Keys.F, this::toggleFilter)
-                .add("scale",  Input.Keys.O, this::cycleScale)
-                .add("pause",  Input.Keys.P, () -> {
+        actions.add("reload map",     Input.Keys.M, this::reloadMap)
+                .add("rebuild level", Input.Keys.F, this::buildLevel)
+                .add("filter",        Input.Keys.F, this::toggleFilter)
+                .add("scale",         Input.Keys.O, this::cycleScale)
+                .add("pause",         Input.Keys.P, () -> {
                     var animSystem = world.getSystem(AnimationSystem.class);
                     animSystem.enabled = !animSystem.enabled;
                 });
@@ -133,54 +137,16 @@ public class ExampleScreen extends BaseScreen {
         cameraFollow.update(dt);
     }
 
-    // ------------------------------------------------------------------------
-    // Spawns for the map's object classes
-    // ------------------------------------------------------------------------
-
-    private void spawnPlayer(Tilemap map, MapObject object) {
+    private void respawnPlayer(MapObject object) {
         if (player != null && !player.isRemoving()) {
-            // Schedule the current player entity for removal before creating a new one
             world.despawn(player);
         }
-
-        int x = TiledProps.x(object);
-        int y = TiledProps.y(object);
-        player = factory.examplePlayer(x, y);
+        player = factory.player(object);
     }
 
-    private void spawnBouncer(Tilemap map, MapObject object) {
-        int x = TiledProps.x(object);
-        int y = TiledProps.y(object);
-        var h = TiledProps.get(object, "height", 8f, Float.class);
-        if (h <= 0) {
-            Log.warn(TAG, "bouncer %s has no width, skipped", TiledProps.describe(object));
-            return;
-        }
-        factory.bouncer(pixel, x, y, h);
-    }
-
-    private void spawnJumpthru(Tilemap map, MapObject object) {
-        int x = TiledProps.x(object);
-        int y = TiledProps.y(object);
-        int w = (object instanceof PolylineMapObject polyline)
-                ? MathUtils.round(polyline.getPolyline().getLength())
-                : TiledProps.width(object);
-        if (w <= 0) {
-            Log.warn(TAG, "jumpthru %s has no width, skipped", TiledProps.describe(object));
-            return;
-        }
-        factory.jumpthru(pixel, x, y, w);
-    }
-
-    private void spawnSpike(Tilemap map, MapObject object) {
-        int x = TiledProps.x(object);
-        int y = TiledProps.y(object);
-        var dir = TiledProps.get(object, "dir", "up", String.class);
-        var allowedDirs = List.of("up", "down", "left", "right");
-        if (!allowedDirs.contains(dir)) {
-            Log.warn(TAG, "spike %s has invalid direction (allowed: [%s]), skipped", TiledProps.describe(object), String.join(", ", allowedDirs));
-            return;
-        }
-        factory.spike(pixel, x, y, dir);
+    /** Save in Tiled, press M: the file is read again and the level rebuilt from it. */
+    private void reloadMap() {
+        GameMap.EXAMPLE.reload(assets);
+        buildLevel();
     }
 }

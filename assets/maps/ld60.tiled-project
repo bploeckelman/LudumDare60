@@ -16,7 +16,7 @@
             "id": 2,
             "members": [
                 {
-                    "name": "height",
+                    "name": "bounce",
                     "type": "float",
                     "value": 8
                 }
@@ -24,9 +24,7 @@
             "name": "bouncer",
             "type": "class",
             "useAs": [
-                "property",
-                "object",
-                "project"
+                "object"
             ]
         },
         {
@@ -57,9 +55,7 @@
             "name": "jumpthru",
             "type": "class",
             "useAs": [
-                "property",
-                "object",
-                "project"
+                "object"
             ]
         },
         {
@@ -76,9 +72,7 @@
             "name": "player",
             "type": "class",
             "useAs": [
-                "property",
-                "object",
-                "project"
+                "object"
             ]
         },
         {
@@ -96,9 +90,7 @@
             "name": "spike",
             "type": "class",
             "useAs": [
-                "property",
-                "object",
-                "project"
+                "object"
             ]
         }
     ]

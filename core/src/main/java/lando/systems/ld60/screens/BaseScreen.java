@@ -46,7 +46,7 @@ public class BaseScreen extends ZenScreen {
         super(game);
         this.pixel = new TextureRegion(game.pixel);
         this.world = new World();
-        this.factory = new Factory(world);
+        this.factory = new Factory(world, pixel);
         this.collision = withCollision ? new CollisionWorld(world) : null;
         this.actions = new DebugActions();
         this.debugViews.add(actions);                // 'Screen' section first, after the switcher Main pins
