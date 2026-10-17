@@ -76,3 +76,77 @@ tasks.register("run"){
   dependsOn("gdx_teavm_web_wasm_release_run")
 }
 build.dependsOn("gdx_teavm_web_wasm_release_build")
+
+
+// 1. Define the JS and WASM specific scripts
+def jsScripts = """
+        <script>
+            async function start() {
+                main()
+            }
+            window.addEventListener("load", start);
+        </script>
+        <script type="text/javascript" charset="utf-8" src="app.js"></script>
+"""
+
+def wasmScripts = """
+        <script>
+            async function start() {
+                let teavm = await TeaVM.wasmGC.load("app.wasm"); teavm.exports.main([]);
+            }
+            window.addEventListener("load", start);
+        </script>
+        <script type="text/javascript" charset="utf-8" src="app.wasm-runtime.js"></script>
+"""
+
+// 2. Overwrite the JS Release HTML
+tasks.matching { it.name == "gdx_teavm_web_js_release_build" }.configureEach {
+  doLast {
+    def templateFile = file("webapp/index_template.html")
+    def outDir = file("build/dist/js/release/webapp")
+    def outputFile = file("${outDir}/index.html")
+    if (templateFile.exists()) {
+      outputFile.text = templateFile.text.replace('<!-- TEAVM_SCRIPTS -->', jsScripts)
+    }
+    project.copy {
+      from file("webapp/static")
+      into outDir
+    }
+  }
+}
+
+// 3. Overwrite the WASM Release HTML
+tasks.matching { it.name == "gdx_teavm_web_wasm_release_build" }.configureEach {
+  doLast {
+    def templateFile = file("webapp/index_template.html")
+    def outDir = file("build/dist/wasm/release/webapp")
+
+    def outputFile = file("${outDir}/index.html")
+    if (templateFile.exists()) {
+      outputFile.text = templateFile.text.replace('<!-- TEAVM_SCRIPTS -->', wasmScripts)
+    }
+
+    project.copy {
+      from file("webapp/static")
+      into outDir
+    }
+  }
+}
+
+// 4. Overwrite the Dev Server (JS Debug) HTML so testing matches release
+tasks.matching { it.name == "gdx_teavm_web_js_build" }.configureEach {
+  doLast {
+    def templateFile = file("webapp/index_template.html")
+    // Note: The debug path lacks the "release/" subfolder
+    def outDir = file("build/dist/js/webapp")
+    def outputFile = file("${outDir}/index.html")
+    if (templateFile.exists()) {
+      outputFile.text = templateFile.text.replace('<!-- TEAVM_SCRIPTS -->', jsScripts)
+    }
+
+    project.copy {
+      from file("webapp/static")
+      into outDir
+    }
+  }
+}
