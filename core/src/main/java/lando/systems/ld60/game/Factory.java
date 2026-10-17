@@ -25,6 +25,8 @@ import lando.systems.ld60.assets.GameSpine;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.components.Health;
 import lando.systems.ld60.game.components.Trigger;
+import lando.systems.ld60.game.movement.BrawlerMotion;
+import lando.systems.ld60.game.movement.BrawlerTuning;
 import lando.systems.ld60.game.movement.FlightMotion;
 import lando.systems.ld60.game.state.ExampleEnemyState;
 import lando.systems.ld60.game.state.ExamplePlayerState;
@@ -323,21 +325,25 @@ public class Factory {
 
     public Entity spineboyScroller(int x, int y) {
         var controls = InputControls.wasd(com.badlogic.gdx.Input.Keys.SPACE);
-        var tuning = new TopDownTuning(
+        var tuning = new BrawlerTuning(
                 UNIT,    // authoring unit -> pixels
-                10,      // speed (tiles/sec, same for every direction)
+                10,      // x-axis speed (tiles/sec)
+                5,       // y-axis speed (tiles/sec)
                 1.5f,    // accel time
-                0.08f);  // stop time
+                0.08f,   // stop time
+                2.5f,    // 'jump' height (tiles)
+                0.35f);  // 'jump' time to peak (seconds)
 
         return world.createEntity()
                 .add(new Name("spineboy"))
                 .add(new Position(x, y))
+                .add(new Timers())
                 .add(new Health(3))
                 .add(new Contacts())
                 .add(new Input(controls))
                 .add(new SpineAnimator(GameSpine.SPINEBOY, "idle"))
                 .add(new Behavior(ExamplePlayerState.NORMAL_SPINEBOY))
-                .add(new Mover(new TopDownMotion(tuning)))
+                .add(new Mover(new BrawlerMotion(tuning)))
                 .add(Collider.rect(GameMask.PLAYER, -4, 0, 8, 8) // feet: sprite's top half may overlap a wall behind it
                         .blockedBy(GameMask.SOLID)
                         .detects(GameMask.ENEMY, GameMask.TRIGGER, GameMask.HAZARD));

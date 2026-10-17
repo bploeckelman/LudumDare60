@@ -10,6 +10,7 @@ import com.zendogames.zenlib.ecs.components.*;
 import com.zendogames.zenlib.ecs.movement.platformer.PlatformerMotion;
 import com.zendogames.zenlib.ecs.movement.topdown.TopDownMotion;
 import lando.systems.ld60.game.components.Trigger;
+import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.state.ExamplePlayerState;
 
 public class GameContacts implements ContactResponder {
@@ -129,6 +130,11 @@ public class GameContacts implements ContactResponder {
             var xAxis = Math.abs(dx) >= Math.abs(dy);
             if (xAxis) { motion.faceX = Integer.signum(dx); motion.faceY = 0; }
             else       { motion.faceX = 0; motion.faceY = Integer.signum(dy); }
+        } else if (mover.is(BrawlerMotion.class)) {
+            int dir = (int) Math.signum(heroPos.x - otherPos.x);
+            var motion = mover.motion(BrawlerMotion.class);
+            motion.facing = -dir;
+            motion.launch(mover, dir, 1.5f, 0.75f);
         }
         Behavior.get(hero).request(ExamplePlayerState.HURT);
         Log.info(TAG, "%s hurt by %s", Name.of(hero), Name.of(other));

@@ -11,6 +11,7 @@ import com.zendogames.zenlib.input.InputControls;
 import com.zendogames.zenlib.state.State;
 import com.zendogames.zenlib.state.StateMachine;
 import lando.systems.ld60.game.components.Health;
+import lando.systems.ld60.game.movement.BrawlerMotion;
 
 public enum ExamplePlayerState implements State<Entity> {
     // NOTE: in practice we should have a separate State<Entity> implementation
@@ -21,18 +22,16 @@ public enum ExamplePlayerState implements State<Entity> {
         @Override
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
             var mover = Mover.get(e);
-            if (!mover.is(TopDownMotion.class)) return this;
+            if (!mover.is(BrawlerMotion.class)) return this;
 
-            var anim = SpineAnimator.get(e);
-            var motion = mover.motion(TopDownMotion.class);
-            if (motion.faceX != 0 && motion.faceX != anim.facing) {
-                anim.facing = motion.faceX; // left/right flip, up/down keep last horizontal facing
-                if (anim.is("idle")) {
-                    anim.start("idle-turn", true);
-                    anim.queue("idle", true, 0);
-                }
-            }
-            locomotion(anim, mover, motion.tuning.maxSpeed() * 0.5f);
+            var anim   = SpineAnimator.get(e);
+            var motion = mover.motion(BrawlerMotion.class);
+            anim.facing   = motion.facing;
+            anim.origin.y = -motion.z / anim.scale.y; // lift the skeleton by its height; Position, Collider stay on the floor
+            anim.order    = -Position.get(e).y;       // lower on the street draws in front of higher
+            if      (!motion.grounded) { anim.play("jump", false); }
+            else if (motion.landed)    { anim.start("run-to-idle", false); anim.queue("idle", true, 0); }
+            else                       { locomotion(anim, mover, motion.tuning.maxSpeedX() * 0.5f); }
 
             return this;
         }

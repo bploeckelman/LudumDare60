@@ -1,22 +1,20 @@
 package lando.systems.ld60.screens;
 
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.maps.MapObject;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.ecs.Family;
+import com.zendogames.zenlib.ecs.components.Mover;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import com.zendogames.zenlib.ecs.components.Tilemap;
-import com.zendogames.zenlib.render.WorldView;
-import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.Factory;
+import lando.systems.ld60.game.movement.BrawlerMotion;
 
 public class ExampleScroller extends ExampleScreen {
 
@@ -40,7 +38,9 @@ public class ExampleScroller extends ExampleScreen {
         buildLevel();
 
         this.debugViews.add(DebugViews.spine(world));
-        actions.add("toggle debug render", Input.Keys.B, () -> debugRender = !debugRender);
+        actions.add("toggle debug render", Input.Keys.B, () -> debugRender = !debugRender)
+                .add("hurt (knockback)",   Input.Keys.K, this::testHurt)
+        ;
     }
 
     @Override
@@ -71,5 +71,20 @@ public class ExampleScroller extends ExampleScreen {
         anim.onEvent(event -> Log.debug(TAG, "event: %s", event.getData().getName()));
 
         setPlayer(spineboy);
+    }
+
+    private void testHurt() {
+        if (player == null) return;
+
+        var anim = SpineAnimator.get(player);
+        anim.play("jump");
+        anim.scale.set(
+                anim.defaultScale.x * 0.9f,
+                anim.defaultScale.y * 1.1f);
+
+        var mover = Mover.get(player);
+        var motion = mover.motion(BrawlerMotion.class);
+        motion.facing = 1;
+        motion.launch(mover, -1, /*dist*/ 5f, /*height*/ 0.2f);
     }
 }

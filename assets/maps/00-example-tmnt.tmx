@@ -3,6 +3,9 @@
  <tileset firstgid="1" source="tilesets/prototype.tsx"/>
  <imagelayer id="3" name="background">
   <image source="backgrounds/turtles-in-time-02-alley-cat-blues.png" width="2432" height="224"/>
+  <properties>
+   <property name="layer" value="background"/>
+  </properties>
  </imagelayer>
  <layer id="1" name="tiles" width="152" height="14">
   <data encoding="csv">
