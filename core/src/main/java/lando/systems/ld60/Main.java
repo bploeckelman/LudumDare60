@@ -1,6 +1,9 @@
 package lando.systems.ld60;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.kotcrab.vis.ui.VisUI;
+import com.zendogames.zenlib.Time;
 import com.zendogames.zenlib.ZenConfig;
 import com.zendogames.zenlib.ZenFlag;
 import com.zendogames.zenlib.ZenGame;
@@ -59,5 +62,17 @@ public class Main extends ZenGame {
         if (ImGuiGdx.isInitialized() && ZenFlag.SHOW_IMGUI.off()) {
             ZenFlag.SHOW_IMGUI.enable();
         }
+    }
+
+    @Override
+    protected void draw() {
+        ScreenUtils.clear(Color.DARK_GRAY);
+        if (screenTransition.inProgress()) {
+            screenTransition.render(batch, windowCamera);
+        } else {
+            currentScreen.renderOffscreenBuffers(batch);
+            currentScreen.render(Time.delta);
+        }
+        ImGuiGdx.render(currentScreen::renderImGui);
     }
 }

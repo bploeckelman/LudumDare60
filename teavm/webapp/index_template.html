@@ -1,36 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>LudumDare60 - COOTER</title>
+    <title>LudumDare60 - Custom Build</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <link href="styles.css" rel="stylesheet" type="text/css">
-
-    <!-- Add your custom CSS, fonts, and headers here -->
     <style>
-        /*body {*/
-        /*    display: flex;*/
-        /*    justify-content: center;*/
-        /*    align-items: center;*/
-        /*    background: #118; !* Example change *!*/
-        /*    height: 100vh;*/
-        /*    margin: 0;*/
-        /*    padding: 0;*/
-        /*    overflow: hidden;*/
-        /*}*/
+        body {
+            /*!* Use CSS Grid to stack elements perfectly on top of each other *!*/
+            /*display: flex;*/
+            /*place-items: center;*/
+            /*align-items: center;*/
+            /*background: #111;*/
+            /*height: 100vh;*/
+            /*margin: 0;*/
+            /*padding: 0;*/
+            /*overflow: hidden;*/
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #111; /* Example change */
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .computer-bg {
+            /* Take the image out of the layout entirely */
+            position: absolute;
+
+            /* Lock the scale so the bezel hole matches your game's physical canvas size */
+            width: 2116px;
+            margin-left: 90px;
+            margin-top: 560px;
+            z-index: -1;          /* Push behind the game */
+            pointer-events: none; /* Let mouse clicks pass through */
+        }
+
         #canvas {
+            /*margin-left: 200px;*/
             border: none;
+            /*display: block;*/
             box-shadow: 0px 0px 20px rgba(1, 0, 0, 0.5);
+            /* No CSS stretching and no relative wrappers here */
         }
     </style>
 </head>
 <body oncontextmenu="return false">
-<img src="ibm.jpg" class="computer">
 
-<div id="embed-html">
-    <canvas id="canvas"></canvas>
-</div>
+<!-- No wrapper needed! Stack them directly in the body -->
+<img src="ibm.jpg" class="computer-bg">
+<canvas id="canvas"></canvas>
 
-<!-- Gradle will replace this token with the JS or WASM scripts -->
 <!-- TEAVM_SCRIPTS -->
 
 </body>

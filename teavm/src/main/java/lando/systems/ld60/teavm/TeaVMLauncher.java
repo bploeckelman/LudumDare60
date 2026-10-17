@@ -15,8 +15,8 @@ public class TeaVMLauncher {
         config.width = Config.windowWidth;
         config.height = Config.windowHeight;
         //// If width and height are both 0, then the app will use all available space.
-        //config.width = 0;
-        //config.height = 0;
+//        config.width = 0;
+//        config.height = 0;
         config.useGL30 = true;
         config.preloadListener = assetLoader -> assetLoader.loadScript("freetype.js");
 
