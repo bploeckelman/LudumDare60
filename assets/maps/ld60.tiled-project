@@ -196,6 +196,24 @@
             ]
         },
         {
+            "color": "#ffff5500",
+            "drawFill": true,
+            "id": 14,
+            "members": [
+                {
+                    "name": "direction",
+                    "propertyType": "direction",
+                    "type": "string",
+                    "value": "right"
+                }
+            ],
+            "name": "patrol",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
             "color": "#ff00ff00",
             "drawFill": true,
             "id": 1,
@@ -258,23 +276,6 @@
             ]
         },
         {
-            "color": "#ffff007f",
-            "drawFill": true,
-            "id": 6,
-            "members": [
-                {
-                    "name": "unused",
-                    "type": "string",
-                    "value": ""
-                }
-            ],
-            "name": "walker",
-            "type": "class",
-            "useAs": [
-                "object"
-            ]
-        },
-        {
             "color": "#ffff55ff",
             "drawFill": true,
             "id": 13,
@@ -297,18 +298,17 @@
             ]
         },
         {
-            "color": "#ffff5500",
+            "color": "#ffff007f",
             "drawFill": true,
-            "id": 14,
+            "id": 6,
             "members": [
                 {
-                    "name": "direction",
-                    "propertyType": "direction",
+                    "name": "unused",
                     "type": "string",
-                    "value": "right"
+                    "value": ""
                 }
             ],
-            "name": "patrol",
+            "name": "walker",
             "type": "class",
             "useAs": [
                 "object"

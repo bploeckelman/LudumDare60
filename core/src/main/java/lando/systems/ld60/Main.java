@@ -6,8 +6,9 @@ import com.zendogames.zenlib.ZenFlag;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.imgui.ImGuiGdx;
 import com.zendogames.zenlib.screens.ZenScreen;
-import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.assets.GameAtlas;
+import lando.systems.ld60.assets.GameMap;
+import lando.systems.ld60.assets.GameSpine;
 import lando.systems.ld60.screens.IntroScreen;
 
 public class Main extends ZenGame {
@@ -28,7 +29,7 @@ public class Main extends ZenGame {
         }
         assets.register(GameMap.values());
         assets.register(GameAtlas.values());
-        // test
+        assets.register(GameSpine.values());
     }
 
     @Override

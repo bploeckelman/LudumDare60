@@ -19,6 +19,7 @@ import com.zendogames.zenlib.ecs.movement.topdown.TopDownMotion;
 import com.zendogames.zenlib.ecs.movement.topdown.TopDownTuning;
 import com.zendogames.zenlib.input.InputControls;
 import com.zendogames.zenlib.tilemap.TiledProps;
+import lando.systems.ld60.assets.GameSpine;
 import lando.systems.ld60.game.components.Health;
 import lando.systems.ld60.game.components.Trigger;
 import lando.systems.ld60.game.movement.FlightMotion;
@@ -306,6 +307,14 @@ public class Factory {
                 .add(new Position(x, y))
                 .add(new Lifetime(duration))
                 .add(animator);
+    }
+
+    /** The Spine example: spineboy standing at {@code (x, y)} (feet), running on track 0. */
+    public Entity spineboy(int x, int y) {
+        return world.createEntity()
+                .add(new Name("spineboy"))
+                .add(new Position(x, y))
+                .add(new SpineAnimator(GameSpine.SPINEBOY, "run"));
     }
 
     // ------------------------------------------------------------------------

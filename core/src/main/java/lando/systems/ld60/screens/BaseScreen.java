@@ -3,7 +3,7 @@ package lando.systems.ld60.screens;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.zendogames.zenlib.Time;
@@ -16,6 +16,7 @@ import com.zendogames.zenlib.collision.SensorDraw;
 import com.zendogames.zenlib.ecs.World;
 import com.zendogames.zenlib.ecs.systems.AnimationSystem;
 import com.zendogames.zenlib.ecs.systems.RenderSystem;
+import com.zendogames.zenlib.ecs.systems.SpineSystem;
 import com.zendogames.zenlib.input.ScreenInputProcessor;
 import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.ui.DebugActions;
@@ -62,6 +63,7 @@ public class BaseScreen extends ZenScreen {
     /** The world's systems after the game-specific ones every subclass adds; call at the end of the constructor. */
     protected void addCommonSystems() {
         world.addSystem(new AnimationSystem());
+        world.addSystem(new SpineSystem());
         world.addSystem(new RenderSystem(batch));
     }
 
@@ -105,7 +107,7 @@ public class BaseScreen extends ZenScreen {
     protected void afterWorldUpdate(float dt) {}
 
     @Override
-    protected void renderWorld(SpriteBatch batch) {
+    protected void renderWorld(Batch batch) {
         batch.begin();
         world.render(Time.delta);
         if (collision != null && ZenFlag.DEBUG_RENDER.on()) {
