@@ -1,5 +1,6 @@
 package lando.systems.ld60.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -11,15 +12,18 @@ import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.Tilemap;
 import com.zendogames.zenlib.ecs.systems.*;
 import com.zendogames.zenlib.render.CameraFollow;
+import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.render.WorldView;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import com.zendogames.zenlib.tilemap.MapObjectSpawner;
 import com.zendogames.zenlib.ui.DebugViews;
+import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameAtlas;
 import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameContacts;
 import lando.systems.ld60.game.GameMask;
+import lando.systems.ld60.particles.effects.CloneEffect;
 
 /**
  * What the example screens share: a Tiled map whose tagged tiles collide, the systems a moving,
@@ -127,5 +131,15 @@ public abstract class ExampleScreen extends BaseScreen {
             cameraFollow.follow(mapCenter);
         }
         cameraFollow.update(dt);
+    }
+
+    @Override
+    public void update(float delta) {
+        super.update(delta);
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            Log.info(TAG, "Left mouse button clicked");
+            var mouse = mouseWorldPosition();
+            factory.emitter(EmitterType.CLONE, new CloneEffect.Params(mouse.x, mouse.y), RenderLayer.BACKGROUND);
+        }
     }
 }

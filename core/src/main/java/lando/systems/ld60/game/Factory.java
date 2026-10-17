@@ -18,13 +18,17 @@ import com.zendogames.zenlib.ecs.movement.platformer.PlatformerTuning;
 import com.zendogames.zenlib.ecs.movement.topdown.TopDownMotion;
 import com.zendogames.zenlib.ecs.movement.topdown.TopDownTuning;
 import com.zendogames.zenlib.input.InputControls;
+import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.tilemap.TiledProps;
+import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameSpine;
+import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.components.Health;
 import lando.systems.ld60.game.components.Trigger;
 import lando.systems.ld60.game.movement.FlightMotion;
 import lando.systems.ld60.game.state.ExampleEnemyState;
 import lando.systems.ld60.game.state.ExamplePlayerState;
+import lando.systems.ld60.particles.ParticleEffectParams;
 
 public class Factory {
 
@@ -516,5 +520,17 @@ public class Factory {
                  .add(new Mover(new TopDownMotion(PATROL_TUNING)))
                  .add(Collider.rect(GameMask.ENEMY, 0, 0, UNIT, UNIT).blockedBy(GameMask.SOLID))
                  .add(input);
+     }
+
+     public Entity emitter(EmitterType type, ParticleEffectParams params) {
+         return emitter(type, params, RenderLayer.WORLD);
+     }
+
+     public Entity emitter(EmitterType type, ParticleEffectParams params, RenderLayer layer) {
+         var emitter = new Emitter(type, params);
+         emitter.layer = layer;
+         return world.createEntity()
+                 .add(new Name("emitter-" + type.name().toLowerCase()))
+                 .add(emitter);
      }
 }

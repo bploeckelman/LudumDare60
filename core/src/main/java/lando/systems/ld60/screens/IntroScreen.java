@@ -1,17 +1,23 @@
 package lando.systems.ld60.screens;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ZenGame;
+import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
+import lando.systems.ld60.assets.EmitterType;
+import lando.systems.ld60.particles.effects.CloneEffect;
 
 import java.util.function.Supplier;
 
-public class IntroScreen extends ZenScreen {
+public class IntroScreen extends BaseScreen {
 
     private static final String TAG = IntroScreen.class.getSimpleName();
 
@@ -20,7 +26,8 @@ public class IntroScreen extends ZenScreen {
     private static final float BUTTON_MARGIN = 16f;
 
     public IntroScreen(ZenGame game) {
-        super(game);
+        super(game, false);
+        addCommonSystems();
 
         var title = new VisLabel("Ludum Dare 60");
 
@@ -49,5 +56,15 @@ public class IntroScreen extends ZenScreen {
         if (transitioning) return;
         transitioning = true;
         game.setScreen(screen.get(), ScreenTransitionEffectType.random());
+    }
+
+    @Override
+    public void update(float delta) {
+        super.update(delta);
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            Log.info(TAG, "Left mouse button clicked");
+            var mouse = mouseWorldPosition();
+            factory.emitter(EmitterType.CLONE, new CloneEffect.Params(mouse.x, mouse.y), RenderLayer.OVERLAY);
+        }
     }
 }

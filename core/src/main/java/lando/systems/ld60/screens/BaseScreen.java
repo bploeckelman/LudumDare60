@@ -22,6 +22,7 @@ import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.ui.DebugActions;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.game.Factory;
+import lando.systems.ld60.game.systems.ParticleSystem;
 
 public class BaseScreen extends ZenScreen {
 
@@ -65,6 +66,7 @@ public class BaseScreen extends ZenScreen {
         world.addSystem(new AnimationSystem());
         world.addSystem(new SpineSystem());
         world.addSystem(new RenderSystem(batch));
+        world.addSystem(new ParticleSystem());
     }
 
     /** Steps {@link #zoomIndex} through {@link #ZOOMS} and applies it to the world camera. */
