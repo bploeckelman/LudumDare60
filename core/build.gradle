@@ -5,6 +5,8 @@ dependencies {
   api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
   api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
+  api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+  api "com.esotericsoftware.spine:spine-libgdx:$spineRuntimeVersion"
   api "com.github.raeleus.TenPatch:tenpatch:$tenPatchVersion"
   api "com.github.tommyettinger:colorful:$colorfulVersion"
   api "com.github.tommyettinger:crux:$cruxVersion"

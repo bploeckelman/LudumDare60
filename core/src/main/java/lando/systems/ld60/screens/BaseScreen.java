@@ -105,7 +105,7 @@ public class BaseScreen extends ZenScreen {
     protected void afterWorldUpdate(float dt) {}
 
     @Override
-    public void renderWorld(SpriteBatch batch) {
+    protected void renderWorld(SpriteBatch batch) {
         batch.begin();
         world.render(Time.delta);
         if (collision != null && ZenFlag.DEBUG_RENDER.on()) {
