@@ -11,6 +11,7 @@ import com.zendogames.zenlib.ecs.Family;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import com.zendogames.zenlib.ui.DebugViews;
+import lando.systems.ld60.assets.GameSpine;
 
 /**
  * Spine through the ECS: spineboy is an entity with a {@code SpineAnimator}, advanced by the

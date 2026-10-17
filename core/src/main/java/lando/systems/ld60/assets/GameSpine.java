@@ -7,19 +7,34 @@ import com.zendogames.zenlib.assets.Asset;
 import com.zendogames.zenlib.assets.SpineData;
 import com.zendogames.zenlib.assets.SpineType;
 
+/**
+ * Spine skeletons the game loads: the skeleton file, its atlas, and the load-time scale.
+ * <p>
+ * Two scales compose. {@link #scale()} is baked into the skeleton data by the loader (bones,
+ * attachments, {@code SpineAnimator.size}), so it should match the atlas pack scale for a
+ * 1:1 texel mapping (the spineboy atlas is packed at 0.5). A per-entity size on top of that is
+ * {@code SpineAnimator.defaultScale}; {@code SpineAnimator.scale} is only the squash/stretch
+ * channel and eases back to {@code defaultScale} every tick, so setting it alone does not stick.
+ * {@code SpineAnimator.size} is the setup-pose bounds from the export and is read, never set.
+ * <p>
+ * {@link #mixes} sets per-pair crossfade times on the shared {@code AnimationStateData}.
+ */
 public enum GameSpine implements SpineType {
-      SPINEBOY ("spine/spineboy/spineboy-pro.skel", "spine/spineboy/spineboy-pma.atlas", 0.5f) {
-          @Override public void mixes(AnimationStateData mixes) {
-              mixes.setMix("run", "jump", 0.2f);
-              mixes.setMix("jump", "run", 0.2f);
-          }
-      }
-    ;
+    SPINEBOY ("spine/spineboy/spineboy-pro.json", "spine/spineboy/0.25/spineboy-pro.atlas", 0.25f) {
+        @Override public void mixes(AnimationStateData mixes) {
+            mixes.setMix("run", "jump", 0.2f);
+            mixes.setMix("jump", "run", 0.2f);
+        }
+    };
 
     private final Asset<SpineData> asset = new Asset<>(this);
     private final String path;
     private final String atlasPath;
     private final float scale;
+
+    GameSpine(String path, String atlasPath) {
+        this(path, atlasPath, /*scale*/ 1f);
+    }
 
     GameSpine(String path, String atlasPath, float scale) {
         this.path = path;
@@ -31,4 +46,5 @@ public enum GameSpine implements SpineType {
     @Override public FileHandle file()        { return Gdx.files.internal(path); }
     @Override public FileHandle atlasFile()   { return Gdx.files.internal(atlasPath); }
     @Override public float scale()            { return scale; }
+    @Override public float defaultMix()       { return 0.1f; }
 }

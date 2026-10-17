@@ -13,6 +13,44 @@ import com.zendogames.zenlib.state.StateMachine;
 import lando.systems.ld60.game.components.Health;
 
 public enum ExamplePlayerState implements State<Entity> {
+    // NOTE: in practice we should have a separate State<Entity> implementation
+    //  for each core entity type, we're only sharing here for example purposes,
+    //  but the code gets cluttered with conditions when trying to catch many
+    //  different cases (spine animation vs normal, different movement types, etc)
+    NORMAL_SPINEBOY {
+        @Override
+        public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
+            var mover = Mover.get(e);
+            if (!mover.is(TopDownMotion.class)) return this;
+
+            var anim = SpineAnimator.get(e);
+            var motion = mover.motion(TopDownMotion.class);
+            if (motion.faceX != 0 && motion.faceX != anim.facing) {
+                anim.facing = motion.faceX; // left/right flip, up/down keep last horizontal facing
+                if (anim.is("idle")) {
+                    anim.start("idle-turn", true);
+                    anim.queue("idle", true, 0);
+                }
+            }
+            locomotion(anim, mover, motion.tuning.maxSpeed() * 0.5f);
+
+            return this;
+        }
+
+        static void locomotion(SpineAnimator anim, Mover mover, float runSpeed) {
+            var speed = (float) Math.hypot(mover.xVel, mover.yVel);
+            var want  = (speed == 0) ? "idle" : (speed >= runSpeed) ? "run" : "walk";
+
+            if (anim.is(want)) return;
+            if (want.equals("idle") && (anim.is("run-to-idle") || anim.is("idle-turn"))) return; // idle is queued behind it
+            if (want.equals("idle") && anim.is("run")) {
+                anim.start("run-to-idle", false);
+                anim.queue("idle", true, 0);
+                return;
+            }
+            anim.play(want); // crossfade from the mixes table; also drops a queued idle if the player moves again
+        }
+    },
     NORMAL {
         @Override
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
