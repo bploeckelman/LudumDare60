@@ -2,7 +2,6 @@ package lando.systems.ld60.particles.effects;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Pool;
-import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.assets.ZenAnimHero;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.Position;
@@ -28,7 +27,6 @@ public class FootStepDustCloudEffect implements ParticleEffect {
                 anim.onEvent(event -> {
                     if ("footstep".equals(event.getData().getName())) {
                         footstepOccurred = true;
-                        Log.info(TAG, "Footstep occurred");
                     }
                 });
             }
