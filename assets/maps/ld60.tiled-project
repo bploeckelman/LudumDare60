@@ -80,6 +80,28 @@
             ]
         },
         {
+            "color": "#ffff55ff",
+            "drawFill": true,
+            "id": 17,
+            "members": [
+                {
+                    "name": "kind",
+                    "type": "string",
+                    "value": "thug"
+                },
+                {
+                    "name": "weapon",
+                    "type": "string",
+                    "value": ""
+                }
+            ],
+            "name": "enemy",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
             "color": "#ffffff00",
             "drawFill": true,
             "id": 7,
@@ -225,6 +247,23 @@
                 }
             ],
             "name": "patrol",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
+            "color": "#ffaaff00",
+            "drawFill": true,
+            "id": 18,
+            "members": [
+                {
+                    "name": "weapon",
+                    "type": "string",
+                    "value": "pipe"
+                }
+            ],
+            "name": "pickup",
             "type": "class",
             "useAs": [
                 "object"

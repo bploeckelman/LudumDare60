@@ -1,6 +1,5 @@
 package lando.systems.ld60.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -8,17 +7,16 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ZenGame;
+import com.zendogames.zenlib.collision.ContactResponder;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.Tilemap;
 import com.zendogames.zenlib.ecs.systems.*;
 import com.zendogames.zenlib.input.HeldKeys;
 import com.zendogames.zenlib.render.CameraFollow;
-import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.render.WorldView;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import com.zendogames.zenlib.tilemap.MapObjectSpawner;
 import com.zendogames.zenlib.ui.DebugViews;
-import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameAtlas;
 import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.Factory;
@@ -27,19 +25,19 @@ import lando.systems.ld60.game.GameMask;
 import lando.systems.ld60.game.input.GameKeys;
 import lando.systems.ld60.game.input.Gamepad;
 import lando.systems.ld60.game.systems.GameInputSystem;
-import lando.systems.ld60.particles.effects.CloneEffect;
 import lando.systems.ld60.ui.GameDebugViews;
 
 /**
- * What the example screens share: a Tiled map whose tagged tiles collide, the systems a moving,
+ * A screen built from a Tiled map: the map whose tagged tiles collide, the systems a moving,
  * colliding, behaving world needs, a camera that follows the player, and the debug views and
  * actions for poking at it. A subclass picks the map, registers which Tiled classes spawn what on
- * {@link #spawner}, then calls {@link #buildLevel()}. Everything named {@code Example*} is reference
- * material to copy from, not the game.
+ * {@link #spawner}, then calls {@link #buildLevel()}; it adds its own systems before that and may
+ * swap the contact rules with {@link #createContactResponder()}. Input is the keyboard or a gamepad
+ * ({@link GameKeys}), so every mover reads one set of keys.
  */
-public abstract class ExampleScreen extends BaseScreen {
+public abstract class MapScreen extends BaseScreen {
 
-    private static final String TAG = ExampleScreen.class.getSimpleName();
+    private static final String TAG = MapScreen.class.getSimpleName();
 
     static final int VIEW_WIDTH  = 320;
     static final int VIEW_HEIGHT = 180;
@@ -54,12 +52,12 @@ public abstract class ExampleScreen extends BaseScreen {
     Entity player;
     Tilemap tilemap;
 
-    protected ExampleScreen(ZenGame game, GameMap map) {
+    protected MapScreen(ZenGame game, GameMap map) {
         super(game, /*withCollision*/ true);
         this.map = map;
         this.mapCenter = new Vector2();
         this.keys = new GameKeys(inputProcessor, Gamepad.player());
-        this.contactSystem = new ContactSystem(collision, new GameContacts(world, factory));
+        this.contactSystem = new ContactSystem(collision, createContactResponder());
         this.spawner = new MapObjectSpawner().on(Factory.MARKER, (m, obj) -> {}); // point objects other objects reference; nothing to spawn
 
         world.addSystem(new InputSystem(keys));
@@ -92,6 +90,11 @@ public abstract class ExampleScreen extends BaseScreen {
                     var animSystem = world.getSystem(AnimationSystem.class);
                     animSystem.enabled = !animSystem.enabled;
                 });
+    }
+
+    /** The rules for this screen's contacts; called from the constructor, so read no subclass fields. The examples' by default. */
+    protected ContactResponder createContactResponder() {
+        return new GameContacts(world, factory);
     }
 
     /** Clears the world and spawns the map again: its tile layers, then every object through {@link #spawner}. */
@@ -139,14 +142,5 @@ public abstract class ExampleScreen extends BaseScreen {
             cameraFollow.follow(mapCenter);
         }
         cameraFollow.update(dt);
-    }
-
-    @Override
-    public void update(float delta) {
-        super.update(delta);
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-            var mouse = mouseWorldPosition();
-            factory.emitter(EmitterType.CLONE, new CloneEffect.Params(mouse.x, mouse.y), RenderLayer.BACKGROUND);
-        }
     }
 }

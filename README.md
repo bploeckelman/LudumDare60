@@ -66,7 +66,7 @@ sprites/                  atlas input: drop PNGs here, rerun lwjgl3:run
 
 ## Examples
 
-Two screens on one base. `ExampleScreen` holds what any map screen needs: the systems, the
+Two screens on one base. `MapScreen` holds what any map screen needs: the systems, the
 spawner, `buildLevel()`, a camera that follows the player, the debug views and keys. A subclass is
 three things: `super(game, MAP)`, one `spawner.on(...)` line per Tiled class, `buildLevel()`.
 
@@ -105,26 +105,26 @@ To add a kind of thing, copy the closest existing one all the way through (class
 
 ## Library usage on one screen
 
-| Need                  | Use                                                                                                                                           | See                                           |
-|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
-| an asset              | an enum implementing `AtlasType` / `MapType`, registered in `Main.init`; `KEY.get()` after load                                               | `GameAtlas`, `GameMap`                        |
-| a screen              | extend `BaseScreen` (or `ExampleScreen` for a map); override `update`, `renderWorld`, `afterWorldUpdate`; keys via the `inputProcessor` hooks | `ExampleScreen`                               |
-| an entity             | `world.createEntity().add(component)...`; `world.despawn(e)`                                                                                  | `Factory`                                     |
-| a component           | one class, `public static final ComponentType<X> TYPE = ComponentType.register(X.class)` + `get(e)`                                           | `Health`                                      |
-| a position            | `Position(x, y)`: integer pixels, interpolated for rendering                                                                                  |                                               |
-| a sprite              | `Image(region, w, h)` or `Animator(clip, originX, originY)`; `tint`, `scale`, `facing`                                                        | `pop`                                         |
-| collision             | `Collider.rect/circ/capsule/platform(mask, ...)` `.blockedBy(...)` `.detects(...)`                                                            | `Factory`, "Make it yours"                    |
-| movement              | `Mover(new PlatformerMotion(tuning))`, `TopDownMotion`, `Motion.NONE`, or your own                                                            | `platformerPlayer`, `overheadPlayer`, `flyer` |
-| control               | `Input(InputControls.wasd(actionKey))`; `new Input()` with no controls = AI, a state writes it                                                | `walker`                                      |
-| a brain               | `enum X implements State<Entity>` + `Behavior(initial)`; `request` (deferred) / `force`                                                       | `ExamplePlayerState`                          |
-| a delay / a beat      | `Timers.after(name, s, t -> ...)`, `every(name, s, ...)`, `cancel(name)`                                                                      | `shooter`, `GameContacts.enter`               |
-| touching things       | `Contacts` on the mover + a `ContactResponder`                                                                                                | `GameContacts`                                |
-| feelers               | `Sensor` whiskers, cast each tick, `hits(mask)`                                                                                               | `walker`                                      |
-| a map                 | `new Tilemap(GameMap.X.get()).spawn(world, SOLID, batch, camera)`, then `MapObjectSpawner`                                                    | `ExampleScreen.buildLevel`                    |
-| a camera              | `CameraFollow`: `follow(entity, snap)`, `bounds`                                                                                              | `ExampleScreen.afterWorldUpdate`              |
-| a switch              | `ZenFlag` (`LOG_DEBUG`, `DEBUG_RENDER`, `FRAME_STEP`...); a game enum via `Flags.register`                                                    | `Main.init`                                   |
-| logging               | `Log.info(TAG, "fmt %s", arg)`, `Log.debug`, `Log.warn`                                                                                       | everywhere                                    |
-| a debug button / view | `actions.add(label, key, runnable)`, `actions.arm(label, key, spawn)`, `DebugViews.xxx(world)`                                                | `BaseScreen`, `ExampleScreen`                 |
+| Need                  | Use                                                                                                                                       | See                                           |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
+| an asset              | an enum implementing `AtlasType` / `MapType`, registered in `Main.init`; `KEY.get()` after load                                           | `GameAtlas`, `GameMap`                        |
+| a screen              | extend `BaseScreen` (or `MapScreen` for a map); override `update`, `renderWorld`, `afterWorldUpdate`; keys via the `inputProcessor` hooks | `MapScreen`                                   |
+| an entity             | `world.createEntity().add(component)...`; `world.despawn(e)`                                                                              | `Factory`                                     |
+| a component           | one class, `public static final ComponentType<X> TYPE = ComponentType.register(X.class)` + `get(e)`                                       | `Health`                                      |
+| a position            | `Position(x, y)`: integer pixels, interpolated for rendering                                                                              |                                               |
+| a sprite              | `Image(region, w, h)` or `Animator(clip, originX, originY)`; `tint`, `scale`, `facing`                                                    | `pop`                                         |
+| collision             | `Collider.rect/circ/capsule/platform(mask, ...)` `.blockedBy(...)` `.detects(...)`                                                        | `Factory`, "Make it yours"                    |
+| movement              | `Mover(new PlatformerMotion(tuning))`, `TopDownMotion`, `Motion.NONE`, or your own                                                        | `platformerPlayer`, `overheadPlayer`, `flyer` |
+| control               | `Input(InputControls.wasd(actionKey))`; `new Input()` with no controls = AI, a state writes it                                            | `walker`                                      |
+| a brain               | `enum X implements State<Entity>` + `Behavior(initial)`; `request` (deferred) / `force`                                                   | `ExamplePlayerState`                          |
+| a delay / a beat      | `Timers.after(name, s, t -> ...)`, `every(name, s, ...)`, `cancel(name)`                                                                  | `shooter`, `GameContacts.enter`               |
+| touching things       | `Contacts` on the mover + a `ContactResponder`                                                                                            | `GameContacts`                                |
+| feelers               | `Sensor` whiskers, cast each tick, `hits(mask)`                                                                                           | `walker`                                      |
+| a map                 | `new Tilemap(GameMap.X.get()).spawn(world, SOLID, batch, camera)`, then `MapObjectSpawner`                                                | `ExampleScreen.buildLevel`                    |
+| a camera              | `CameraFollow`: `follow(entity, snap)`, `bounds`                                                                                          | `ExampleScreen.afterWorldUpdate`              |
+| a switch              | `ZenFlag` (`LOG_DEBUG`, `DEBUG_RENDER`, `FRAME_STEP`...); a game enum via `Flags.register`                                                | `Main.init`                                   |
+| logging               | `Log.info(TAG, "fmt %s", arg)`, `Log.debug`, `Log.warn`                                                                                   | everywhere                                    |
+| a debug button / view | `actions.add(label, key, runnable)`, `actions.arm(label, key, spawn)`, `DebugViews.xxx(world)`                                            | `BaseScreen`, `MapScreen`                     |
 
 ## Library Customization
 
@@ -229,7 +229,7 @@ To add a kind of thing, copy the closest existing one all the way through (class
 - **`KEY.get()` throws "not loaded"**: the enum is not registered in `Main.init`, or it is used
   before loading finishes (`createFirstScreen` is the first safe place).
 - **"no spawn for map object"** at load: the Tiled class has no `spawner.on(...)` line.
-- **A gray screen and no entities**: a new `ExampleScreen` subclass forgot to call `buildLevel()`.
+- **A gray screen and no entities**: a new `MapScreen` subclass forgot to call `buildLevel()`.
 - **Position is integers.** Velocity and sub-pixel remainders live on the `Mover` as floats; the
   renderer interpolates between ticks. `Position(float, float)` rounds; `teleport(x, y)` moves
   without a visible interpolation step.
@@ -248,4 +248,4 @@ To add a kind of thing, copy the closest existing one all the way through (class
   `var`, `java.util.zip` are fine. Test with `teavm:run` before relying on it.
 - **Two actions on one key**: `DebugActions.key` runs the first match only.
 - **More examples**: zenlib's own README has the consumer recipe; the zenlib-demo project has
-  more screens (movement, tilemaps, sensors, transitions) in the same style as `ExampleScreen`.
+  more screens (movement, tilemaps, sensors, transitions) in the same style as `MapScreen`.

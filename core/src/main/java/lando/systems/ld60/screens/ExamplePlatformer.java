@@ -5,7 +5,7 @@ import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.Factory;
 
 /** The platformer example: gravity, jumps, ramps, one-way platforms and every enemy kind in {@link Factory}. */
-public class ExamplePlatformer extends ExampleScreen {
+public class ExamplePlatformer extends MapScreen {
 
     public ExamplePlatformer(ZenGame game) {
         super(game, GameMap.EXAMPLE_PLATFORMER);

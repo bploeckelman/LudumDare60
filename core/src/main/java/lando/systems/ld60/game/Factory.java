@@ -11,6 +11,7 @@ import com.zendogames.zenlib.assets.ZenAnimHero;
 import com.zendogames.zenlib.collision.CollisionMask;
 import com.zendogames.zenlib.collision.shapes.CollisionCaps;
 import com.zendogames.zenlib.ecs.Entity;
+import com.zendogames.zenlib.ecs.Family;
 import com.zendogames.zenlib.ecs.World;
 import com.zendogames.zenlib.ecs.components.*;
 import com.zendogames.zenlib.ecs.movement.Motion;
@@ -24,6 +25,8 @@ import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameSpine;
+import lando.systems.ld60.game.anim.AnimClip;
+import lando.systems.ld60.game.combat.Weapon;
 import lando.systems.ld60.game.combat.Weapons;
 import lando.systems.ld60.game.components.*;
 import lando.systems.ld60.game.input.GameControls;
@@ -56,6 +59,8 @@ public class Factory {
     public static final String BALL       = "ball";
     public static final String PATROL     = "patrol";       // simple enemy for overhead example
     public static final String WALL       = "wall";
+    public static final String ENEMY      = "enemy";  // scroller: a thug (member 'kind' picks which, 'weapon' arms it)
+    public static final String PICKUP     = "pickup"; // scroller: a weapon on the floor (member 'weapon')
 
     /** Seconds a bullet flies before it expires on its own. */
     public static final float BULLET_LIFETIME = 3f;
@@ -86,17 +91,55 @@ public class Factory {
             2.5f,    // 'jump' height (tiles)
             0.35f);  // 'jump' time to peak (seconds)
 
+    /** Every live player, for the enemies' AI to look for. */
+    private final Family players;
+
     private final World world;
     private final TextureRegion pixel;
 
     public Factory(World world, TextureRegion pixel) {
         this.world = world;
         this.pixel = pixel;
+        this.players = world.family(Family.all(GameTags.PLAYER, Position.TYPE));
     }
 
     // ------------------------------------------------------------------------
     // From map objects: read the Tiled class members here, then build the plain way
     // ------------------------------------------------------------------------
+
+    /** The scroller's player object: feet at the bottom center. */
+    public Entity hero(MapObject object) {
+        int x = TiledProps.x(object);
+        int y = TiledProps.y(object);
+        int w = TiledProps.width(object);
+        return hero(x + w / 2, y);
+    }
+
+    /** The scroller's rank and file: {@code kind} picks the build (only "thug") so far), {@code weapon} (optional) arms it. */
+    public Entity thug(MapObject object) {
+        int x      = TiledProps.x(object);
+        int y      = TiledProps.y(object);
+        int w      = TiledProps.width(object);
+        var kind   = TiledProps.get(object, "kind", "thug", String.class);
+        var weapon = TiledProps.get(object, "weapon", "", String.class);
+        if (!kind.equals("thug")) {
+            throw new GdxRuntimeException("enemy %s: unknown kind '%s".formatted(TiledProps.describe(object), kind));
+        }
+        var thug = thug(x + w / 2, y, -1);
+        if (!weapon.isEmpty()) {
+            Weapons.arm(thug, GameWeapons.byName(weapon));
+        }
+        return thug;
+    }
+
+    /** A weapon on the floor; {@code weapon} names one of the {@link GameWeapons#ALL}. */
+    public Entity pickup(MapObject object) {
+        int x = TiledProps.x(object);
+        int y = TiledProps.y(object);
+        int w = TiledProps.width(object);
+        var weapon = GameWeapons.byName(TiledProps.require(object, "weapon", String.class));
+        return pickup(weapon, x + w / 2, y);
+    }
 
     public Entity platformerPlayer(MapObject object) {
         int x = TiledProps.x(object);
@@ -244,6 +287,143 @@ public class Factory {
                  .add(new Position(x, y))
                  .add(Collider.rect(GameMask.SOLID, 0, 0, w, h));
      }
+
+    // ------------------------------------------------------------------------
+    // The scroller: brawlers are components all the way down; only the player has states
+    // ------------------------------------------------------------------------
+
+    /** spineboy at the scroller's size: load scale 0.25 in {@link GameSpine}, half size again per entity, about 85 px tall. */
+    protected SpineAnimator spineboyAnimator(int facing) {
+        var anim = new SpineAnimator(GameSpine.SPINEBOY, "idle");
+        anim.defaultScale.set(0.5f, 0.5f);
+        anim.scale.set(0.5f, 0.5f);
+        anim.facing = facing;
+        return anim;
+    }
+
+    /** spineboy's clips for what the motion does; one instance per entity (components are not shared). */
+    static BrawlerAnimClips spineboyClips() {
+        return new BrawlerAnimClips(
+                AnimClip.spine("idle"),
+                AnimClip.spine("walk"),
+                AnimClip.spine("run"),
+                AnimClip.spine("jump"),
+                BRAWLER_TUNING.maxSpeedX() * 0.5f)
+                .stop(AnimClip.spine("run-to-idle"))
+                .dead(AnimClip.spine("death"));
+    }
+
+    /** The player: a brawler on the keyboard (or pad) with the states that read its buttons; hits ask for HURT and DEAD through its Hurtable. */
+    public Entity hero(int x, int y) {
+        var hurtable = new Hurtable()
+                .hurtState(BrawlerState.HURT)
+                .deadState(BrawlerState.DEAD)
+                .deathTint(null); // the death clip is the look
+        var boxes = new Hitboxes(GameWeapons.BLASTER.set(), GameMask.PLAYER, GameMask.ENEMY);
+        boxes.onStrike = (e, strike) -> Weapons.wear(e);
+        return world.createEntity()
+                .tag(GameTags.PLAYER)
+                .add(new Name("hero"))
+                .add(new Position(x, y))
+                .add(new Timers())
+                .add(new Health(3))
+                .add(new Contacts())
+                .add(new Input(GameControls.PLAYER))
+                .add(GameControls.playerButtons())
+                .add(spineboyAnimator(1))
+                .add(spineboyClips())
+                .add(new Held(GameWeapons.BLASTER))
+                .add(hurtable)
+                .add(new Behavior(BrawlerState.NORMAL))
+                .add(new Mover(new BrawlerMotion(BRAWLER_TUNING)))
+                .add(Collider.capsule(GameMask.PLAYER, new Rectangle(-18, 0, 36, 12), CollisionCaps.Axis.HORIZONTAL) // only covers feet: sprite's top half may overlap a wall behind it
+                        .blockedBy(GameMask.SOLID)
+                        .detects(GameMask.TRIGGER, GameMask.PICKUP))
+                .add(boxes);
+    }
+
+    /**
+     * A thug: the rank and file, with no states at all. A {@code Timers} beat is its brain (close in
+     * on the nearest player, shoot when lined up, grab a weapon it stands on), its {@link Hurtable}
+     * says what hits do (flash, fly, die, vanish after a moment, and stop thinking), the
+     * {@code BrawlerPresentSystem} animates it from its clips. Everything else is a component.
+     */
+    public Entity thug(int x, int y, int facing) {
+        var timers = new Timers();
+        var motion = new BrawlerMotion(BRAWLER_TUNING);
+        motion.facing = facing;
+        var hurtable = new Hurtable()
+                .despawnAfter(1.5f)
+                .onDeath((e, strike) -> { timers.cancel("think"); Input.get(e).reset(); });
+        var thug = world.createEntity()
+                .tag(GameTags.ENEMY)
+                .add(new Name("thug"))
+                .add(new Position(x, y))
+                .add(new Health(5))
+                .add(new Contacts())
+                .add(new Input())
+                .add(spineboyAnimator(facing))
+                .add(spineboyClips())
+                .add(new Held(GameWeapons.BLASTER))
+                .add(hurtable)
+                .add(new Mover(motion))
+                .add(Collider.capsule(GameMask.ENEMY, new Rectangle(-18, 0, 36, 12), CollisionCaps.Axis.HORIZONTAL)
+                        .blockedBy(GameMask.SOLID)
+                        .detects(GameMask.PICKUP))
+                .add(new Hitboxes(GameWeapons.BLASTER.set(), GameMask.ENEMY, GameMask.PLAYER))
+                .add(timers);
+
+        timers.every("think", 0.25f, think -> {
+            var e      = think.entity();
+            var input  = Input.get(e);
+            var target = nearestPlayer(e);
+            if (target == null) { input.moveX = 0; input.moveY = 0; return; }
+
+            var item = Weapons.under(e);
+            if (item != null) Weapons.pickUp(e, item);
+
+            var pos = Position.get(e);
+            var tp  = Position.get(target);
+            int dx = tp.x - pos.x, dy = tp.y - pos.y;
+            int reach = 3 * UNIT;
+            input.moveX = (Math.abs(dx) > reach) ? Integer.signum(dx) : 0;
+            input.moveY = (Math.abs(dy) > 6)     ? Integer.signum(dy) : 0;
+            if (input.moveX == 0 && input.moveY == 0 && Math.abs(dx) <= reach + UNIT / 2) {
+                if (dx != 0) motion.facing = Integer.signum(dx);
+                var attack = Weapons.attackOf(e);
+                if (attack != null && !attack.playing(e) && motion.grounded && !motion.launched) attack.start(e);
+            }
+        });
+
+        return thug;
+    }
+
+    /** A weapon lying on the floor at {@code (x, y)}. */
+    public Entity pickup(Weapon weapon, int x, int y) {
+        return Weapons.spawnPickup(world, weapon, x, y);
+    }
+
+    /** The live player nearest to {@code e} along the street, or null. */
+    private Entity nearestPlayer(Entity e) {
+        var pos = Position.get(e);
+
+        var nearest = (Entity) null;
+        int best = Integer.MAX_VALUE;
+
+        var entities = players.entities();
+        for (int i = 0; i < entities.size; i++) {
+            var playerEntity = entities.get(i);
+            if (playerEntity == e || playerEntity.isRemoving()) continue;
+
+            var playerPos = Position.get(playerEntity);
+            int dist = Math.abs(playerPos.x - pos.x) + Math.abs(playerPos.y - pos.y);
+            if (dist < best) {
+                best = dist;
+                nearest = playerEntity;
+            }
+        }
+        return nearest;
+    }
 
     // ------------------------------------------------------------------------
     // Plain builders: usable from DebugActions.arm(...) at the pointer

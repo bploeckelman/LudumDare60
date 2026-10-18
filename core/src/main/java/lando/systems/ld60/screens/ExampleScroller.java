@@ -6,8 +6,8 @@ import com.badlogic.gdx.maps.MapObject;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ZenGame;
+import com.zendogames.zenlib.collision.ContactResponder;
 import com.zendogames.zenlib.ecs.Family;
-import com.zendogames.zenlib.ecs.components.Mover;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import com.zendogames.zenlib.ecs.components.Tilemap;
@@ -19,17 +19,18 @@ import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.events.CombatEvent;
 import lando.systems.ld60.events.Signal;
 import lando.systems.ld60.events.SignalListener;
+import lando.systems.ld60.game.BrawlContacts;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameStrikes;
-import lando.systems.ld60.game.GameTags;
+import lando.systems.ld60.game.GameWeapons;
 import lando.systems.ld60.game.combat.HitboxDraw;
-import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HitSystem;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
+import lando.systems.ld60.particles.effects.CloneEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
-public class ExampleScroller extends ExampleScreen implements SignalListener<CombatEvent> {
+public class ExampleScroller extends MapScreen implements SignalListener<CombatEvent> {
 
     private static final String TAG = ExampleScroller.class.getSimpleName();
 
@@ -60,10 +61,18 @@ public class ExampleScroller extends ExampleScreen implements SignalListener<Com
         buildLevel();
 
         this.debugViews.add(DebugViews.spine(world));
-        actions .arm("spawn dummy",         Input.Keys.N, (x, y) -> factory.dummy(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
+        actions.defaultClick((x, y) -> factory.emitter(EmitterType.CLONE, new CloneEffect.Params(x, y), RenderLayer.BACKGROUND))
+//                .arm("spawn dummy",         Input.Keys.N, (x, y) -> factory.dummy(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
+                .arm("spawn dummy",         Input.Keys.N, (x, y) -> factory.thug(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
+                .arm("spawn pipe",          Input.Keys.K, (x, y) -> factory.pickup(GameWeapons.PIPE, x, y))
                 .add("toggle debug render", Input.Keys.B, () -> debugRender  = !debugRender)
                 .add("toggle hitboxes",     Input.Keys.H, () -> showHitboxes = !showHitboxes)
         ;
+    }
+
+    @Override
+    protected ContactResponder createContactResponder() {
+        return new BrawlContacts();
     }
 
     @Override
@@ -89,20 +98,11 @@ public class ExampleScroller extends ExampleScreen implements SignalListener<Com
     }
 
     private void spawnPlayer(Tilemap map, MapObject object) {
-        int x = TiledProps.x(object);
-        int y = TiledProps.y(object);
-        var spineboy = factory.spineboyScroller(x, y);
-        spineboy.tag(GameTags.PLAYER);
-
-        var anim = SpineAnimator.get(spineboy);
-        anim.defaultScale.set(0.5f, 0.5f);
-        anim.scale.set(0.5f, 0.5f);
-        // TODO: gate this behind LOG_SPINE
+        var hero = factory.hero(object);
+        var anim = SpineAnimator.get(hero);
         anim.onEvent(event -> Log.debug(TAG, "event: %s", event.getData().getName()));
-
-        factory.emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(spineboy), RenderLayer.BACKGROUND);
-
-        setPlayer(spineboy);
+        factory.emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(hero));
+        setPlayer(hero);
     }
 
     private void spawnDummy(Tilemap map, MapObject object) {
@@ -111,21 +111,6 @@ public class ExampleScroller extends ExampleScreen implements SignalListener<Com
         int playerX = (player != null) ? Position.get(player).x : 0;
         int facing  = (playerX < x) ? -1 : +1;
         factory.dummy(x, y, facing);
-    }
-
-    private void testHurt() {
-        if (player == null) return;
-
-        var anim = SpineAnimator.get(player);
-        anim.play("jump");
-        anim.scale.set(
-                anim.defaultScale.x * 0.9f,
-                anim.defaultScale.y * 1.1f);
-
-        var mover = Mover.get(player);
-        var motion = mover.motion(BrawlerMotion.class);
-        motion.facing = 1;
-        motion.launch(mover, -1, /*dist*/ 5f, /*height*/ 0.2f);
     }
 
     @Override

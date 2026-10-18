@@ -9,7 +9,7 @@ import lando.systems.ld60.game.Factory;
  * Spikes, teleporters and the hurt response are the platformer's own, since none of
  * them depend on gravity.
  */
-public class ExampleOverhead extends ExampleScreen {
+public class ExampleOverhead extends MapScreen {
 
     public ExampleOverhead(ZenGame game) {
         super(game, GameMap.EXAMPLE_TOP_DOWN);

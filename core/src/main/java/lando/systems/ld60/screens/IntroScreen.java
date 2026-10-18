@@ -17,6 +17,7 @@ import lando.systems.ld60.assets.ParticleAnim;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
 import lando.systems.ld60.events.DistortionEvent;
+import lando.systems.ld60.game.GameLevel;
 import lando.systems.ld60.particles.effects.TestEffect;
 
 import java.util.function.Supplier;
@@ -38,15 +39,22 @@ public class IntroScreen extends BaseScreen {
         var table = new VisTable();
         table.setFillParent(true);
         table.add(title).padBottom(BUTTON_MARGIN * 3).row();
-        table.add(buttonWithOnClick("Example: Platformer", () -> start(() -> new ExamplePlatformer(game)))).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
-        table.add(buttonWithOnClick("Example: Overhead",   () -> start(() -> new ExampleOverhead(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(disabledButtonWithOnClick("Play",                () -> start(() -> new GameScreen(game, GameLevel.LEVEL_1)))).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        //table.add(buttonWithOnClick("Example: Platformer", () -> start(() -> new ExamplePlatformer(game)))).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        //table.add(buttonWithOnClick("Example: Overhead",   () -> start(() -> new ExampleOverhead(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(buttonWithOnClick("Example: Scroller",   () -> start(() -> new ExampleScroller(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(buttonWithOnClick("Example: Spine",      () -> start(() -> new ExampleSpine(game))))     .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
-        table.add(buttonWithOnClick("Settings", () -> settingsUI.toggle())).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(buttonWithOnClick("Settings", settingsUI::toggle)).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(new VisTextButton("Credits")).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         uiStage.addActor(table);
         AudioEvent.playMusic(MusicType.MAIN_THEME);
         addSettingButton();
+    }
+
+    private static VisTextButton disabledButtonWithOnClick(String text, Runnable onClick) {
+        var button = buttonWithOnClick(text, onClick);
+        button.setDisabled(true);
+        return button;
     }
 
     private static VisTextButton buttonWithOnClick(String text, Runnable onClick) {
