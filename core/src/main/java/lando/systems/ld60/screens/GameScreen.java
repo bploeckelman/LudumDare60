@@ -7,7 +7,6 @@ import com.esotericsoftware.spine.SkeletonRendererDebug;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.collision.ContactResponder;
 import com.zendogames.zenlib.ecs.Family;
-import com.zendogames.zenlib.ecs.components.Mover;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import com.zendogames.zenlib.render.RenderLayer;
@@ -122,6 +121,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
     public void receive(Signal<CombatEvent> signal, CombatEvent event) {
         switch (event) {
             case CombatEvent.Died d:
+                var pos = Position.get(d.entity);
                 var anim = SpineAnimator.get(d.entity);
                 factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + -anim.facing * 50f, pos.y), RenderLayer.BACKGROUND);
                 break;
