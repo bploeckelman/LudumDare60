@@ -58,6 +58,7 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
         assets.register(MusicType.values());
         assets.register(SoundType.values());
         assets.register(GameUIAnim.values());
+        assets.register(ParticleAnim.values());
 
         Flags.register(GameFlags.values());
 

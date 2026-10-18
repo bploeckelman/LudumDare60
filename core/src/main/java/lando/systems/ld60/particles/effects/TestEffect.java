@@ -40,15 +40,16 @@ public class TestEffect implements ParticleEffect {
 
         var particles = new ArrayList<ParticleData>(COUNT);
         for (int i = 0; i < COUNT; i++) {
-            var startSize = MathUtils.random(2f, 5f);
+            var startSize = MathUtils.random(50f, 75f);
             particles.add(ParticleData.initializer(pool.obtain())
                     .keyframe(params.keyframe)
                     .startPos(params.x, params.y)
-                    .velocityDirection(MathUtils.random(360f), MathUtils.random(10f, 30f))
+                    .jitter(10f)
+                    .velocityDirection(MathUtils.random(360f), MathUtils.random(50f, 100f))
                     .startSize(startSize)
                     .endSize(0f)
-                    .startColor(Color.LIGHT_GRAY)
-                    .startAlpha(0.8f)
+                    .startColor(Color.ORANGE)
+                    .startAlpha(1f)
                     .endAlpha(0f)
                     .timeToLive(MathUtils.random(0.3f, 0.7f))
                     .init());

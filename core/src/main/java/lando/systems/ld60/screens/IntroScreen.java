@@ -14,10 +14,11 @@ import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.MusicType;
+import lando.systems.ld60.assets.ParticleAnim;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
 import lando.systems.ld60.events.DistortionEvent;
-import lando.systems.ld60.particles.effects.CloneEffect;
+import lando.systems.ld60.particles.effects.TestEffect;
 
 import java.util.function.Supplier;
 
@@ -72,7 +73,7 @@ public class IntroScreen extends BaseScreen {
             AudioEvent.playSound(SoundType.SoundGroup.BELLS);
             DistortionEvent.trigger();
             var mouse = mouseWorldPosition();
-            factory.emitter(EmitterType.CLONE, new CloneEffect.Params(mouse.x, mouse.y), RenderLayer.OVERLAY);
+            factory.emitter(EmitterType.TEST, new TestEffect.Params(mouse.x, mouse.y,ParticleAnim.FIRE.get().getKeyFrame(0)), RenderLayer.OVERLAY);
         }
     }
 }
