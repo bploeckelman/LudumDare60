@@ -354,6 +354,23 @@
             ]
         },
         {
+            "color": "#ff00ffff",
+            "drawFill": true,
+            "id": 19,
+            "members": [
+                {
+                    "name": "unused",
+                    "type": "string",
+                    "value": ""
+                }
+            ],
+            "name": "television",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
             "color": "#ffff007f",
             "drawFill": true,
             "id": 6,

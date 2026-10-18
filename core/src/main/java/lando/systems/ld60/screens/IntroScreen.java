@@ -77,7 +77,7 @@ public class IntroScreen extends BaseScreen {
     public void update(float delta) {
         super.update(delta);
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-            AudioEvent.playSound(SoundType.SoundGroup.BELLS);
+//            AudioEvent.playSound(SoundType.SoundGroup.BELLS);
             DistortionEvent.trigger();
             var mouse = mouseWorldPosition();
             factory.emitter(EmitterType.TEST, new TestEffect.Params(mouse.x, mouse.y,ParticleAnim.FIRE.get().getKeyFrame(0)), RenderLayer.OVERLAY);

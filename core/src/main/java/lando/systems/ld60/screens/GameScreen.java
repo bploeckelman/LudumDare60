@@ -4,8 +4,10 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
+import com.zendogames.zenlib.Time;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.collision.ContactResponder;
+import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.Family;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
@@ -40,6 +42,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
     final Family skeletons;
     final SkeletonRendererDebug skeletonDebug;
     final HitSystem hitSystem;
+    final TelevisionFeed televisions;
 
     public boolean debugRender  = false;
     public boolean showHitboxes = false;
@@ -54,14 +57,18 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         this.skeletonDebug.setRegionAttachments(false);
 
         this.hitSystem = new HitSystem(new GameStrikes());
+        this.televisions = new TelevisionFeed(VIEW_WIDTH / 2, VIEW_HEIGHT / 2);
+        this.televisions.clearColor.set(worldView.clearColor);
         world.addSystem(new BrawlerPresentSystem());
         world.addSystem(hitSystem);
         world.addSystem(new HealthBarSystem());
 
-        spawner .on(Factory.PLAYER, (map, obj) -> spawnPlayer(factory.hero(obj)))
-                .on(Factory.WALL,   (map, obj) -> factory.wall(obj))
-                .on(Factory.ENEMY,  (map, obj) -> factory.thug(obj))
-                .on(Factory.PICKUP, (map, obj) -> factory.pickup(obj));
+        spawner .on(Factory.PLAYER,     (map, obj) -> spawnPlayer(factory.hero(obj)))
+                .on(Factory.WALL,       (map, obj) -> factory.wall(obj))
+                .on(Factory.ENEMY,      (map, obj) -> factory.thug(obj))
+                .on(Factory.PICKUP,     (map, obj) -> factory.pickup(obj))
+                .on(Factory.TELEVISION, (map, obj) -> factory.television(obj, televisions))
+        ;
 
         buildLevel();
 
@@ -85,9 +92,25 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         return new BrawlContacts();
     }
 
-    private void spawnPlayer(com.zendogames.zenlib.ecs.Entity hero) {
+    private void spawnPlayer(Entity hero) {
         factory.emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(hero));
         setPlayer(hero);
+    }
+
+    @Override
+    public void renderOffscreenBuffers(Batch batch) {
+        televisions.capture(batch, worldCamera, b -> {
+            b.begin();
+            world.render(Time.delta);
+            b.end();
+        });
+        super.renderOffscreenBuffers(batch);
+    }
+
+    @Override
+    public void dispose() {
+        televisions.dispose();
+        super.dispose();
     }
 
     @Override

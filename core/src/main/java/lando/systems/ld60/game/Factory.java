@@ -61,6 +61,7 @@ public class Factory {
     public static final String WALL       = "wall";
     public static final String ENEMY      = "enemy";  // scroller: a thug (member 'kind' picks which, 'weapon' arms it)
     public static final String PICKUP     = "pickup"; // scroller: a weapon on the floor (member 'weapon')
+    public static final String TELEVISION = "television"; // scroller: a region where the game world framebuffer is rendered back into for a "watch yourself play" effect
 
     /** Seconds a bullet flies before it expires on its own. */
     public static final float BULLET_LIFETIME = 3f;
@@ -296,6 +297,14 @@ public class Factory {
                  .add(new Name("wall"))
                  .add(new Position(x, y))
                  .add(Collider.rect(GameMask.SOLID, 0, 0, w, h));
+     }
+
+     public Entity television(MapObject object, TelevisionFeed televisions) {
+         int x = TiledProps.x(object);
+         int y = TiledProps.y(object);
+         int w = TiledProps.width(object);
+         int h = TiledProps.height(object);
+         return television(televisions, x, y, w, h);
      }
 
     // ------------------------------------------------------------------------
@@ -794,5 +803,15 @@ public class Factory {
          return world.createEntity()
                  .add(new Name("emitter-" + type.name().toLowerCase()))
                  .add(emitter);
+     }
+
+     /** A screen on the back wall showing the feed; it sorts by its bottom edge like everything on the street. */
+     public Entity television(TelevisionFeed feed, int x, int y, int w, int h) {
+         var television = new Television(feed, w, h);
+         television.order = -y;
+        return world.createEntity()
+                .add(new Name("television"))
+                .add(new Position(x, y))
+                .add(television);
      }
 }

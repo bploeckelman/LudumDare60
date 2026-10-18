@@ -31,6 +31,7 @@ import lando.systems.ld60.assets.GameUIAnim;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.components.FloatingHealthBar;
+import lando.systems.ld60.game.components.Television;
 import lando.systems.ld60.game.systems.ParticleSystem;
 import lando.systems.ld60.ui.SettingsUI;
 
@@ -82,7 +83,7 @@ public class BaseScreen extends ZenScreen {
     protected void addCommonSystems() {
         world.addSystem(new AnimationSystem());
         world.addSystem(new SpineSystem());
-        world.addSystem(new RenderSystem(batch, Emitter.TYPE, FloatingHealthBar.TYPE));
+        world.addSystem(new RenderSystem(batch, Emitter.TYPE, FloatingHealthBar.TYPE, Television.TYPE));
         world.addSystem(new ParticleSystem(factory));
     }
 
