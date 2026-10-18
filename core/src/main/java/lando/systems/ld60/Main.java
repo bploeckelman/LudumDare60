@@ -1,6 +1,9 @@
 package lando.systems.ld60;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.kotcrab.vis.ui.VisUI;
 import com.zendogames.zenlib.Time;
@@ -9,24 +12,25 @@ import com.zendogames.zenlib.ZenFlag;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.imgui.ImGuiGdx;
 import com.zendogames.zenlib.screens.ZenScreen;
-import lando.systems.ld60.assets.GameFont;
-import lando.systems.ld60.assets.GameMap;
-import lando.systems.ld60.assets.GameAtlas;
-import lando.systems.ld60.assets.GameMap;
-import lando.systems.ld60.assets.GameSpine;
+import lando.systems.ld60.assets.*;
 import lando.systems.ld60.screens.IntroScreen;
 import lando.systems.ld60.screens.LauncherScreen;
 
 public class Main extends ZenGame {
 
     public static Main game;
+    FrameBuffer crtFramebuffer;
+    Texture crtTexture;
+    private float accum;
 
     public Main() {
         Main.game = this;
+        this.accum = 0;
     }
 
     @Override
     protected void init() {
+
         //ZenFlag.LOG_DEBUG.enable();
         //ZenFlag.LOG_INPUT.enable();
         //ZenFlag.DEBUG_FRAME_POOL.enable();
@@ -37,6 +41,9 @@ public class Main extends ZenGame {
         assets.register(GameAtlas.values());
         assets.register(GameSpine.values());
         assets.register(GameFont.values());
+        assets.register(GameShader.values());
+        crtFramebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, Config.windowWidth, Config.windowHeight, false);
+        crtTexture = crtFramebuffer.getColorBufferTexture();
     }
 
     @Override
@@ -59,6 +66,7 @@ public class Main extends ZenGame {
     @Override
     protected void update() {
         super.update();
+        accum += Time.delta;
         if (ImGuiGdx.isInitialized() && ZenFlag.SHOW_IMGUI.off()) {
             ZenFlag.SHOW_IMGUI.enable();
         }
@@ -66,13 +74,28 @@ public class Main extends ZenGame {
 
     @Override
     protected void draw() {
-        ScreenUtils.clear(Color.DARK_GRAY);
+        crtFramebuffer.begin();
         if (screenTransition.inProgress()) {
-            screenTransition.render(batch, windowCamera);
+            screenTransition.render(batch, windowCamera, crtFramebuffer.getFramebufferHandle());
         } else {
             currentScreen.renderOffscreenBuffers(batch);
+            crtFramebuffer.begin();
+
             currentScreen.render(Time.delta);
         }
         ImGuiGdx.render(currentScreen::renderImGui);
+
+        crtFramebuffer.end();
+        ScreenUtils.clear(Color.CLEAR);
+        var crtShader = GameShader.CRT.get();
+        batch.setShader(crtShader);
+        crtShader.bind();
+        batch.begin();
+        crtShader.setUniformf("u_time", accum);
+        batch.setColor(Color.WHITE);
+        batch.draw(crtTexture, 0, crtFramebuffer.getHeight(), crtFramebuffer.getWidth(), -crtFramebuffer.getHeight());
+        batch.end();
+
+        batch.setShader(null);
     }
 }
