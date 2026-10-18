@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Pool;
 import com.zendogames.zenlib.assets.ZenAnimHero;
 import com.zendogames.zenlib.ecs.Entity;
+import com.zendogames.zenlib.ecs.components.Mover;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import lando.systems.ld60.particles.ParticleData;
@@ -42,16 +43,18 @@ public class FootStepDustCloudEffect implements ParticleEffect {
     public List<ParticleData> spawn(ParticleEffectParams parameters, Pool<ParticleData> pool) {
         var params = (Params) parameters;
         var position = Position.get(params.target);
+        var mover = Mover.get(params.target);
 
         if (params.footstepOccurred) {
-            float vy = 30f;
-            float ttl = MathUtils.random(.5f, .8f);
+            var vx = -.3f * mover.xVel;
+            var vy = 30f;
+            var ttl = MathUtils.random(.5f, .8f);
             var startSize = MathUtils.random(25f, 35f);
             params.footstepOccurred = false;
             return List.of(ParticleData.initializer(pool.obtain())
                     .animation(ZenAnimHero.EFFECT_LAND.get())
-                    .startPos(position.x + MathUtils.random(-3f, 3f), position.y + 10f)
-                    .velocity(0, vy)
+                    .startPos(position.x, position.y + 10f)
+                    .velocity(vx, vy)
                     .startSize(startSize)
                     .endSize(startSize * 1.5f)
                     .startColor(0.85f, 0.85f, 0.85f, 0.85f)
