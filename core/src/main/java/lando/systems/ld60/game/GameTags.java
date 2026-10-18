@@ -6,6 +6,7 @@ public final class GameTags {
 
     private GameTags() {}
 
+    public static final Tag PLAYER     = Tag.register("Player");
     public static final Tag ENEMY      = Tag.register("Enemy");
     public static final Tag PROJECTILE = Tag.register("Projectile");
 }

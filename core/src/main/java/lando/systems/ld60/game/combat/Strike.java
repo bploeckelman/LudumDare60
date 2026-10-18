@@ -18,6 +18,15 @@ public record Strike(Entity attacker, Hitbox hit, Entity target, Hitbox hurt, in
         return (dx != 0) ? Integer.signum(dx) : facing;
     }
 
+    /**
+     * One entity's own reaction to a strike, authored where it is spawned like {@code Mover.onHitX}:
+     * the target's ({@code Hurtable.onHurt / onDeath}) or the attacker's ({@code Hitboxes.onStrike}).
+     */
+    @FunctionalInterface
+    public interface Callback {
+        void struck(Entity e, Strike strike);
+    }
+
     /** The game's half of strikes: called once per {@link Strike} after {@code HitSystem} has found them all for the tick. */
     @FunctionalInterface
     public interface Responder {

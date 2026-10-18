@@ -1,5 +1,6 @@
 package lando.systems.ld60.game.state;
 
+import com.badlogic.gdx.graphics.Color;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.assets.ZenAnimHero;
 import com.zendogames.zenlib.ecs.Entity;
@@ -97,6 +98,47 @@ public enum ExamplePlayerState implements State<Entity> {
         @Override
         public boolean interruptible(StateMachine<Entity> m, Entity e, State<Entity> by) {
             return false; // runs its course; a second hit re-launches the mover without re-entering
+        }
+    },
+    DEAD_SPINEBOY {
+
+        float respawnTimer = 3f;
+
+        @Override
+        public void enter(StateMachine<Entity> m, Entity e) {
+            var anim = SpineAnimator.get(e);
+            anim.play("death", /*loop*/ false);
+        }
+
+        @Override
+        public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
+            // No input while dead
+            var input = Input.get(e);
+            input.clearFrameEvents();
+            input.moveX = 0;
+            input.moveY = 0;
+
+            var gameInput = GameInput.get(e);
+            gameInput.clearFrameEvents();
+
+            var anim = SpineAnimator.get(e);
+            if (anim.isComplete()) {
+                anim.tint.set(Color.DARK_GRAY);
+                respawnTimer -= dt;
+            }
+
+            if (respawnTimer <= 0) {
+                respawnTimer = 3f;
+                anim.tint.set(Color.WHITE);
+                return NORMAL_SPINEBOY;
+            }
+
+            return this;
+        }
+
+        @Override
+        public boolean interruptible(StateMachine<Entity> m, Entity e, State<Entity> by) {
+            return false;
         }
     },
     NORMAL {

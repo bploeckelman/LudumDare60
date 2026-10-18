@@ -22,25 +22,30 @@ import lando.systems.ld60.screens.LauncherScreen;
 public class Main extends ZenGame implements SignalListener<DistortionEvent> {
 
     public static Main game;
+
     FrameBuffer crtFramebuffer;
     Texture crtTexture;
-    private float accum;
     AudioSystem audioSystem;
+
+    private float accum;
+    private boolean imguiOnce;
 
     public Main() {
         Main.game = this;
         this.accum = 0;
+        this.imguiOnce = true;
     }
 
     @Override
     protected void init() {
-
         //ZenFlag.LOG_DEBUG.enable();
         //ZenFlag.LOG_INPUT.enable();
         //ZenFlag.DEBUG_FRAME_POOL.enable();
+
         if (!VisUI.isLoaded()) {
             VisUI.load(VisUI.SkinScale.X2);
         }
+
         assets.register(GameMap.values());
         assets.register(GameAtlas.values());
         assets.register(GameSpine.values());
@@ -48,10 +53,13 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
         assets.register(GameShader.values());
         assets.register(MusicType.values());
         assets.register(SoundType.values());
+
         Flags.register(GameFlags.values());
+
         crtFramebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), false);
         crtTexture = crtFramebuffer.getColorBufferTexture();
         audioSystem = new AudioSystem();
+
         DistortionEvent.signal.register(this);
     }
 
@@ -77,7 +85,8 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
     protected void update() {
         super.update();
         accum += Time.delta;
-        if (ImGuiGdx.isInitialized() && ZenFlag.SHOW_IMGUI.off()) {
+        if (imguiOnce && ImGuiGdx.isInitialized() && ZenFlag.SHOW_IMGUI.off()) {
+            imguiOnce = false;
             ZenFlag.SHOW_IMGUI.enable();
         }
 

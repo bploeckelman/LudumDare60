@@ -350,23 +350,27 @@ public class Factory {
     }
 
     public Entity spineboyScroller(int x, int y) {
-        var controls = InputControls.wasd(com.badlogic.gdx.Input.Keys.SPACE); // the motion's button: jump
-        var buttons  = new GameInput(com.badlogic.gdx.Input.Keys.ENTER);      // the states' buttons: attack
+        var jumpKey   = com.badlogic.gdx.Input.Keys.SPACE;
+        var attackKey = com.badlogic.gdx.Input.Keys.ENTER;
         return world.createEntity()
                 .add(new Name("spineboy"))
                 .add(new Position(x, y))
                 .add(new Timers())
-                .add(new Health(3))
+                .add(new Health(5))
                 .add(new Contacts())
-                .add(new Input(controls))
-                .add(buttons)
+                .add(new Input(InputControls.wasd(jumpKey))) // the motion's button: jump
+                .add(new GameInput(attackKey))               // the state's buttons: attack
                 .add(new SpineAnimator(GameSpine.SPINEBOY, "idle"))
                 .add(new Behavior(ExamplePlayerState.NORMAL_SPINEBOY))
                 .add(new Mover(new BrawlerMotion(BRAWLER_TUNING)))
                 .add(Collider.capsule(GameMask.PLAYER, new Rectangle(-18, 0, 36, 12), CollisionCaps.Axis.HORIZONTAL) // only covers feet: sprite's top half may overlap a wall behind it
                         .blockedBy(GameMask.SOLID)
                         .detects(GameMask.ENEMY, GameMask.TRIGGER, GameMask.HAZARD))
-                .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.PLAYER, GameMask.ENEMY)); // the body that gets hit, the shot that hits
+                .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.PLAYER, GameMask.ENEMY)) // the body that gets hit, the shot that hits
+                .add(new Hurtable()
+                        .hurtState(ExamplePlayerState.HURT_SPINEBOY)
+                        .deadState(ExamplePlayerState.DEAD_SPINEBOY)
+                        .deathTint(Color.WHITE));
     }
 
     /** TEMP: Something to hit in the scroller: a spineboy that stands where it is put, facing {@code facing}, and shoots every two seconds. */
@@ -383,6 +387,7 @@ public class Factory {
                 .add(new Health(5))
                 .add(new Mover(new BrawlerMotion(BRAWLER_TUNING)))
                 .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.ENEMY, GameMask.PLAYER))
+                .add(new Hurtable().despawnAfter(1.5f).onDeath((e, strike) -> Timers.get(e).cancel("attack")))
                 .add(timers)
                 .add(anim);
 

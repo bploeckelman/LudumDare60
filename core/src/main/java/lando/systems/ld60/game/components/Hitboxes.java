@@ -19,6 +19,7 @@ import lando.systems.ld60.game.systems.HitSystem;
  * <pre>{@code
  * entity.add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.PLAYER, GameMask.ENEMY)); // is PLAYER, hits ENEMY
  * Hitboxes.get(e).vulnerable = false;                                               // i-frames
+ * Hitboxes.get(e).onStrike = (e, strike) -> Weapons.wear(e);                        // the attacker's own reaction
  * }</pre>
  * {@link #facing} is copied from the animator each tick (an entity without one keeps what code
  * sets). {@link #lift} is the fighter's height above its floor line, which code that moves the art
@@ -58,6 +59,13 @@ public class Hitboxes implements Component {
 
     /** Height above the floor line in pixels; every box is raised by it. */
     public float lift;
+
+    /**
+     * This fighter's own reaction to landing a hit, authored where it is spawned like {@code Mover.onHitX}:
+     * a thrown bottle that drops, a weapon that wears, a hit-stop. Called by {@code GameStrikes} after the
+     * target's response; null does nothing.
+     */
+    public Strike.Callback onStrike;
 
     /** This tick's boxes in resolve order (base, then the open windows), one per name. */
     public final Array<Active> active = new Array<>(8);

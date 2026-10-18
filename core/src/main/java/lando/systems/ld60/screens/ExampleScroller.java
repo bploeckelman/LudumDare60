@@ -17,6 +17,7 @@ import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameStrikes;
+import lando.systems.ld60.game.GameTags;
 import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
@@ -84,6 +85,7 @@ public class ExampleScroller extends ExampleScreen {
         int x = TiledProps.x(object);
         int y = TiledProps.y(object);
         var spineboy = factory.spineboyScroller(x, y);
+        spineboy.tag(GameTags.PLAYER);
 
         var anim = SpineAnimator.get(spineboy);
         anim.defaultScale.set(0.5f, 0.5f);
