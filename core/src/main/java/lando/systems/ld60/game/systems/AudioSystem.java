@@ -1,7 +1,10 @@
 package lando.systems.ld60.game.systems;
 
+import aurelienribon.tweenengine.primitives.MutableFloat;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.math.MathUtils;
+import lando.systems.ld60.Main;
 import lando.systems.ld60.assets.MusicType;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.assets.SoundType.SoundGroup;
@@ -12,11 +15,18 @@ import lando.systems.ld60.events.SignalListener;
 
 public class AudioSystem implements SignalListener<AudioEvent> {
 
-    public static final float DEFAULT_VOLUME = 0.5f;
+    public static MutableFloat musicVolume;
+    public static MutableFloat soundVolume;
+
+    public static final float DEFAULT_VOLUME = 0.05f;
     public static Music currentMusic = null;
+
+    // TODO: Wire up volumes to settings and prefs
 
 
     public AudioSystem() {
+        musicVolume = new MutableFloat(DEFAULT_VOLUME);
+        soundVolume = new MutableFloat(DEFAULT_VOLUME);
         AudioEvent.signal.register(this);
     }
 
@@ -32,7 +42,7 @@ public class AudioSystem implements SignalListener<AudioEvent> {
             }
             case AudioEvent.PlayMusic pm -> {
                 var music = pm.musicType.get();
-                music.setVolume(pm.volume);
+                music.setVolume(pm.volume * musicVolume.floatValue());
                 music.setLooping(true);
                 music.play();
                 this.currentMusic = music;
@@ -54,7 +64,7 @@ public class AudioSystem implements SignalListener<AudioEvent> {
 
     private void playSoundLogic(SoundType soundType, float volume, float pan) {
         // Automatically calls default get() from AssetType interface
-        soundType.get().play(volume, soundType.pitch, pan);
+        soundType.get().play(volume * soundVolume.floatValue(), soundType.pitch, pan);
     }
 
     private SoundType getRandomFromGroup(SoundGroup group) {
