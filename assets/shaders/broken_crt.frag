@@ -102,9 +102,6 @@ void main() {
     float alphaY = smoothstep(0.0, fadeSize, screenCoords.y) * smoothstep(1.0, 1.0 - fadeSize, screenCoords.y);
     float edgeAlpha = alphaX * alphaY;
 
-    if (edgeAlpha <= 0.001) {
-        discard;
-    }
 
     // 3. APPLY SHADERTOY VCR LOGIC TO SCREEN COORDS
     float jerkOffset = (1.0-step(snoise(vec2(u_time*1.3,5.0)),0.8))*0.05;
@@ -125,7 +122,6 @@ void main() {
 
     float staticVal = 0.0;
 
-    // Converted to an int loop for strict GLES 2.0 WebGL/Android compliance
     for (int i = -1; i <= 1; i++) {
         float maxDist = 5.0/200.0;
         float dist = float(i)/200.0;
