@@ -9,15 +9,20 @@ import com.zendogames.zenlib.collision.ContactResponder;
 import com.zendogames.zenlib.ecs.Family;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
+import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.render.WorldView;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.events.AudioEvent;
+import lando.systems.ld60.events.CombatEvent;
+import lando.systems.ld60.events.Signal;
+import lando.systems.ld60.events.SignalListener;
 import lando.systems.ld60.game.*;
 import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HitSystem;
+import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
 /**
@@ -25,7 +30,7 @@ import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
  * contacts), spawning the level's objects through {@link Factory}. The scroller example stays
  * as reference; everything the real content needs accumulates here.
  */
-public class GameScreen extends MapScreen {
+public class GameScreen extends MapScreen implements SignalListener<CombatEvent> {
 
     static final int VIEW_WIDTH  = 320 * 2;
     static final int VIEW_HEIGHT = 180 * 2;
@@ -61,6 +66,7 @@ public class GameScreen extends MapScreen {
         worldCamera.position.set(VIEW_WIDTH / 2f, VIEW_HEIGHT / 2f, 0f);
         worldCamera.update();
 
+        CombatEvent.signal.register(this);
         AudioEvent.playMusic(level.music);
 
         this.debugViews.add(DebugViews.spine(world));
@@ -107,5 +113,17 @@ public class GameScreen extends MapScreen {
         var view = new WorldView(worldCamera, VIEW_WIDTH, VIEW_HEIGHT);
         view.clearColor.set(Color.DARK_GRAY);
         return view;
+    }
+
+    @Override
+    public void receive(Signal<CombatEvent> signal, CombatEvent event) {
+        switch (event) {
+            case CombatEvent.Died d:
+                var pos = Position.get(d.entity);
+                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x, pos.y), RenderLayer.BACKGROUND);
+                break;
+            default:
+                break;
+        }
     }
 }
