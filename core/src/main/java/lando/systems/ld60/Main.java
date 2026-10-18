@@ -1,5 +1,6 @@
 package lando.systems.ld60;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -40,7 +41,7 @@ public class Main extends ZenGame {
         assets.register(GameFont.values());
         assets.register(GameShader.values());
         Flags.register(GameFlags.values());
-        crtFramebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, Config.windowWidth, Config.windowHeight, false);
+        crtFramebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), false);
         crtTexture = crtFramebuffer.getColorBufferTexture();
     }
 
