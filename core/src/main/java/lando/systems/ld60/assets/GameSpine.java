@@ -8,6 +8,7 @@ import com.esotericsoftware.spine.AnimationStateData;
 import com.zendogames.zenlib.assets.Asset;
 import com.zendogames.zenlib.assets.SpineData;
 import com.zendogames.zenlib.assets.SpineType;
+import com.zendogames.zenlib.ecs.components.SpineAnimator;
 
 /**
  * Spine skeletons the game loads: the skeleton file, its atlas, and the load-time scale.
@@ -45,6 +46,20 @@ public enum GameSpine implements SpineType {
             jump.setTimelines(timelines, jump.getBones()); // recomputes the property ids the mixer checks
         }
     };
+
+    /** Where spineboy's 'aim' IK points the gun: the crosshair bone's position from the feet, in skeleton units (x is always ahead, facing flips the skeleton. */
+    static final float AIM_X = 300, AIM_Y = 85;
+
+    /**
+     * Levels spineboy's gun for a shot: "aim" on track 1 for half a second so the gun points at the
+     * crosshair instead of the "shoot" clip's pointing-down rest pose (the clip's recoil key gives
+     * way to the aim pose), then the track empties. The {@code Move} that plays "shoot" calls this.
+     */
+    public static void aim(SpineAnimator anim) {
+        anim.skeleton.findBone("crosshair").getPose().setPosition(AIM_X, AIM_Y);
+        anim.start(1, "aim", true);
+        anim.state.addEmptyAnimation(1, /*mix*/ 0.2f, /*delay*/ 0.5f);
+    }
 
     private final Asset<SpineData> asset = new Asset<>(this);
     private final String path;

@@ -12,7 +12,8 @@ import lando.systems.ld60.game.systems.GameInputSystem;
  * {@code InputSystem}, right after it; a button left {@link #UNBOUND} is an AI's to write from a
  * {@code DECIDE} state ({@link Button#setHeld}), so the states read every fighter the same way.
  * The library's {@code Input.action} stays the motion's button (the brawler jumps on it); these
- * are for the behavior states only.
+ * are for the behavior states only: {@link #attack} swings (or picks up what the fighter stands
+ * over), {@link #special} throws the held weapon.
  */
 public class GameInput implements Component {
 
@@ -40,16 +41,18 @@ public class GameInput implements Component {
         }
     }
 
-    public final Button attack = new Button();
+    public final Button attack  = new Button();
+    public final Button special = new Button();
     // more buttons: add a field here and to the array below
 
     /** Every button, for the system. */
-    public final Button[] buttons = { attack };
+    public final Button[] buttons = { attack, special };
 
     public GameInput() {}
 
-    public GameInput(int attackKey) {
-        attack.key = attackKey;
+    public GameInput(int attackKey, int specialKey) {
+        attack.key  = attackKey;
+        special.key = specialKey;
     }
 
     /** Clears the one-tick edges on every button; held state is kept. {@link GameInputSystem} calls it at the top of every tick. */

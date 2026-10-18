@@ -24,10 +24,13 @@ import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameSpine;
+import lando.systems.ld60.game.combat.Weapons;
 import lando.systems.ld60.game.components.*;
+import lando.systems.ld60.game.input.GameControls;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.movement.BrawlerTuning;
 import lando.systems.ld60.game.movement.FlightMotion;
+import lando.systems.ld60.game.state.BrawlerState;
 import lando.systems.ld60.game.state.ExampleEnemyState;
 import lando.systems.ld60.game.state.ExamplePlayerState;
 import lando.systems.ld60.particles.ParticleEffectParams;
@@ -74,7 +77,7 @@ public class Factory {
     static final TopDownTuning PATROL_TUNING = new TopDownTuning(UNIT, 3, 0.3f, 0.05f);
 
     /** The scroller's brawlers, player and dummy: ten tiles a second along the street, five up it. */
-    static final BrawlerTuning BRAWLER_TUNING = new BrawlerTuning(
+    public static final BrawlerTuning BRAWLER_TUNING = new BrawlerTuning(
             UNIT,    // authoring unit -> pixels
             10,      // x-axis speed (tiles/sec)
             5,       // y-axis speed (tiles/sec)
@@ -351,26 +354,28 @@ public class Factory {
     }
 
     public Entity spineboyScroller(int x, int y) {
-        var jumpKey   = com.badlogic.gdx.Input.Keys.SPACE;
-        var attackKey = com.badlogic.gdx.Input.Keys.ENTER;
+        var hitboxes = new Hitboxes(GameHitboxes.SPINEBOY, GameMask.PLAYER, GameMask.ENEMY);
+        hitboxes.onStrike = (e, strike) -> Weapons.wear(e);
+
         return world.createEntity()
                 .add(new Name("spineboy"))
                 .add(new Position(x, y))
                 .add(new Timers())
                 .add(new Health(5))
                 .add(new Contacts())
-                .add(new Input(InputControls.wasd(jumpKey))) // the motion's button: jump
-                .add(new GameInput(attackKey))               // the state's buttons: attack
+                .add(new Input(GameControls.PLAYER))
+                .add(GameControls.playerButtons())
+                .add(new Held(GameWeapons.BLASTER))
                 .add(new SpineAnimator(GameSpine.SPINEBOY, "idle"))
-                .add(new Behavior(ExamplePlayerState.NORMAL_SPINEBOY))
+                .add(new Behavior(BrawlerState.NORMAL))
                 .add(new Mover(new BrawlerMotion(BRAWLER_TUNING)))
                 .add(Collider.capsule(GameMask.PLAYER, new Rectangle(-18, 0, 36, 12), CollisionCaps.Axis.HORIZONTAL) // only covers feet: sprite's top half may overlap a wall behind it
                         .blockedBy(GameMask.SOLID)
-                        .detects(GameMask.ENEMY, GameMask.TRIGGER, GameMask.HAZARD))
-                .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.PLAYER, GameMask.ENEMY)) // the body that gets hit, the shot that hits
+                        .detects(GameMask.ENEMY, GameMask.TRIGGER, GameMask.HAZARD, GameMask.PICKUP))
+                .add(hitboxes) // the body that gets hit, the shot that hits
                 .add(new Hurtable()
-                        .hurtState(ExamplePlayerState.HURT_SPINEBOY)
-                        .deadState(ExamplePlayerState.DEAD_SPINEBOY)
+                        .hurtState(BrawlerState.HURT)
+                        .deadState(BrawlerState.DEAD)
                         .deathTint(Color.WHITE));
     }
 
@@ -381,18 +386,24 @@ public class Factory {
         anim.defaultScale.set(0.5f, 0.5f); // the scroller's spineboy size, as ExampleScroller.spawnPlayer sets it
         anim.scale.set(0.5f, 0.5f);
         anim.facing = facing;
+        var noneKey = com.badlogic.gdx.Input.Keys.UNKNOWN;
+        var noneControls = new InputControls(noneKey, noneKey, noneKey, noneKey, noneKey);
 
         var entity = world.createEntity()
                 .add(new Name("dummy"))
                 .add(new Position(x, y))
                 .add(new Health(5))
+                .add(new Input(noneControls))
+                .add(GameControls.none())
+                .add(new Held(GameWeapons.BLASTER))
+                .add(new Behavior(BrawlerState.NORMAL))
                 .add(new Mover(new BrawlerMotion(BRAWLER_TUNING)))
                 .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.ENEMY, GameMask.PLAYER))
                 .add(new Hurtable().despawnAfter(1.5f).onDeath((e, strike) -> Timers.get(e).cancel("attack")))
                 .add(timers)
                 .add(anim);
 
-        timers.every("attack", 2f, attack -> ExamplePlayerState.shoot(SpineAnimator.get(attack.entity())));
+        timers.every("attack", 2f, attack -> Behavior.get(attack.entity()).request(BrawlerState.ATTACK));
 
         return entity;
     }

@@ -11,6 +11,7 @@ import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.Tilemap;
 import com.zendogames.zenlib.ecs.systems.*;
+import com.zendogames.zenlib.input.HeldKeys;
 import com.zendogames.zenlib.render.CameraFollow;
 import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.render.WorldView;
@@ -23,6 +24,8 @@ import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameContacts;
 import lando.systems.ld60.game.GameMask;
+import lando.systems.ld60.game.input.GameKeys;
+import lando.systems.ld60.game.input.Gamepad;
 import lando.systems.ld60.game.systems.GameInputSystem;
 import lando.systems.ld60.particles.effects.CloneEffect;
 import lando.systems.ld60.ui.GameDebugViews;
@@ -42,10 +45,11 @@ public abstract class ExampleScreen extends BaseScreen {
     static final int VIEW_HEIGHT = 180;
 
     final GameMap map;
+    final Vector2 mapCenter;
+    final HeldKeys keys;
     final ContactSystem contactSystem;
     final CameraFollow cameraFollow;
     final MapObjectSpawner spawner;
-    final Vector2 mapCenter;
 
     Entity player;
     Tilemap tilemap;
@@ -54,12 +58,12 @@ public abstract class ExampleScreen extends BaseScreen {
         super(game, /*withCollision*/ true);
         this.map = map;
         this.mapCenter = new Vector2();
+        this.keys = new GameKeys(inputProcessor, Gamepad.player());
         this.contactSystem = new ContactSystem(collision, new GameContacts(world, factory));
-        this.spawner = new MapObjectSpawner()
-                .on(Factory.MARKER, (m, obj) -> {}); // point objects other objects reference; nothing to spawn
+        this.spawner = new MapObjectSpawner().on(Factory.MARKER, (m, obj) -> {}); // point objects other objects reference; nothing to spawn
 
-        world.addSystem(new InputSystem(inputProcessor));
-        world.addSystem(new GameInputSystem(inputProcessor));
+        world.addSystem(new InputSystem(keys));
+        world.addSystem(new GameInputSystem(keys));
         world.addSystem(new SensorSystem(collision));
         world.addSystem(new TimerSystem());
         world.addSystem(new BehaviorSystem());
