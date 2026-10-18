@@ -125,6 +125,8 @@ public class ParticleSystem extends IteratingSystem implements Disposable, Signa
         }
         else if (data.keyframe  != null) {
             renderable = new Image(data.keyframe);
+            renderable.order = emitter.order;
+            renderable.layer = emitter.layer;
             entity.add((Image) renderable);
         }
         if (renderable != null) {

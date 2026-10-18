@@ -26,6 +26,11 @@ public class HealthBarParticleEffect implements ParticleEffect {
         }
 
         @Override
+        public int getOrder() {
+            return 101;
+        }
+
+        @Override
         public boolean isComplete() {
             return spawned;
         }
@@ -39,15 +44,15 @@ public class HealthBarParticleEffect implements ParticleEffect {
 
 
         var particles = new ArrayList<ParticleData>(16);
-        for (int i = 0; i < 1; i++) {
-            float speed = 30;
+        for (int i = 0; i < 5; i++) {
+            float speed = MathUtils.random(30, 40f);
             float ttl = MathUtils.random(.3f, .6f);
             particles.add(ParticleData.initializer(pool.obtain())
                 .keyframe(new TextureRegion(Main.game.pixel))
                 .interpolation(Interpolation.linear)
                 .startPos(params.target.x, params.target.y + 5)
                 .velocity(0, speed)
-                .startSize(MathUtils.random(1f, 3f), 10f)
+                .startSize(MathUtils.random(1f, 1.5f), 5f)
                 .startColor(.9f, .5f, .01f, .9f)
                 .endColor(.3f, 0.3f, .3f, 0f)
                 .timeToLive(ttl)

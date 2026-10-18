@@ -28,6 +28,7 @@ public class Emitter extends Renderable {
         this.emitterType = emitterType;
         this.effect = emitterType.effect;
         this.params = params;
+        this.order = params.getOrder();
     }
 
     @Override

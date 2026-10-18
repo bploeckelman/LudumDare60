@@ -25,6 +25,7 @@ import lando.systems.ld60.game.GameStrikes;
 import lando.systems.ld60.game.GameWeapons;
 import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
+import lando.systems.ld60.game.systems.HealthBarSystem;
 import lando.systems.ld60.game.systems.HitSystem;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.CloneEffect;
@@ -52,6 +53,7 @@ public class ExampleScroller extends MapScreen implements SignalListener<CombatE
         this.hitSystem = new HitSystem(new GameStrikes());
         world.addSystem(new BrawlerPresentSystem());
         world.addSystem(hitSystem);
+        world.addSystem(new HealthBarSystem());
         CombatEvent.signal.register(this);
 
         spawner .on(Factory.PLAYER, this::spawnPlayer)
