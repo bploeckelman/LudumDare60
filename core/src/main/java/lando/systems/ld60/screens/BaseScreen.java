@@ -25,6 +25,7 @@ import lando.systems.ld60.GameFlags;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.systems.ParticleSystem;
+import lando.systems.ld60.ui.GameDebugViews;
 
 public class BaseScreen extends ZenScreen {
 

@@ -25,6 +25,7 @@ import lando.systems.ld60.game.GameContacts;
 import lando.systems.ld60.game.GameMask;
 import lando.systems.ld60.game.systems.GameInputSystem;
 import lando.systems.ld60.particles.effects.CloneEffect;
+import lando.systems.ld60.ui.GameDebugViews;
 
 /**
  * What the example screens share: a Tiled map whose tagged tiles collide, the systems a moving,
@@ -79,6 +80,7 @@ public abstract class ExampleScreen extends BaseScreen {
         debugViews.add(DebugViews.behaviors(world));
         debugViews.add(DebugViews.sensors(world));
         debugViews.add(DebugViews.timers(world));
+        debugViews.add(GameDebugViews.particlePool(world));
         actions .add("back to menu",  Input.Keys.ESCAPE, () -> game.setScreen(new IntroScreen(game), ScreenTransitionEffectType.DOORWAY))
                 .add("reload map",    Input.Keys.M, this::reloadMap)
                 .add("rebuild level", Input.Keys.F, this::buildLevel)
