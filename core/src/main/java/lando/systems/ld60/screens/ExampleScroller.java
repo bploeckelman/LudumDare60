@@ -31,7 +31,7 @@ public class ExampleScroller extends ExampleScreen {
     final HitSystem hitSystem;
 
     boolean debugRender = false;
-    boolean showHitboxes = true;
+    boolean showHitboxes = false;
 
     public ExampleScroller(ZenGame game) {
         super(game, GameMap.EXAMPLE_SCROLLER);
