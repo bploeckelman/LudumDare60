@@ -22,6 +22,7 @@ import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HitSystem;
+import lando.systems.ld60.particles.effects.CloneEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
 public class ExampleScroller extends ExampleScreen {
@@ -48,6 +49,7 @@ public class ExampleScroller extends ExampleScreen {
         world.addSystem(hitSystem);
 
         spawner .on(Factory.PLAYER, this::spawnPlayer)
+                .on(Factory.DUMMY,  this::spawnDummy)
                 .on(Factory.WALL, (map, obj) -> factory.wall(obj));
 
         buildLevel();
@@ -96,6 +98,14 @@ public class ExampleScroller extends ExampleScreen {
         factory.emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(spineboy));
 
         setPlayer(spineboy);
+    }
+
+    private void spawnDummy(Tilemap map, MapObject object) {
+        int x = TiledProps.x(object);
+        int y = TiledProps.y(object);
+        int playerX = (player != null) ? Position.get(player).x : 0;
+        int facing  = (playerX < x) ? -1 : +1;
+        factory.dummy(x, y, facing);
     }
 
     private void testHurt() {

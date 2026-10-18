@@ -63,6 +63,23 @@
             "valuesAsFlags": false
         },
         {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 16,
+            "members": [
+                {
+                    "name": "unused",
+                    "type": "string",
+                    "value": ""
+                }
+            ],
+            "name": "dummy",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
             "color": "#ffffff00",
             "drawFill": true,
             "id": 7,

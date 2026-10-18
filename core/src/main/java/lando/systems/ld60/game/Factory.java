@@ -40,6 +40,7 @@ public class Factory {
     // Tiled class names: spawner keys, one per factory method below
     public static final String MARKER     = "marker"; // point objects that other objects reference (teleporter / leaper target); spawns nothing
     public static final String PLAYER     = "player";
+    public static final String DUMMY      = "dummy";
     public static final String BOUNCER    = "bouncer";
     public static final String JUMPTHRU   = "jumpthru";
     public static final String SPIKE      = "spike";
