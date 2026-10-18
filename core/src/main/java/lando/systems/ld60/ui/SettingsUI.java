@@ -6,12 +6,11 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisSlider;
-import com.kotcrab.vis.ui.widget.VisTextButton;
-import com.kotcrab.vis.ui.widget.VisWindow;
+import com.kotcrab.vis.ui.widget.*;
 import lando.systems.ld60.Config;
+import lando.systems.ld60.GameFlags;
 import lando.systems.ld60.Main;
+import lando.systems.ld60.assets.GameFont;
 import lando.systems.ld60.assets.GameUIAnim;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
@@ -26,14 +25,32 @@ public class SettingsUI extends VisWindow {
 
     public SettingsUI() {
         super("");
+
+        GameFlags.CRT_SHADER.set(prefs.getBoolean("crtShader", true));
+
         setBackground(new TextureRegionDrawable(GameUIAnim.SETTINGS.get().getKeyFrame(0)));
         setWidth(panelWidth);
         setHeight(panelHeight);
         setPosition(Config.windowWidth * .05f, Config.windowHeight * .05f);
         setVisible(false);
 
+        add().height(40f).row();
+
+        VisCheckBox crtShaderCheckBox = new VisCheckBox("CRT Shader");
+        crtShaderCheckBox.setChecked(prefs.getBoolean("crtShader", true));
+        crtShaderCheckBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                prefs.putBoolean("crtShader", crtShaderCheckBox.isChecked());
+                prefs.flush();
+                GameFlags.CRT_SHADER.set(prefs.getBoolean("crtShader", true));
+                crtShaderCheckBox.setChecked(prefs.getBoolean("crtShader", true));
+            }
+        });
+        add(crtShaderCheckBox).row();
+
         VisLabel musicLabel = new VisLabel("Music");
-        add().height(100f).row();
+        add().height(10f).row();
         add(musicLabel).row();
 
         VisSlider musicSlider = new VisSlider(0, 1f, 0.1f, false);
