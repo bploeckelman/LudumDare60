@@ -5,16 +5,21 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.kotcrab.vis.ui.VisUI;
 import com.zendogames.zenlib.*;
 import com.zendogames.zenlib.imgui.ImGuiGdx;
 import com.zendogames.zenlib.screens.ZenScreen;
+import com.zendogames.zenlib.screens.transition.ScreenTransitionEffect;
 import lando.systems.ld60.assets.*;
+import lando.systems.ld60.events.DistortionEvent;
+import lando.systems.ld60.events.Signal;
+import lando.systems.ld60.events.SignalListener;
 import lando.systems.ld60.game.systems.AudioSystem;
 import lando.systems.ld60.screens.LauncherScreen;
 
-public class Main extends ZenGame {
+public class Main extends ZenGame implements SignalListener<DistortionEvent> {
 
     public static Main game;
     FrameBuffer crtFramebuffer;
@@ -47,6 +52,7 @@ public class Main extends ZenGame {
         crtFramebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), false);
         crtTexture = crtFramebuffer.getColorBufferTexture();
         audioSystem = new AudioSystem();
+        DistortionEvent.signal.register(this);
     }
 
     @Override
@@ -57,7 +63,8 @@ public class Main extends ZenGame {
         }
     }
 
-    @Override public ZenConfig config() {
+    @Override
+    public ZenConfig config() {
         return Config.zenConfig();
     }
 
@@ -72,6 +79,29 @@ public class Main extends ZenGame {
         accum += Time.delta;
         if (ImGuiGdx.isInitialized() && ZenFlag.SHOW_IMGUI.off()) {
             ZenFlag.SHOW_IMGUI.enable();
+        }
+
+        if (shakeDuration > 0) {
+            shakeDuration -= Time.delta;
+
+            if (shakeDuration <= 0) {
+                shakeIntensity = 0f;
+                shakeDuration = 0f;
+                currentDistortion = 1.0f;
+            } else {
+// 1. Progress goes from 1.0 down to 0.0
+                float progress = shakeDuration / maxDuration;
+
+                // 2. Use a smooth curve to decay the amplitude (pow3Out gives a great spring-like settle)
+                float decay = com.badlogic.gdx.math.Interpolation.pow3Out.apply(progress);
+
+                float wobble = MathUtils.sin(accum * 20f);
+
+                // 4. Combine them. (Use + to bulge outward, - to pinch inward)
+                currentDistortion = 1.0f + (shakeIntensity * wobble * decay);
+            }
+        } else {
+            currentDistortion = 1.0f;
         }
     }
 
@@ -91,21 +121,40 @@ public class Main extends ZenGame {
         ScreenUtils.clear(Color.CLEAR);
         var crtShader = GameShader.CRT.get();
         if (GameFlags.CRT_SHADER.on()) {
-        batch.setShader(crtShader);
-        crtShader.bind();
+            batch.setShader(crtShader);
+            crtShader.bind();
         }
         batch.begin();
         batch.setProjectionMatrix(windowCamera.combined);
         crtShader.setUniformf("u_time", accum);
+        crtShader.setUniformf("u_kWarp", currentDistortion);
         batch.setColor(Color.WHITE);
         batch.draw(crtTexture, 0, windowCamera.viewportHeight, windowCamera.viewportWidth, -windowCamera.viewportHeight);
         batch.end();
 
-        if(GameFlags.CRT_SHADER.on()) {
+        if (GameFlags.CRT_SHADER.on()) {
             batch.setShader(null);
         }
 
         ImGuiGdx.render(currentScreen::renderImGui);
 
+    }
+
+    private float shakeDuration = 0f;
+    private float shakeIntensity = 0f;
+    private float currentDistortion = 1f;
+    private float maxDuration = 1f;
+
+    @Override
+    public void receive(Signal<DistortionEvent> signal, DistortionEvent event) {
+        this.shakeIntensity = Math.max(this.shakeIntensity, event.intensity);
+        this.shakeDuration = Math.max(this.shakeDuration, event.duration);
+        this.maxDuration = Math.max(this.maxDuration, event.duration);
+    }
+
+    @Override
+    public void setScreen(ZenScreen newScreen, ScreenTransitionEffect effect, boolean instant) {
+        super.setScreen(newScreen, effect, instant);
+        DistortionEvent.trigger();
     }
 }

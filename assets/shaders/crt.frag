@@ -6,7 +6,7 @@ uniform sampler2D u_texture;
 
 varying vec4 v_color;
 varying vec2 v_texCoord;
-uniform vec2 u_kWarp;
+uniform float u_kWarp;
 uniform float u_time;
 
 vec3 scanline(vec2 coord, vec3 screen)
@@ -15,16 +15,17 @@ vec3 scanline(vec2 coord, vec3 screen)
     return screen;
 }
 
-vec2 crt(vec2 coord, float bend)
+vec2 crt(vec2 coord, float warpAmount)
 {
     // put in symmetrical coords
     coord = (coord - 0.5) * 2.0;
 
     coord *= 1.01;
 
-    // deform coords
-    coord.x *= 1.0 + pow((abs(coord.y) / bend), 2.0);
-    coord.y *= 1.0 + pow((abs(coord.x) / bend), 2.0);
+    // deform coords (using multiplication avoids divide-by-zero explosions)
+    // and allows negative numbers to "pinch" the screen inward!
+    coord.x *= 1.0 + (coord.y * coord.y) * warpAmount;
+    coord.y *= 1.0 + (coord.x * coord.x) * warpAmount;
 
     // transform back to 0.0 - 1.0 space
     coord  = (coord / 2.0) + 0.5;
@@ -63,21 +64,14 @@ vec3 apertureGrille(vec2 fragCoord) {
 
 void main() {
     vec2 uv = v_texCoord.xy;
-    vec2 crtCoords = crt(uv, 4.2);
+    vec2 crtCoords = crt(uv, 0.056 * u_kWarp);
 
-    // --- V-HOLD SLIP LOGIC ---
-    // Generate a rolling wave moving vertically.
-    // Alter the 3.0 to change how many bands appear at once.
-    // Alter the 2.0 to change the roll speed (negative reverses direction).
     float vHoldRoll = max(0.0, sin(crtCoords.y * 3.0 - u_time * 2.0));
 
-    // Narrow the wide sine wave down to a sharp band using a high power
     float vHoldBand = pow(vHoldRoll, 15.0);
 
-    // Apply a slight horizontal tear/shift where the v-hold band is located.
-    // This gives the screen that physical "pull" as the sync breaks down.
+
     crtCoords.x += vHoldBand * 0.002;
-    // -------------------------
 
     if (crtCoords.x < 0.0 || crtCoords.x > 1.0 || crtCoords.y < 0.0 || crtCoords.y > 1.0) {
         discard;
@@ -85,23 +79,18 @@ void main() {
 
     vec4 fragColor = vec4(1.0);
 
-    // Split the color channels
     fragColor.rgb = sampleSplit(u_texture, crtCoords);
 
-    // Apply the original scanline
     vec2 screenSpace = crtCoords;
     fragColor.rgb = scanline(screenSpace, fragColor.rgb);
 
-    // Add the visual brightness band from the V-Hold slip
-    // The * 0.15 controls how bright the washed-out bar gets
+
     fragColor.rgb += vec3(vHoldBand * 0.05);
 
-    // Apply the new physical RGB pixel mask
-    // We use gl_FragCoord.xy so the subpixels don't bend with the CRT glass
+
     fragColor.rgb *= apertureGrille(gl_FragCoord.xy);
 
-    // Multiply by a brightness boost. Masking cuts out a lot of light,
-    // so we need to artificially boost the final output to compensate.
+
     fragColor.rgb *= 1.2;
 
     gl_FragColor = fragColor;

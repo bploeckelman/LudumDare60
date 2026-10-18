@@ -16,6 +16,7 @@ import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.MusicType;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
+import lando.systems.ld60.events.DistortionEvent;
 import lando.systems.ld60.particles.effects.CloneEffect;
 
 import java.util.function.Supplier;
@@ -68,6 +69,7 @@ public class IntroScreen extends BaseScreen {
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             Log.info(TAG, "Left mouse button clicked");
             AudioEvent.playSound(SoundType.SoundGroup.BELLS);
+            DistortionEvent.trigger();
             var mouse = mouseWorldPosition();
             factory.emitter(EmitterType.CLONE, new CloneEffect.Params(mouse.x, mouse.y), RenderLayer.OVERLAY);
         }

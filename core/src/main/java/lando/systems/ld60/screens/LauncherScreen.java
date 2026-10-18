@@ -13,6 +13,7 @@ import com.zendogames.zenlib.screens.ZenScreen;
 import lando.systems.ld60.Main;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
+import lando.systems.ld60.events.DistortionEvent;
 
 public class LauncherScreen extends BaseScreen {
 
