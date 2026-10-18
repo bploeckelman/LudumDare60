@@ -93,7 +93,7 @@ public class Main extends ZenGame {
         batch.setProjectionMatrix(windowCamera.combined);
         crtShader.setUniformf("u_time", accum);
         batch.setColor(Color.WHITE);
-        batch.draw(crtTexture, 0, Config.windowHeight, Config.windowWidth, -Config.windowHeight);
+        batch.draw(crtTexture, 0, windowCamera.viewportHeight, windowCamera.viewportWidth, -windowCamera.viewportHeight);
         batch.end();
 
         batch.setShader(null);
