@@ -12,6 +12,7 @@ import java.util.Objects;
 
 public enum GameShader implements AssetType<ShaderProgram> {
     CRT( "shaders/crt.frag")
+    , HEALTH_BAR( "shaders/health_bar.frag")
     ;
 
 
@@ -30,7 +31,9 @@ public enum GameShader implements AssetType<ShaderProgram> {
         params.vertexFile = vertPath;
         params.fragmentFile = fragPath;
         params.logOnCompileFailure = true;
-//        ShaderProgram.pedantic = false;
+
+        // TODO: test with this off before we are done
+        ShaderProgram.pedantic = false;
 
     }
 

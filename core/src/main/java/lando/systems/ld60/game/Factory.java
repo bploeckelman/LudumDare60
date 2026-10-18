@@ -373,6 +373,8 @@ public class Factory {
                 .add(new Hitboxes(GameWeapons.BLASTER.set(), GameMask.ENEMY, GameMask.PLAYER))
                 .add(timers);
 
+        thug.add(new FloatingHealthBar(thug, 90f));
+
         timers.every("think", 0.25f, think -> {
             var e      = think.entity();
             var input  = Input.get(e);
@@ -569,8 +571,8 @@ public class Factory {
         var noneKey = com.badlogic.gdx.Input.Keys.UNKNOWN;
         var noneControls = new InputControls(noneKey, noneKey, noneKey, noneKey, noneKey);
 
-        var entity = world.createEntity()
-                .add(new Name("dummy"))
+        var entity = world.createEntity();
+        entity  .add(new Name("dummy"))
                 .add(new Position(x, y))
                 .add(new Health(5))
                 .add(new Input(noneControls))
@@ -581,7 +583,9 @@ public class Factory {
                 .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.ENEMY, GameMask.PLAYER))
                 .add(new Hurtable().despawnAfter(1.5f).onDeath((e, strike) -> Timers.get(e).cancel("attack")))
                 .add(timers)
-                .add(anim);
+                .add(anim)
+                .add(new FloatingHealthBar(entity, 90f))
+        ;
 
         timers.every("attack", 2f, attack -> Behavior.get(attack.entity()).request(BrawlerState.ATTACK));
 

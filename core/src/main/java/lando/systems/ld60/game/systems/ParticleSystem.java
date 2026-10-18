@@ -11,6 +11,10 @@ import com.zendogames.zenlib.ecs.components.Animator;
 import com.zendogames.zenlib.ecs.components.Image;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.Renderable;
+import lando.systems.ld60.events.ParticleEvent;
+import lando.systems.ld60.events.Signal;
+import lando.systems.ld60.events.SignalListener;
+import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.components.Particle;
 import lando.systems.ld60.particles.ParticleData;
@@ -19,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ParticleSystem extends IteratingSystem implements Disposable {
+public class ParticleSystem extends IteratingSystem implements Disposable, SignalListener<ParticleEvent> {
 
     public final Pool<ParticleData> pool = new Pool<>() {
         @Override
@@ -31,8 +35,12 @@ public class ParticleSystem extends IteratingSystem implements Disposable {
     public List<ParticleData> activeData = new ArrayList<>();
     public List<Entity> activeParticles = new ArrayList<>();
 
-    public ParticleSystem() {
+    private final Factory factory;
+
+    public ParticleSystem(Factory factory) {
         super(Family.one(Emitter.TYPE, Particle.TYPE), SystemOrder.PRESENT);
+        this.factory = factory;
+        ParticleEvent.signal.register(this);
     }
 
     @Override
@@ -221,5 +229,11 @@ public class ParticleSystem extends IteratingSystem implements Disposable {
             position.x - data.width/2,
             position.y - data.height/2,
             data.width, data.height);
+    }
+
+    @Override
+    public void receive(Signal<ParticleEvent> signal, ParticleEvent event) {
+        // When an event is fired anywhere in the game, the system uses the factory to spawn the emitter!
+        factory.emitter(event.type, event.params, event.layer);
     }
 }
