@@ -83,7 +83,6 @@ public class Main extends ZenGame {
 
             currentScreen.render(Time.delta);
         }
-        ImGuiGdx.render(currentScreen::renderImGui);
 
         crtFramebuffer.end();
         ScreenUtils.clear(Color.CLEAR);
@@ -91,11 +90,15 @@ public class Main extends ZenGame {
         batch.setShader(crtShader);
         crtShader.bind();
         batch.begin();
+        batch.setProjectionMatrix(windowCamera.combined);
         crtShader.setUniformf("u_time", accum);
         batch.setColor(Color.WHITE);
         batch.draw(crtTexture, 0, Config.windowHeight, Config.windowWidth, -Config.windowHeight);
         batch.end();
 
         batch.setShader(null);
+
+        ImGuiGdx.render(currentScreen::renderImGui);
+
     }
 }
