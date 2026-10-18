@@ -93,7 +93,7 @@ public class Main extends ZenGame {
         batch.begin();
         crtShader.setUniformf("u_time", accum);
         batch.setColor(Color.WHITE);
-        batch.draw(crtTexture, 0, crtFramebuffer.getHeight(), crtFramebuffer.getWidth(), -crtFramebuffer.getHeight());
+        batch.draw(crtTexture, 0, Config.windowHeight, Config.windowWidth, -Config.windowHeight);
         batch.end();
 
         batch.setShader(null);
