@@ -20,8 +20,11 @@ public final class GameHitboxes {
     public static final HitboxSet SPINEBOY = new HitboxSet()
             .base(Hitbox.hurt("head", Hitbox.circ(2, 16, 15)).on("head"),
                   Hitbox.hurt("body", Hitbox.rect(-8, -28, 16, 46)).on("hip"))
-            .window("shoot", 0.03f, 0.2f,
-                    Hitbox.hit("shot", Hitbox.rect(4, -6, 40, 12), SHOT).on("muzzle"));
+            .window("shoot", 0.03f, 0.2f, Hitbox.hit("shot", Hitbox.rect(4, -6, 40, 12), SHOT).on("muzzle"));
+
+    public static final HitboxSet AWOL = new HitboxSet()
+            .base(Hitbox.hurt("body", Hitbox.circ(0, 0, 35)).on("body-awol"))
+            .window("punch", 0.03f, 0.2f, Hitbox.hit("punch", Hitbox.rect(4, -6, 40, 12), SHOT).on("left-hand"));
 
     private GameHitboxes() {}
 }

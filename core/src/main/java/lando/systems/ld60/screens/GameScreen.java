@@ -66,7 +66,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
 
         spawner .on(Factory.PLAYER,     (map, obj) -> spawnPlayer(factory.hero(obj)))
                 .on(Factory.WALL,       (map, obj) -> factory.wall(obj))
-                .on(Factory.ENEMY,      (map, obj) -> factory.thug(obj))
+                .on(Factory.ENEMY,      (map, obj) -> factory.enemy(obj))
                 .on(Factory.PICKUP,     (map, obj) -> factory.pickup(obj))
                 .on(Factory.TELEVISION, (map, obj) -> factory.television(obj, televisions))
         ;

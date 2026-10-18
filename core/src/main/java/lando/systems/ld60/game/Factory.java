@@ -38,6 +38,8 @@ import lando.systems.ld60.game.state.ExampleEnemyState;
 import lando.systems.ld60.game.state.ExamplePlayerState;
 import lando.systems.ld60.particles.ParticleEffectParams;
 
+import java.util.List;
+
 public class Factory {
 
     /** Tile size: the unit every tuning is authored in. */
@@ -62,6 +64,8 @@ public class Factory {
     public static final String ENEMY      = "enemy";  // scroller: a thug (member 'kind' picks which, 'weapon' arms it)
     public static final String PICKUP     = "pickup"; // scroller: a weapon on the floor (member 'weapon')
     public static final String TELEVISION = "television"; // scroller: a region where the game world framebuffer is rendered back into for a "watch yourself play" effect
+
+    public static final List<String> ENEMY_KINDS = List.of("thug", /*TEMP: testing*/ "awol");
 
     /** Seconds a bullet flies before it expires on its own. */
     public static final float BULLET_LIFETIME = 3f;
@@ -127,20 +131,28 @@ public class Factory {
     }
 
     /** The scroller's rank and file: {@code kind} picks the build (only "thug") so far), {@code weapon} (optional) arms it. */
-    public Entity thug(MapObject object) {
+    public Entity enemy(MapObject object) {
         int x      = TiledProps.x(object);
         int y      = TiledProps.y(object);
         int w      = TiledProps.width(object);
         var kind   = TiledProps.get(object, "kind", "thug", String.class);
         var weapon = TiledProps.get(object, "weapon", "", String.class);
-        if (!kind.equals("thug")) {
-            throw new GdxRuntimeException("enemy %s: unknown kind '%s".formatted(TiledProps.describe(object), kind));
+        if (!ENEMY_KINDS.contains(kind)) {
+            throw new GdxRuntimeException("enemy %s: unknown kind '%s', kinds available: %s"
+                    .formatted(TiledProps.describe(object), kind, ENEMY_KINDS));
         }
-        var thug = thug(x + w / 2, y, -1);
+        var enemy = switch (kind) {
+            case "thug" -> thug(x + w / 2, y, -1);
+            case "awol" -> awol(x + w / 2, y, -1);
+            default -> {
+                throw new GdxRuntimeException("enemy %s: unknown kind '%s', kinds available: %s"
+                        .formatted(TiledProps.describe(object), kind, ENEMY_KINDS));
+            }
+        };
         if (!weapon.isEmpty()) {
-            Weapons.arm(thug, GameWeapons.byName(weapon));
+            Weapons.arm(enemy, GameWeapons.byName(weapon));
         }
-        return thug;
+        return enemy;
     }
 
     /** A weapon on the floor; {@code weapon} names one of the {@link GameWeapons#ALL}. */
@@ -332,6 +344,26 @@ public class Factory {
                 .dead(AnimClip.spine("death"));
     }
 
+    static BrawlerAnimClips awolClips() {
+        return new BrawlerAnimClips(
+                AnimClip.spine("run"),
+                AnimClip.spine("run"),
+                AnimClip.spine("run"),
+                AnimClip.spine("jump"),
+                BRAWLER_THUG_TUNING.maxSpeedX())
+                .stop(AnimClip.spine("run"))
+                .dead(AnimClip.spine("jump"));
+    }
+
+    static SpineAnimator awolAnimator(int facing) {
+        var anim = new SpineAnimator(GameSpine.AWOL, "run");
+        // TODO: probably don't need to change scale...
+        anim.defaultScale.set(0.5f, 0.5f);
+        anim.scale.set(0.5f, 0.5f);
+        anim.facing = facing;
+        return anim;
+    }
+
     /** The player: a brawler on the keyboard (or pad) with the states that read its buttons; hits ask for HURT and DEAD through its Hurtable. */
     public Entity hero(int x, int y) {
         var hurtable = new Hurtable()
@@ -420,6 +452,62 @@ public class Factory {
         });
 
         return thug;
+    }
+
+    public Entity awol(int x, int y, int facing) {
+        var timers = new Timers();
+        var motion = new BrawlerMotion(BRAWLER_THUG_TUNING);
+        motion.facing = facing;
+        var hurtable = new Hurtable()
+                .despawnAfter(1.5f)
+                .onDeath((e, strike) -> { timers.cancel("think"); Input.get(e).reset(); });
+
+        var entity = world.createEntity()
+                .tag(GameTags.ENEMY)
+                .add(new Name("awol"))
+                .add(new Position(x, y))
+                .add(new Health(3))
+                .add(new Contacts())
+                .add(new Input())
+                .add(new Held(GameWeapons.AWOL_FIST))
+                .add(new Mover(motion))
+                .add(Collider.capsule(GameMask.ENEMY, new Rectangle(-18, 0, 36, 12), CollisionCaps.Axis.HORIZONTAL)
+                        .blockedBy(GameMask.SOLID)
+                        .detects(GameMask.PICKUP))
+                .add(new Hitboxes(GameWeapons.AWOL_FIST.set(), GameMask.ENEMY, GameMask.PLAYER))
+                .add(awolAnimator(facing))
+                .add(awolClips())
+                .add(hurtable)
+                .add(timers);
+
+        entity.add(new FloatingHealthBar(entity, 90f));
+
+        timers.every("think", 0.25f, think -> {
+            var e      = think.entity();
+            var input  = Input.get(e);
+            var target = nearestPlayer(e);
+            if (target == null) { input.moveX = 0; input.moveY = 0; return; }
+
+            var item = Weapons.under(e);
+            if (item != null) Weapons.pickUp(e, item);
+
+            var pos  = Position.get(e);
+            var tPos = Position.get(target);
+            int dx = tPos.x - pos.x;
+            int dy = tPos.y - pos.y;
+            int reach = 3 * UNIT;
+            input.moveX = (Math.abs(dx) > reach) ? Integer.signum(dx) : 0;
+            input.moveY = (Math.abs(dy) > 6)     ? Integer.signum(dy) : 0;
+            if (input.moveX == 0 && input.moveY == 0 && Math.abs(dx) <= reach + UNIT / 2) {
+                if (dx != 0) motion.facing = Integer.signum(dx);
+                var attack = Weapons.attackOf(e);
+                if (attack != null && !attack.playing(e) && motion.grounded && !motion.launched) {
+                    attack.start(e);
+                }
+            }
+        });
+
+        return entity;
     }
 
     /** A weapon lying on the floor at {@code (x, y)}. */
