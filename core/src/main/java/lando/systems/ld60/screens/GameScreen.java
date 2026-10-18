@@ -21,6 +21,7 @@ import lando.systems.ld60.events.SignalListener;
 import lando.systems.ld60.game.*;
 import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
+import lando.systems.ld60.game.systems.HealthBarSystem;
 import lando.systems.ld60.game.systems.HitSystem;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
@@ -55,6 +56,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         this.hitSystem = new HitSystem(new GameStrikes());
         world.addSystem(new BrawlerPresentSystem());
         world.addSystem(hitSystem);
+        world.addSystem(new HealthBarSystem());
 
         spawner .on(Factory.PLAYER, (map, obj) -> spawnPlayer(factory.hero(obj)))
                 .on(Factory.WALL,   (map, obj) -> factory.wall(obj))
