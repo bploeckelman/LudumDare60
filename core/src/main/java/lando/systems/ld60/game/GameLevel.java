@@ -9,10 +9,10 @@ import lando.systems.ld60.assets.MusicType;
  * is cleared. Maps and themes are placeholders until the {@code 01-} maps exist.
  */
 public enum GameLevel {
-    LEVEL_1 ("Dial-Up Alley",     GameMap.EXAMPLE_SCROLLER, MusicType.MAIN_THEME),  // TODO: GameMap.LEVEL_1 -> maps/01-level-1.tmx
-    LEVEL_2 ("The Server Room",   GameMap.EXAMPLE_SCROLLER, MusicType.MAIN_THEME),
-    LEVEL_3 ("Tape Vault",        GameMap.EXAMPLE_SCROLLER, MusicType.MAIN_THEME),
-    FINALE  ("The Mainframe",     GameMap.EXAMPLE_SCROLLER, MusicType.MAIN_THEME);
+    LEVEL_1 ("Dial-Up Alley",     GameMap.LEVEL_1, MusicType.MAIN_THEME),
+    LEVEL_2 ("The Server Room",   GameMap.LEVEL_1, MusicType.MAIN_THEME),
+    LEVEL_3 ("Tape Vault",        GameMap.LEVEL_1, MusicType.MAIN_THEME),
+    FINALE  ("The Mainframe",     GameMap.LEVEL_1, MusicType.MAIN_THEME);
 
     public final String title;
     public final GameMap map;

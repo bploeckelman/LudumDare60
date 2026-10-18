@@ -39,7 +39,7 @@ public class IntroScreen extends BaseScreen {
         var table = new VisTable();
         table.setFillParent(true);
         table.add(title).padBottom(BUTTON_MARGIN * 3).row();
-        table.add(disabledButtonWithOnClick("Play",                () -> start(() -> new GameScreen(game, GameLevel.LEVEL_1)))).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(buttonWithOnClick("Play",                () -> start(() -> new GameScreen(game, GameLevel.LEVEL_1)))).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         //table.add(buttonWithOnClick("Example: Platformer", () -> start(() -> new ExamplePlatformer(game)))).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         //table.add(buttonWithOnClick("Example: Overhead",   () -> start(() -> new ExampleOverhead(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(buttonWithOnClick("Example: Scroller",   () -> start(() -> new ExampleScroller(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();

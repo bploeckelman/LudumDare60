@@ -126,7 +126,7 @@ public final class Weapons {
         var pos    = Position.get(thrower);
         var boxes  = Hitboxes.get(thrower);
         var facing = (Mover.has(thrower) && Mover.get(thrower).motion instanceof BrawlerMotion m) ? m.facing : boxes.facing;
-        var motion = new BrawlerMotion(Factory.BRAWLER_TUNING);
+        var motion = new BrawlerMotion(Factory.BRAWLER_PLAYER_TUNING);
         var mover  = new Mover(motion);
         var timers = new Timers();
         var set    = new HitboxSet().base(Hitbox.hit("item", Hitbox.rect(-ITEM / 2, -ITEM / 2, ITEM, ITEM), weapon.thrown()).depth(ITEM_DEPTH));

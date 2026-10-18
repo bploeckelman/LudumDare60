@@ -82,10 +82,20 @@ public class Factory {
     static final TopDownTuning PATROL_TUNING = new TopDownTuning(UNIT, 3, 0.3f, 0.05f);
 
     /** The scroller's brawlers, player and dummy: ten tiles a second along the street, five up it. */
-    public static final BrawlerTuning BRAWLER_TUNING = new BrawlerTuning(
+    public static final BrawlerTuning BRAWLER_PLAYER_TUNING = new BrawlerTuning(
             UNIT,    // authoring unit -> pixels
             10,      // x-axis speed (tiles/sec)
             5,       // y-axis speed (tiles/sec)
+            0.1f,    // accel time
+            0.08f,   // stop time
+            2.5f,    // 'jump' height (tiles)
+            0.35f);  // 'jump' time to peak (seconds)
+
+    /** The scroller's brawlers, thug: slower than player so they don't overwhelm immediately. */
+    public static final BrawlerTuning BRAWLER_THUG_TUNING = new BrawlerTuning(
+            UNIT,    // authoring unit -> pixels
+            5,       // x-axis speed (tiles/sec)
+            2,       // y-axis speed (tiles/sec)
             0.1f,    // accel time
             0.08f,   // stop time
             2.5f,    // 'jump' height (tiles)
@@ -308,7 +318,7 @@ public class Factory {
                 AnimClip.spine("walk"),
                 AnimClip.spine("run"),
                 AnimClip.spine("jump"),
-                BRAWLER_TUNING.maxSpeedX() * 0.5f)
+                BRAWLER_PLAYER_TUNING.maxSpeedX() * 0.5f)
                 .stop(AnimClip.spine("run-to-idle"))
                 .dead(AnimClip.spine("death"));
     }
@@ -335,7 +345,7 @@ public class Factory {
                 .add(new Held(GameWeapons.BLASTER))
                 .add(hurtable)
                 .add(new Behavior(BrawlerState.NORMAL))
-                .add(new Mover(new BrawlerMotion(BRAWLER_TUNING)))
+                .add(new Mover(new BrawlerMotion(BRAWLER_PLAYER_TUNING)))
                 .add(Collider.capsule(GameMask.PLAYER, new Rectangle(-18, 0, 36, 12), CollisionCaps.Axis.HORIZONTAL) // only covers feet: sprite's top half may overlap a wall behind it
                         .blockedBy(GameMask.SOLID)
                         .detects(GameMask.TRIGGER, GameMask.PICKUP))
@@ -350,7 +360,7 @@ public class Factory {
      */
     public Entity thug(int x, int y, int facing) {
         var timers = new Timers();
-        var motion = new BrawlerMotion(BRAWLER_TUNING);
+        var motion = new BrawlerMotion(BRAWLER_THUG_TUNING);
         motion.facing = facing;
         var hurtable = new Hurtable()
                 .despawnAfter(1.5f)
@@ -384,16 +394,19 @@ public class Factory {
             var item = Weapons.under(e);
             if (item != null) Weapons.pickUp(e, item);
 
-            var pos = Position.get(e);
-            var tp  = Position.get(target);
-            int dx = tp.x - pos.x, dy = tp.y - pos.y;
+            var pos  = Position.get(e);
+            var tPos = Position.get(target);
+            int dx = tPos.x - pos.x;
+            int dy = tPos.y - pos.y;
             int reach = 3 * UNIT;
             input.moveX = (Math.abs(dx) > reach) ? Integer.signum(dx) : 0;
             input.moveY = (Math.abs(dy) > 6)     ? Integer.signum(dy) : 0;
             if (input.moveX == 0 && input.moveY == 0 && Math.abs(dx) <= reach + UNIT / 2) {
                 if (dx != 0) motion.facing = Integer.signum(dx);
                 var attack = Weapons.attackOf(e);
-                if (attack != null && !attack.playing(e) && motion.grounded && !motion.launched) attack.start(e);
+                if (attack != null && !attack.playing(e) && motion.grounded && !motion.launched) {
+                    attack.start(e);
+                }
             }
         });
 
@@ -550,7 +563,7 @@ public class Factory {
                 .add(new Held(GameWeapons.BLASTER))
                 .add(new SpineAnimator(GameSpine.SPINEBOY, "idle"))
                 .add(new Behavior(BrawlerState.NORMAL))
-                .add(new Mover(new BrawlerMotion(BRAWLER_TUNING)))
+                .add(new Mover(new BrawlerMotion(BRAWLER_PLAYER_TUNING)))
                 .add(Collider.capsule(GameMask.PLAYER, new Rectangle(-18, 0, 36, 12), CollisionCaps.Axis.HORIZONTAL) // only covers feet: sprite's top half may overlap a wall behind it
                         .blockedBy(GameMask.SOLID)
                         .detects(GameMask.ENEMY, GameMask.TRIGGER, GameMask.HAZARD, GameMask.PICKUP))
@@ -579,7 +592,7 @@ public class Factory {
                 .add(GameControls.none())
                 .add(new Held(GameWeapons.BLASTER))
                 .add(new Behavior(BrawlerState.NORMAL))
-                .add(new Mover(new BrawlerMotion(BRAWLER_TUNING)))
+                .add(new Mover(new BrawlerMotion(BRAWLER_PLAYER_TUNING)))
                 .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.ENEMY, GameMask.PLAYER))
                 .add(new Hurtable().despawnAfter(1.5f).onDeath((e, strike) -> Timers.get(e).cancel("attack")))
                 .add(timers)

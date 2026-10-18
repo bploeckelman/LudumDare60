@@ -1,20 +1,20 @@
 package lando.systems.ld60.screens;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.collision.ContactResponder;
 import com.zendogames.zenlib.ecs.Family;
+import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
+import com.zendogames.zenlib.render.WorldView;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.events.AudioEvent;
-import lando.systems.ld60.game.BrawlContacts;
-import lando.systems.ld60.game.Factory;
-import lando.systems.ld60.game.GameLevel;
-import lando.systems.ld60.game.GameStrikes;
+import lando.systems.ld60.game.*;
 import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HitSystem;
@@ -26,6 +26,9 @@ import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
  * as reference; everything the real content needs accumulates here.
  */
 public class GameScreen extends MapScreen {
+
+    static final int VIEW_WIDTH  = 320 * 2;
+    static final int VIEW_HEIGHT = 180 * 2;
 
     final GameLevel level;
     final Family skeletons;
@@ -54,12 +57,15 @@ public class GameScreen extends MapScreen {
                 .on(Factory.PICKUP, (map, obj) -> factory.pickup(obj));
 
         buildLevel();
+
+        worldCamera.position.set(VIEW_WIDTH / 2f, VIEW_HEIGHT / 2f, 0f);
+        worldCamera.update();
+
         AudioEvent.playMusic(level.music);
 
         this.debugViews.add(DebugViews.spine(world));
-        actions
-//                .arm("spawn thug",          Input.Keys.N, (x, y) -> factory.thug(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
-//                .arm("spawn pipe",          Input.Keys.K, (x, y) -> factory.pickup(GameWeapons.PIPE, x, y))
+        actions .arm("spawn thug",          Input.Keys.N, (x, y) -> factory.thug(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
+                .arm("spawn pipe",          Input.Keys.K, (x, y) -> factory.pickup(GameWeapons.PIPE, x, y))
                 .add("next level",          Input.Keys.RIGHT_BRACKET, () -> game.setScreen(new GameScreen(game, level.next()), ScreenTransitionEffectType.random()))
                 .add("toggle debug render", Input.Keys.B, () -> debugRender  = !debugRender)
                 .add("toggle hitboxes",     Input.Keys.H, () -> showHitboxes = !showHitboxes);
@@ -94,5 +100,12 @@ public class GameScreen extends MapScreen {
                 skeletonDebug.draw(SpineAnimator.get(entities.get(i)).skeleton);
             }
         }
+    }
+
+    @Override
+    protected WorldView createWorldView() {
+        var view = new WorldView(worldCamera, VIEW_WIDTH, VIEW_HEIGHT);
+        view.clearColor.set(Color.DARK_GRAY);
+        return view;
     }
 }
