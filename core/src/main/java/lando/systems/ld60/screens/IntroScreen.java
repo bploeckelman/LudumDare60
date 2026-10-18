@@ -7,7 +7,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
-import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.screens.ZenScreen;
@@ -69,7 +68,6 @@ public class IntroScreen extends BaseScreen {
     public void update(float delta) {
         super.update(delta);
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-            Log.info(TAG, "Left mouse button clicked");
             AudioEvent.playSound(SoundType.SoundGroup.BELLS);
             DistortionEvent.trigger();
             var mouse = mouseWorldPosition();

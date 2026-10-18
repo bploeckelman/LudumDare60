@@ -141,7 +141,6 @@ public abstract class ExampleScreen extends BaseScreen {
     public void update(float delta) {
         super.update(delta);
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-            Log.info(TAG, "Left mouse button clicked");
             var mouse = mouseWorldPosition();
             factory.emitter(EmitterType.CLONE, new CloneEffect.Params(mouse.x, mouse.y), RenderLayer.BACKGROUND);
         }
