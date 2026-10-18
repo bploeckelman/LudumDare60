@@ -44,7 +44,8 @@ public class ExampleScroller extends ExampleScreen {
         this.hitSystem = new HitSystem(new GameStrikes());
         world.addSystem(hitSystem);
 
-        spawner.on(Factory.PLAYER, this::spawnPlayer);
+        spawner .on(Factory.PLAYER, this::spawnPlayer)
+                .on(Factory.WALL, (map, obj) -> factory.wall(obj));
 
         buildLevel();
 

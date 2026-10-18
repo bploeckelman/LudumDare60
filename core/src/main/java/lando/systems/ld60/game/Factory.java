@@ -51,6 +51,7 @@ public class Factory {
     public static final String SHOOTER    = "shooter";
     public static final String BALL       = "ball";
     public static final String PATROL     = "patrol";       // simple enemy for overhead example
+    public static final String WALL       = "wall";
 
     /** Seconds a bullet flies before it expires on its own. */
     public static final float BULLET_LIFETIME = 3f;
@@ -223,6 +224,21 @@ public class Factory {
          var dir    = TiledProps.enumOf(object, "direction", Direction.class);
          // TODO: send position as center x,y instead?
          return patrol(region, x, y, dir);
+     }
+
+     /** A rectangle drawn over the background art in Tiled: a static SOLID box that colliders can't enter. */
+     public Entity wall(MapObject object) {
+         int x = TiledProps.x(object);
+         int y = TiledProps.y(object);
+         int w = TiledProps.width(object);
+         int h = TiledProps.height(object);
+         if (w <= 0 || h <= 0) {
+             throw new GdxRuntimeException("wall %s: draw it as a rectangle with a width and height".formatted(TiledProps.describe(object)));
+         }
+         return world.createEntity()
+                 .add(new Name("wall"))
+                 .add(new Position(x, y))
+                 .add(Collider.rect(GameMask.SOLID, 0, 0, w, h));
      }
 
     // ------------------------------------------------------------------------

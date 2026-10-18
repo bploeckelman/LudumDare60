@@ -313,6 +313,23 @@
             "useAs": [
                 "object"
             ]
+        },
+        {
+            "color": "#ffff0000",
+            "drawFill": true,
+            "id": 15,
+            "members": [
+                {
+                    "name": "unused",
+                    "type": "bool",
+                    "value": false
+                }
+            ],
+            "name": "wall",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
         }
     ]
 }
