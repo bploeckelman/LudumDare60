@@ -6,6 +6,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.kotcrab.vis.ui.widget.VisImageButton;
+import com.zendogames.zenlib.FramePool;
 import com.zendogames.zenlib.Time;
 import com.zendogames.zenlib.ZenFlag;
 import com.zendogames.zenlib.ZenGame;
@@ -22,10 +27,13 @@ import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.ui.DebugActions;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.GameFlags;
+import lando.systems.ld60.Main;
+import lando.systems.ld60.assets.GameUIAnim;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.systems.ParticleSystem;
 import lando.systems.ld60.ui.GameDebugViews;
+import lando.systems.ld60.ui.SettingsUI;
 
 public class BaseScreen extends ZenScreen {
 
@@ -44,6 +52,8 @@ public class BaseScreen extends ZenScreen {
     final CollisionWorld collision; // null when withCollision is false
     final TextureRegion pixel;
     final DebugActions actions;
+    public final SettingsUI settingsUI = new SettingsUI();
+
 
     int zoomIndex = 0;
 
@@ -63,6 +73,10 @@ public class BaseScreen extends ZenScreen {
         actions.add("zoom out", Input.Keys.MINUS,  () -> zoom(+1))
                .add("zoom in",  Input.Keys.EQUALS, () -> zoom(-1));
         actions.add("crt shader", Input.Keys.C, GameFlags.CRT_SHADER::toggle);
+
+        uiStage.addActor(settingsUI);
+
+        initializeUI();
     }
 
     /** The world's systems after the game-specific ones every subclass adds; call at the end of the constructor. */
@@ -126,5 +140,42 @@ public class BaseScreen extends ZenScreen {
     @Override public void dispose() {
         world.dispose();
         super.dispose();
+    }
+
+    @Override
+    public void initializeUI() {
+
+
+    }
+
+
+    /**
+     * Adds a "Settings" button to the user interface of the screen.
+     * The button is placed in the bottom-right corner of the screen and allows the user to toggle
+     * the visibility of the settings user interface when clicked.
+     *
+     * Functionality:
+     * - Creates a button using a `TextureRegionDrawable` for visual representation.
+     * - Configures the button size and position relative to the current viewport dimensions.
+     * - Adds an event listener to handle the click action, which toggles the settings UI visibility.
+     * - Adds the button to the stage for rendering and interaction.
+     */
+    public void addSettingButton() {
+        var buttonSize  = 50f;
+        var settingsPos = FramePool.vec2(windowCamera.viewportWidth - buttonSize, 0);
+
+        var gearRegion = GameUIAnim.GEAR.get().getKeyFrame(0f);
+        var gearDrawable = new TextureRegionDrawable(gearRegion);
+        var settingsButton = new VisImageButton(gearDrawable, "Settings");
+        settingsButton.setSize(buttonSize, buttonSize);
+        settingsButton.setPosition(settingsPos.x, settingsPos.y);
+        settingsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                settingsUI.toggle();
+            }
+        });
+
+        uiStage.addActor(settingsButton);
     }
 }

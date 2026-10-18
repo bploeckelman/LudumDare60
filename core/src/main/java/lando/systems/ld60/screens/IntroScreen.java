@@ -42,10 +42,11 @@ public class IntroScreen extends BaseScreen {
         table.add(buttonWithOnClick("Example: Overhead",   () -> start(() -> new ExampleOverhead(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(buttonWithOnClick("Example: Scroller",   () -> start(() -> new ExampleScroller(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(buttonWithOnClick("Example: Spine",      () -> start(() -> new ExampleSpine(game))))     .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
-        table.add(new VisTextButton("Settings")).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(buttonWithOnClick("Settings", () -> settingsUI.toggle())).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(new VisTextButton("Credits")).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         uiStage.addActor(table);
         AudioEvent.playMusic(MusicType.MAIN_THEME);
+        addSettingButton();
     }
 
     private static VisTextButton buttonWithOnClick(String text, Runnable onClick) {

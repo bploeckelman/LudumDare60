@@ -1,6 +1,7 @@
 package lando.systems.ld60;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -23,6 +24,7 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
 
     public static Main game;
 
+    public Preferences prefs;
     FrameBuffer crtFramebuffer;
     Texture crtTexture;
     AudioSystem audioSystem;
@@ -38,6 +40,8 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
 
     @Override
     protected void init() {
+
+        prefs = Gdx.app.getPreferences(Config.preferencesName);
         //ZenFlag.LOG_DEBUG.enable();
         //ZenFlag.LOG_INPUT.enable();
         //ZenFlag.DEBUG_FRAME_POOL.enable();
@@ -53,6 +57,7 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
         assets.register(GameShader.values());
         assets.register(MusicType.values());
         assets.register(SoundType.values());
+        assets.register(GameUIAnim.values());
 
         Flags.register(GameFlags.values());
 

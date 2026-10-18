@@ -92,6 +92,8 @@ public class LauncherScreen extends BaseScreen {
         drawTextAt("► Press Enter ◄", 17, 14, Color.BLACK);
 
         batch.end();
+
+        renderUI();
     }
 
 
