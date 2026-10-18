@@ -11,6 +11,8 @@ import com.badlogic.gdx.utils.Align;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.screens.ZenScreen;
 import lando.systems.ld60.Main;
+import lando.systems.ld60.assets.SoundType;
+import lando.systems.ld60.events.AudioEvent;
 
 public class LauncherScreen extends BaseScreen {
 
@@ -40,6 +42,7 @@ public class LauncherScreen extends BaseScreen {
         if (deBounceTimer <= 0 && (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.justTouched())) {
             if (!transitioning){
                 transitioning = true;
+                AudioEvent.playSound(SoundType.BELL);
                 game.setScreen(new IntroScreen(game));
             }
         }

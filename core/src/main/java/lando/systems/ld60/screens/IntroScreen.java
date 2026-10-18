@@ -13,6 +13,9 @@ import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import lando.systems.ld60.assets.EmitterType;
+import lando.systems.ld60.assets.MusicType;
+import lando.systems.ld60.assets.SoundType;
+import lando.systems.ld60.events.AudioEvent;
 import lando.systems.ld60.particles.effects.CloneEffect;
 
 import java.util.function.Supplier;
@@ -41,6 +44,7 @@ public class IntroScreen extends BaseScreen {
         table.add(new VisTextButton("Settings")).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(new VisTextButton("Credits")).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         uiStage.addActor(table);
+        AudioEvent.playMusic(MusicType.MAIN_THEME);
     }
 
     private static VisTextButton buttonWithOnClick(String text, Runnable onClick) {
@@ -63,6 +67,7 @@ public class IntroScreen extends BaseScreen {
         super.update(delta);
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             Log.info(TAG, "Left mouse button clicked");
+            AudioEvent.playSound(SoundType.SoundGroup.BELLS);
             var mouse = mouseWorldPosition();
             factory.emitter(EmitterType.CLONE, new CloneEffect.Params(mouse.x, mouse.y), RenderLayer.OVERLAY);
         }

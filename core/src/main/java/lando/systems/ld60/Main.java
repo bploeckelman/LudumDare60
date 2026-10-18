@@ -11,7 +11,7 @@ import com.zendogames.zenlib.*;
 import com.zendogames.zenlib.imgui.ImGuiGdx;
 import com.zendogames.zenlib.screens.ZenScreen;
 import lando.systems.ld60.assets.*;
-import lando.systems.ld60.screens.IntroScreen;
+import lando.systems.ld60.game.systems.AudioSystem;
 import lando.systems.ld60.screens.LauncherScreen;
 
 public class Main extends ZenGame {
@@ -20,6 +20,7 @@ public class Main extends ZenGame {
     FrameBuffer crtFramebuffer;
     Texture crtTexture;
     private float accum;
+    AudioSystem audioSystem;
 
     public Main() {
         Main.game = this;
@@ -40,9 +41,12 @@ public class Main extends ZenGame {
         assets.register(GameSpine.values());
         assets.register(GameFont.values());
         assets.register(GameShader.values());
+        assets.register(MusicType.values());
+        assets.register(SoundType.values());
         Flags.register(GameFlags.values());
         crtFramebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), false);
         crtTexture = crtFramebuffer.getColorBufferTexture();
+        audioSystem = new AudioSystem();
     }
 
     @Override
