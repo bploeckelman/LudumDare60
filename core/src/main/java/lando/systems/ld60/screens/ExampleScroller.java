@@ -8,6 +8,7 @@ import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.ecs.Family;
 import com.zendogames.zenlib.ecs.components.Mover;
+import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import com.zendogames.zenlib.ecs.components.Tilemap;
 import com.zendogames.zenlib.tilemap.TiledProps;
@@ -15,7 +16,10 @@ import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.Factory;
+import lando.systems.ld60.game.GameStrikes;
+import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.movement.BrawlerMotion;
+import lando.systems.ld60.game.systems.HitSystem;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
 public class ExampleScroller extends ExampleScreen {
@@ -24,8 +28,10 @@ public class ExampleScroller extends ExampleScreen {
 
     final Family skeletons;
     final SkeletonRendererDebug skeletonDebug;
+    final HitSystem hitSystem;
 
     boolean debugRender = false;
+    boolean showHitboxes = true;
 
     public ExampleScroller(ZenGame game) {
         super(game, GameMap.EXAMPLE_SCROLLER);
@@ -35,19 +41,29 @@ public class ExampleScroller extends ExampleScreen {
         this.skeletonDebug.setBoundingBoxes(false);
         this.skeletonDebug.setRegionAttachments(false);
 
+        this.hitSystem = new HitSystem(new GameStrikes());
+        world.addSystem(hitSystem);
+
         spawner.on(Factory.PLAYER, this::spawnPlayer);
 
         buildLevel();
 
         this.debugViews.add(DebugViews.spine(world));
-        actions.add("toggle debug render", Input.Keys.B, () -> debugRender = !debugRender)
-                .add("hurt (knockback)",   Input.Keys.K, this::testHurt)
+        actions .arm("spawn dummy",         Input.Keys.N, (x, y) -> factory.dummy(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
+                .add("toggle debug render", Input.Keys.B, () -> debugRender  = !debugRender)
+                .add("toggle hitboxes",     Input.Keys.H, () -> showHitboxes = !showHitboxes)
         ;
     }
 
     @Override
     protected void renderWorld(Batch batch) {
         super.renderWorld(batch);
+
+        if (showHitboxes) {
+            batch.begin();
+            HitboxDraw.all(shapes, hitSystem, world.alpha());
+            batch.end();
+        }
 
         if (debugRender) {
             // The skeletons were just posed at their render positions, so the bones line up with the draw

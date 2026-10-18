@@ -1,0 +1,60 @@
+package lando.systems.ld60.game.combat;
+
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
+import com.zendogames.zenlib.FramePool;
+import com.zendogames.zenlib.ZenFlag;
+import com.zendogames.zenlib.collision.CollisionDraw;
+import com.zendogames.zenlib.ecs.components.Position;
+import lando.systems.ld60.game.components.Hitboxes;
+import lando.systems.ld60.game.systems.HitSystem;
+import space.earlygrey.shapedrawer.ShapeDrawer;
+
+/**
+ * Debug outlines for this tick's hitboxes, drawn with the screen's {@link ShapeDrawer} between the
+ * batch's begin and end, at the interpolated position like {@code CollisionDraw.all}. Colors say
+ * the state: HURT green, HIT red; yellow (and thicker) while touching an opposing box; orange once
+ * a HIT box's window has landed; grey for the HURT boxes of a fighter that is not vulnerable. A
+ * lifted fighter gets a line from its floor line up to its boxes.
+ */
+public final class HitboxDraw {
+
+    public static final Color HURT      = new Color(0.2f, 0.9f, 0.3f, 0.8f);
+    public static final Color HIT       = new Color(1.0f, 0.2f, 0.2f, 0.9f);
+    public static final Color TOUCHING  = new Color(1.0f, 1.0f, 0.2f, 1.0f);
+    public static final Color CONNECTED = new Color(1.0f, 0.6f, 0.1f, 1.0f);
+    public static final Color IMMUNE    = new Color(0.6f, 0.6f, 0.6f, 0.6f);
+
+    private HitboxDraw() {}
+
+    /** Every fighter of {@code system}; {@code alpha} is {@code World.alpha()}. */
+    public static void all(ShapeDrawer shapes, HitSystem system, float alpha) {
+        var a = ZenFlag.RENDER_INTERP.on() ? alpha : 1f;
+        var fighters = system.fighters().entities();
+        for (int i = 0; i < fighters.size; i++) {
+            var e = fighters.get(i);
+            var pos = Position.get(e);
+            var boxes = Hitboxes.get(e);
+            int x = MathUtils.round(pos.renderX(a));
+            int floor = MathUtils.round(pos.renderY(a));
+            int y = floor + MathUtils.round(boxes.lift);
+            if (y != floor) {
+                shapes.line(x, floor, x, y, IMMUNE, 1f);
+            }
+            for (int j = 0; j < boxes.active.size; j++) {
+                var slot = boxes.active.get(j);
+                var at = FramePool.pi2(x + slot.x, y + slot.y);
+                CollisionDraw.shape(shapes, slot.box.shape(boxes.facing), at, color(boxes, slot), slot.touching ? 2f : 1f);
+            }
+        }
+    }
+
+    private static Color color(Hitboxes boxes, Hitboxes.Active slot) {
+        if (slot.box.isHurt()) {
+            if (!boxes.vulnerable) return IMMUNE;
+            return slot.touching ? TOUCHING : HURT;
+        }
+        if (slot.connected) return CONNECTED;
+        return slot.touching ? TOUCHING : HIT;
+    }
+}

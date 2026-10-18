@@ -11,6 +11,7 @@ import com.zendogames.zenlib.input.InputControls;
 import com.zendogames.zenlib.state.State;
 import com.zendogames.zenlib.state.StateMachine;
 import lando.systems.ld60.game.components.Health;
+import lando.systems.ld60.game.components.Hitboxes;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 
 public enum ExamplePlayerState implements State<Entity> {
@@ -23,9 +24,11 @@ public enum ExamplePlayerState implements State<Entity> {
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
             var mover = Mover.get(e);
             if (!mover.is(BrawlerMotion.class)) return this;
+            if (Input.get(e).actionPressed) return ATTACK_SPINEBOY;
 
             var anim   = SpineAnimator.get(e);
             var motion = mover.motion(BrawlerMotion.class);
+            Hitboxes.get(e).lift = motion.z;
             anim.facing   = motion.facing;
             anim.origin.y = -motion.z / anim.scale.y; // lift the skeleton by its height; Position, Collider stay on the floor
             anim.order    = -Position.get(e).y;       // lower on the street draws in front of higher
@@ -48,6 +51,24 @@ public enum ExamplePlayerState implements State<Entity> {
                 return;
             }
             anim.play(want); // crossfade from the mixes table; also drops a queued idle if the player moves again
+        }
+    },
+    ATTACK_SPINEBOY {
+        @Override
+        public void enter(StateMachine<Entity> m, Entity e) {
+            Mover.get(e).stop();
+            var anim = SpineAnimator.get(e);
+            anim.start("shoot", false);
+            anim.queue("idle", true, 0);
+        }
+
+        @Override
+        public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
+            // the keyboard wrote Input already (INPUT runs before DECIDE): hold still until the clip ends
+            var input = Input.get(e);
+            input.moveX = 0;
+            input.moveY = 0;
+            return SpineAnimator.get(e).is("shoot") ? this : NORMAL_SPINEBOY;
         }
     },
     NORMAL {

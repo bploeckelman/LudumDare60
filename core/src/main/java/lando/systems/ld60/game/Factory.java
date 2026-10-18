@@ -24,6 +24,7 @@ import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameSpine;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.components.Health;
+import lando.systems.ld60.game.components.Hitboxes;
 import lando.systems.ld60.game.components.Trigger;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.movement.BrawlerTuning;
@@ -344,9 +345,35 @@ public class Factory {
                 .add(new SpineAnimator(GameSpine.SPINEBOY, "idle"))
                 .add(new Behavior(ExamplePlayerState.NORMAL_SPINEBOY))
                 .add(new Mover(new BrawlerMotion(tuning)))
-                .add(Collider.rect(GameMask.PLAYER, -4, 0, 8, 8) // feet: sprite's top half may overlap a wall behind it
+                .add(Collider.circ(GameMask.PLAYER, 0, 0, 5) // only covers feet: sprite's top half may overlap a wall behind it
                         .blockedBy(GameMask.SOLID)
-                        .detects(GameMask.ENEMY, GameMask.TRIGGER, GameMask.HAZARD));
+                        .detects(GameMask.ENEMY, GameMask.TRIGGER, GameMask.HAZARD))
+                .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.PLAYER, GameMask.ENEMY)); // the body that gets hit, the shot that hits
+    }
+
+    /** TEMP: Something to hit in the scroller: a spineboy that stands where it is put, facing {@code facing}, and shoots every two seconds. */
+    public Entity dummy(int x, int y, int facing) {
+        var timers = new Timers();
+        var anim = new SpineAnimator(GameSpine.SPINEBOY, "idle");
+        anim.defaultScale.set(0.5f, 0.5f); // the scroller's spineboy size, as ExampleScroller.spawnPlayer sets it
+        anim.scale.set(0.5f, 0.5f);
+        anim.facing = facing;
+
+        var entity = world.createEntity()
+                .add(new Name("dummy"))
+                .add(new Position(x, y))
+                .add(new Health(5))
+                .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.ENEMY, GameMask.PLAYER))
+                .add(timers)
+                .add(anim);
+
+        timers.every("attack", 2f, attack -> {
+            var a = SpineAnimator.get(attack.entity());
+            a.start("shoot", false);
+            a.queue("idle", true, 0);
+        });
+
+        return entity;
     }
 
     // ------------------------------------------------------------------------
