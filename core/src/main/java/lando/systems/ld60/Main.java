@@ -6,10 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.kotcrab.vis.ui.VisUI;
-import com.zendogames.zenlib.Time;
-import com.zendogames.zenlib.ZenConfig;
-import com.zendogames.zenlib.ZenFlag;
-import com.zendogames.zenlib.ZenGame;
+import com.zendogames.zenlib.*;
 import com.zendogames.zenlib.imgui.ImGuiGdx;
 import com.zendogames.zenlib.screens.ZenScreen;
 import lando.systems.ld60.assets.*;
@@ -42,6 +39,7 @@ public class Main extends ZenGame {
         assets.register(GameSpine.values());
         assets.register(GameFont.values());
         assets.register(GameShader.values());
+        Flags.register(GameFlags.values());
         crtFramebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, Config.windowWidth, Config.windowHeight, false);
         crtTexture = crtFramebuffer.getColorBufferTexture();
     }
@@ -87,8 +85,10 @@ public class Main extends ZenGame {
         crtFramebuffer.end();
         ScreenUtils.clear(Color.CLEAR);
         var crtShader = GameShader.CRT.get();
+        if (GameFlags.CRT_SHADER.on()) {
         batch.setShader(crtShader);
         crtShader.bind();
+        }
         batch.begin();
         batch.setProjectionMatrix(windowCamera.combined);
         crtShader.setUniformf("u_time", accum);
@@ -96,7 +96,9 @@ public class Main extends ZenGame {
         batch.draw(crtTexture, 0, windowCamera.viewportHeight, windowCamera.viewportWidth, -windowCamera.viewportHeight);
         batch.end();
 
-        batch.setShader(null);
+        if(GameFlags.CRT_SHADER.on()) {
+            batch.setShader(null);
+        }
 
         ImGuiGdx.render(currentScreen::renderImGui);
 

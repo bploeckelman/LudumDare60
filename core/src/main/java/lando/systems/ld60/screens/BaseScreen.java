@@ -21,6 +21,7 @@ import com.zendogames.zenlib.input.ScreenInputProcessor;
 import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.ui.DebugActions;
 import com.zendogames.zenlib.ui.DebugViews;
+import lando.systems.ld60.GameFlags;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.systems.ParticleSystem;
@@ -60,6 +61,7 @@ public class BaseScreen extends ZenScreen {
         SensorDraw.THREAT.a  = OVERLAY_ALPHA;
         actions.add("zoom out", Input.Keys.MINUS,  () -> zoom(+1))
                .add("zoom in",  Input.Keys.EQUALS, () -> zoom(-1));
+        actions.add("crt shader", Input.Keys.C, GameFlags.CRT_SHADER::toggle);
     }
 
     /** The world's systems after the game-specific ones every subclass adds; call at the end of the constructor. */

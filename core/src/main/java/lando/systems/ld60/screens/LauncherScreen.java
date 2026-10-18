@@ -12,7 +12,7 @@ import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.screens.ZenScreen;
 import lando.systems.ld60.Main;
 
-public class LauncherScreen extends ZenScreen {
+public class LauncherScreen extends BaseScreen {
 
     private float deBounceTimer = 0f;
     public float charWidth = 16f;
@@ -23,7 +23,7 @@ public class LauncherScreen extends ZenScreen {
 
 
     public LauncherScreen(ZenGame game) {
-        super(game);
+        super(game, false);
         deBounceTimer = .5f;
         // This needed to be a bitmap font to get that old dos terminal look,
         // Textra font was fucking with kerning and such.
