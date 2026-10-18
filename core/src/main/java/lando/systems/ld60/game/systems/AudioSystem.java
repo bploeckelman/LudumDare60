@@ -18,7 +18,7 @@ public class AudioSystem implements SignalListener<AudioEvent> {
     public static MutableFloat musicVolume;
     public static MutableFloat soundVolume;
 
-    public static final float DEFAULT_VOLUME = 0.05f;
+    public static final float DEFAULT_VOLUME = 0.5f;
     public static Music currentMusic = null;
 
     private static final Preferences prefs = Main.game.prefs;
@@ -27,6 +27,8 @@ public class AudioSystem implements SignalListener<AudioEvent> {
     public AudioSystem() {
         musicVolume = new MutableFloat(prefs.getFloat("musicVolume", DEFAULT_VOLUME));
         soundVolume = new MutableFloat(prefs.getFloat("soundVolume", DEFAULT_VOLUME));
+        prefs.putFloat("soundVolume", soundVolume.floatValue());
+        prefs.putFloat("musicVolume", musicVolume.floatValue());
         prefs.flush();
         AudioEvent.signal.register(this);
     }
