@@ -7,7 +7,7 @@ import lando.systems.ld60.game.combat.Weapon;
 
 /**
  * A weapon lying on the floor. The entity's {@code PICKUP} collider is the zone a fighter must
- * stand in; a fighter with {@code Held} takes it by pressing attack there ({@code Weapons.under}),
+ * stand in; a fighter with {@code Held} takes it by pressing down + attack there ({@code Weapons.under}),
  * or on touch when {@link #onTouch} is set (a contact responder calls {@code Weapons.pickUp}).
  */
 public record Pickup(Weapon weapon, boolean onTouch) implements Component {

@@ -25,7 +25,7 @@ import lando.systems.ld60.game.movement.BrawlerMotion;
  * outside.
  */
 public enum BrawlerState implements State<Entity> {
-    /** Walks, jumps (the motion's action), attacks or picks up on attack, throws on special. */
+    /** Walks, jumps (the motion's action), attacks on attack, picks up on down + attack, throws on special. */
     NORMAL {
         @Override
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
@@ -34,9 +34,11 @@ public enum BrawlerState implements State<Entity> {
 
             var buttons = GameInput.get(e);
             if (buttons.attack.pressed) {
-                var item = Weapons.under(e);
-                if (item != null && Weapons.pickUp(e, item)) {
-                    return this;
+                if (Input.get(e).moveY < 0) { // down + attack: pickup what is underfoot, else a crouching swing is just a swing
+                    var item = Weapons.under(e);
+                    if (item != null && Weapons.pickUp(e, item)) {
+                        return this;
+                    }
                 }
                 return (attackOf(e) != null) ? ATTACK : this;
             }
@@ -124,12 +126,21 @@ public enum BrawlerState implements State<Entity> {
         return move;
     }
 
-    /** The keyboard wrote {@code Input} already (INPUT runs before DECIDE): stand still, no jump, until the move is over. */
+    /**
+     * The keyboard wrote {@code Input} and {@code GameInput} already (INPUT runs before DECIDE): stand still,
+     * no jump, and no button edge for anything that reads them later this tick or on the way back to
+     * {@link #NORMAL}, until the move is over. Held state stays, so a button held across the move
+     * does not press again when it ends.
+     */
     static void hold(Entity e) {
         var input = Input.get(e);
         input.moveX = 0;
         input.moveY = 0;
         input.actionPressed = false;
+        var buttons = GameInput.get(e);
+        if (buttons != null) {
+            buttons.clearFrameEvents();
+        }
     }
 
     static void squash(Entity e, float sx, float sy) {

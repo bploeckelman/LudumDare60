@@ -26,6 +26,6 @@ public record Move(AnimClip clip, Consumer<Entity> onStart) {
 
     /** True from {@link #start} until the clip has played through. */
     public boolean playing(Entity e) {
-        return clip.is(e) && AnimClip.complete(e);
+        return clip.is(e) && !AnimClip.complete(e);
     }
 }
