@@ -14,16 +14,16 @@ import java.util.List;
 
 public class BloodSplatterEffect implements ParticleEffect {
 
-    private static final int STAINS = 12;
-
     public static class Params implements ParticleEffectParams {
         public final float x;
         public final float y;
+        public final int count;
         public boolean spawned;
 
-        public Params(float x, float y) {
+        public Params(float x, float y, int count) {
             this.x = x;
             this.y = y;
+            this.count = count;
         }
 
         @Override
@@ -38,8 +38,8 @@ public class BloodSplatterEffect implements ParticleEffect {
         params.spawned = true;
 
         var frames = ParticleAnim.SPLAT.get().getKeyFrames();
-        var particles = new ArrayList<ParticleData>(STAINS);
-        for (int i = 0; i < STAINS; i++) {
+        var particles = new ArrayList<ParticleData>(params.count);
+        for (int i = 0; i < params.count; i++) {
             var reach = MathUtils.random(-30f, 30f);
             var size = MathUtils.random(12f, 32f);
             particles.add(ParticleData.initializer(pool.obtain())

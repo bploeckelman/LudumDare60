@@ -25,6 +25,7 @@ import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HealthBarSystem;
 import lando.systems.ld60.game.systems.HitSystem;
+import lando.systems.ld60.particles.effects.BloodSprayEffect;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
@@ -143,10 +144,16 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
     @Override
     public void receive(Signal<CombatEvent> signal, CombatEvent event) {
         switch (event) {
+            case CombatEvent.Struck s:
+                var pos = Position.get(s.strike.target());
+                var anim = SpineAnimator.get(s.strike.target());
+                factory.emitter(EmitterType.BLOOD_SPRAY, new BloodSprayEffect.Params(pos.x, pos.y + 40f, s.strike.away()), RenderLayer.BACKGROUND);
+                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + -anim.facing * 50f, pos.y, 1), RenderLayer.BACKGROUND);
+                break;
             case CombatEvent.Died d:
-                var pos = Position.get(d.entity);
-                var anim = SpineAnimator.get(d.entity);
-                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + -anim.facing * 50f, pos.y), RenderLayer.BACKGROUND);
+                var deadPos = Position.get(d.entity);
+                var deadAnim = SpineAnimator.get(d.entity);
+                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(deadPos.x + -deadAnim.facing * 50f, deadPos.y, 12), RenderLayer.BACKGROUND);
                 break;
             default:
                 break;

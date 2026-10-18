@@ -120,7 +120,7 @@ public class ExampleScroller extends MapScreen implements SignalListener<CombatE
         switch (event) {
             case CombatEvent.Died d:
                 var pos = Position.get(d.entity);
-                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x, pos.y), RenderLayer.BACKGROUND);
+                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x, pos.y, 12), RenderLayer.BACKGROUND);
                 break;
 //            case CombatEvent.Struck s:
 //                var pos = Position.get(player);

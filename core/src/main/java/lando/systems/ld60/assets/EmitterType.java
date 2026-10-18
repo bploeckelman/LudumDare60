@@ -1,6 +1,7 @@
 package lando.systems.ld60.assets;
 
 import lando.systems.ld60.particles.ParticleEffect;
+import lando.systems.ld60.particles.effects.BloodSprayEffect;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.CloneEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
@@ -12,6 +13,7 @@ public enum EmitterType {
     , CLONE(new CloneEffect())
     , DUST (new FootStepDustCloudEffect())
     , BLOOD(new BloodSplatterEffect())
+    , BLOOD_SPRAY(new BloodSprayEffect())
     , HEALTH_BAR_DAMAGE(new HealthBarParticleEffect())
     ;
 
