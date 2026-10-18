@@ -1,11 +1,16 @@
 package lando.systems.ld60.game.components;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.zendogames.zenlib.ecs.ComponentType;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.Renderable;
 import com.zendogames.zenlib.utils.Draw;
+import lando.systems.ld60.Main;
+import lando.systems.ld60.assets.GameShader;
 import lando.systems.ld60.game.TelevisionFeed;
+
+import java.awt.*;
 
 /**
  * A screen in the world showing the {@link TelevisionFeed}: the player watching themselves play.
@@ -20,6 +25,7 @@ public class Television extends Renderable {
 
     private final TelevisionFeed feed;
 
+
     public Television(TelevisionFeed feed, int width, int height) {
         this.feed = feed;
         this.size.set(width, height);
@@ -27,6 +33,18 @@ public class Television extends Renderable {
 
     @Override
     public void render(Batch batch, float x, float y) {
-        Draw.region(batch, feed.region(), rect(x, y), tint);
+        var shader = GameShader.BROKEN_CRT.get();
+        var prevShader = batch.getShader();
+
+        var rect = rect(x, y);
+
+        batch.setShader(shader);
+        shader.setUniformf("u_time", feed.time);
+        shader.setUniformf("u_resolution", rect.width, rect.height);
+
+        batch.setColor(Color.WHITE);
+        batch.draw(feed.region(), rect.x, rect.y, rect.width, rect.height);
+
+        batch.setShader(prevShader);
     }
 }

@@ -12,6 +12,7 @@ import java.util.Objects;
 
 public enum GameShader implements AssetType<ShaderProgram> {
     CRT( "shaders/crt.frag")
+    , BROKEN_CRT ("shaders/broken_crt.frag")
     , HEALTH_BAR( "shaders/health_bar.frag")
     ;
 

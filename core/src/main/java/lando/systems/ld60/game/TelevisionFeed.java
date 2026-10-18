@@ -1,5 +1,6 @@
 package lando.systems.ld60.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -7,8 +8,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.zendogames.zenlib.Time;
 import lando.systems.ld60.game.components.Television;
 
 import java.util.function.Consumer;
@@ -33,6 +36,7 @@ public class TelevisionFeed implements Disposable {
     private final FrameBuffer[] buffers = new FrameBuffer[2];
     private final TextureRegion[] regions = new TextureRegion[2];
     private int current = 0;
+    public float time = 0;
 
     public TelevisionFeed(int width, int height) {
         this(width, height, Texture.TextureFilter.Nearest);
@@ -50,6 +54,7 @@ public class TelevisionFeed implements Disposable {
             ScreenUtils.clear(clearColor);
             buffers[i].end();
         }
+        time = MathUtils.random(0f, 100f);
     }
 
     /** The latest capture, y-flipped for the batch; what a {@link Television} draws. */
@@ -63,6 +68,7 @@ public class TelevisionFeed implements Disposable {
      * Call only while no other framebuffer is bound: {@code FrameBuffer.end} rebinds the default one.
      */
     public void capture(Batch batch, Camera camera, Consumer<Batch> drawWorld) {
+        time += Time.delta;
         int next = 1 - current;
         buffers[next].begin();
         {
