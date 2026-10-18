@@ -12,9 +12,11 @@ import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import com.zendogames.zenlib.ecs.components.Tilemap;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import com.zendogames.zenlib.ui.DebugViews;
+import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.movement.BrawlerMotion;
+import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
 public class ExampleScroller extends ExampleScreen {
 
@@ -69,6 +71,8 @@ public class ExampleScroller extends ExampleScreen {
         anim.scale.set(0.5f, 0.5f);
         // TODO: gate this behind LOG_SPINE
         anim.onEvent(event -> Log.debug(TAG, "event: %s", event.getData().getName()));
+
+        factory.emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(spineboy));
 
         setPlayer(spineboy);
     }
