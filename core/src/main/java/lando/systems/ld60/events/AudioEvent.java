@@ -14,8 +14,8 @@ public abstract class AudioEvent {
     public static void playSound(SoundType.SoundGroup group)               { signal.dispatch(new PlaySoundGroup(group)); }
     public static void playSound(SoundType.SoundGroup group, float volume) { signal.dispatch(new PlaySoundGroup(group, volume)); }
 
-    public static void playMusic(MusicType music)               { signal.dispatch(new PlayMusic(music)); }
-    public static void playMusic(MusicType music, float volume) { signal.dispatch(new PlayMusic(music, volume)); }
+    public static void playMusic(MusicType music)               { AudioEvent.stopAllMusic(); signal.dispatch(new PlayMusic(music)); }
+    public static void playMusic(MusicType music, float volume) { AudioEvent.stopAllMusic(); signal.dispatch(new PlayMusic(music, volume)); }
     public static void stopMusic(MusicType music)               { signal.dispatch(new StopMusic(music)); }
     public static void stopAllMusic()                           { signal.dispatch(new StopMusic()); }
 

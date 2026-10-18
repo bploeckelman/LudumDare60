@@ -1,0 +1,98 @@
+{ "skeleton": { "images": "images/" },
+"PhotoshopToSpine": { "scale": 1, "padding": 1, "trim": true },
+"bones": [
+	{ "name": "root" },
+	{ "name": "right-thigh", "parent": "root", "x": 37, "y": 105 },
+	{ "name": "right-shin", "parent": "root", "x": 46, "y": 77 },
+	{ "name": "right-knee", "parent": "root", "x": 47, "y": 95 },
+	{ "name": "right-shoe", "parent": "root", "x": 58.5, "y": 37.5 },
+	{ "name": "left-thigh", "parent": "root", "x": -34, "y": 101 },
+	{ "name": "left-shin", "parent": "root", "x": -33, "y": 73 },
+	{ "name": "left-knee", "parent": "root", "x": -31, "y": 86 },
+	{ "name": "left-shoe", "parent": "root", "x": -28.5, "y": 28.5 },
+	{ "name": "body-awol", "parent": "root", "x": -6.5, "y": 174 },
+	{ "name": "right-bicep", "parent": "root", "x": 66.5, "y": 161.5 },
+	{ "name": "right-forearm", "parent": "root", "x": 76, "y": 138 },
+	{ "name": "right-elbow", "parent": "root", "x": 77.5, "y": 150.5 },
+	{ "name": "right-hand", "parent": "root", "x": 76.5, "y": 103 },
+	{ "name": "left-bicep", "parent": "root", "x": -63, "y": 149 },
+	{ "name": "left-forearm", "parent": "root", "x": -67, "y": 118 },
+	{ "name": "left-elbow", "parent": "root", "x": -68.5, "y": 130.5 },
+	{ "name": "left-hand", "parent": "root", "x": -64.5, "y": 83 }
+],
+"slots": [
+	{ "name": "right-thigh", "bone": "right-thigh", "attachment": "right-thigh" },
+	{ "name": "right-shin", "bone": "right-shin", "attachment": "right-shin" },
+	{ "name": "right-knee", "bone": "right-knee", "attachment": "right-knee" },
+	{ "name": "right-shoe", "bone": "right-shoe", "attachment": "right-shoe" },
+	{ "name": "left-thigh", "bone": "left-thigh", "attachment": "left-thigh" },
+	{ "name": "left-shin", "bone": "left-shin", "attachment": "left-shin" },
+	{ "name": "left-knee", "bone": "left-knee", "attachment": "left-knee" },
+	{ "name": "left-shoe", "bone": "left-shoe", "attachment": "left-shoe" },
+	{ "name": "body-awol", "bone": "body-awol", "attachment": "body-awol" },
+	{ "name": "right-bicep", "bone": "right-bicep", "attachment": "right-bicep" },
+	{ "name": "right-forearm", "bone": "right-forearm", "attachment": "right-forearm" },
+	{ "name": "right-elbow", "bone": "right-elbow", "attachment": "right-elbow" },
+	{ "name": "right-hand", "bone": "right-hand", "attachment": "right-hand" },
+	{ "name": "left-bicep", "bone": "left-bicep", "attachment": "left-bicep" },
+	{ "name": "left-forearm", "bone": "left-forearm", "attachment": "left-forearm" },
+	{ "name": "left-elbow", "bone": "left-elbow", "attachment": "left-elbow" },
+	{ "name": "left-hand", "bone": "left-hand", "attachment": "left-hand" },
+],
+"skins": {
+	"default": {
+		"right-thigh": {
+			"right-thigh": { "x": 0, "y": 0, "width": 36, "height": 38 }
+		},
+		"right-shin": {
+			"right-shin": { "x": 0, "y": 0, "width": 16, "height": 38 }
+		},
+		"right-knee": {
+			"right-knee": { "x": 0, "y": 0, "width": 18, "height": 18 }
+		},
+		"right-shoe": {
+			"right-shoe": { "x": 0, "y": 0, "width": 75, "height": 55 }
+		},
+		"left-thigh": {
+			"left-thigh": { "x": 0, "y": 0, "width": 20, "height": 36 }
+		},
+		"left-shin": {
+			"left-shin": { "x": 0, "y": 0, "width": 16, "height": 38 }
+		},
+		"left-knee": {
+			"left-knee": { "x": 0, "y": 0, "width": 18, "height": 18 }
+		},
+		"left-shoe": {
+			"left-shoe": { "x": 0, "y": 0, "width": 61, "height": 61 }
+		},
+		"body-awol": {
+			"body-awol": { "x": -1.4210854715202e-14, "y": 0, "width": 141, "height": 150 }
+		},
+		"right-bicep": {
+			"right-bicep": { "x": 0, "y": 0, "width": 29, "height": 29 }
+		},
+		"right-forearm": {
+			"right-forearm": { "x": 0, "y": 0, "width": 12, "height": 38 }
+		},
+		"right-elbow": {
+			"right-elbow": { "x": 0, "y": 0, "width": 15, "height": 15 }
+		},
+		"right-hand": {
+			"right-hand": { "x": 0, "y": 0, "width": 35, "height": 48 }
+		},
+		"left-bicep": {
+			"left-bicep": { "x": 0, "y": 0, "width": 20, "height": 34 }
+		},
+		"left-forearm": {
+			"left-forearm": { "x": 0, "y": 0, "width": 12, "height": 38 }
+		},
+		"left-elbow": {
+			"left-elbow": { "x": 0, "y": 0, "width": 15, "height": 15 }
+		},
+		"left-hand": {
+			"left-hand": { "x": 0, "y": 0, "width": 35, "height": 48 }
+		}
+	}
+},
+"animations": { "animation": {} }
+}

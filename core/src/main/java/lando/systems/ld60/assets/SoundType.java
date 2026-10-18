@@ -6,9 +6,10 @@ import com.zendogames.zenlib.assets.AssetType;
 import com.zendogames.zenlib.assets.Assets;
 
 public enum SoundType implements AssetType<Sound> {
-    BELL("blip1.ogg", 1.0f),
-    BELL_LOW("blip1.ogg", 0.8f),
-    BELL_HIGH("blip1.ogg", 1.2f);
+    BELL("blip1.ogg", 1.0f)
+    , BELL_LOW("blip1.ogg", 0.8f)
+    , BELL_HIGH("blip1.ogg", 1.2f)
+    , DEGAUSS("degauss.ogg", 1f);
 
     private final Asset<Sound> asset;
     private final String path;
@@ -58,7 +59,13 @@ public enum SoundType implements AssetType<Sound> {
             new WeightedSound(BELL, 70f),
             new WeightedSound(BELL_HIGH, 20f),
             new WeightedSound(BELL_LOW, 10f)
-        );
+        )
+        ,DEGAUSS(
+            new WeightedSound(SoundType.DEGAUSS, 100f)
+//            new WeightedSound(BELL_HIGH, 20f),
+//            new WeightedSound(BELL_LOW, 10f)
+        )
+        ;
 
         public final WeightedSound[] sounds;
         public final float totalWeight;

@@ -43,7 +43,7 @@ public class LauncherScreen extends BaseScreen {
         if (deBounceTimer <= 0 && (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.justTouched())) {
             if (!transitioning){
                 transitioning = true;
-                AudioEvent.playSound(SoundType.BELL);
+                AudioEvent.playSound(SoundType.DEGAUSS);
                 game.setScreen(new IntroScreen(game));
             }
         }

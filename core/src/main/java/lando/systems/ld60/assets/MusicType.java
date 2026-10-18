@@ -6,8 +6,9 @@ import com.zendogames.zenlib.assets.AssetType;
 import com.zendogames.zenlib.assets.Assets;
 
 public enum MusicType implements AssetType<Music> {
-    MAIN_THEME("main1.ogg"),
-    TITLE_THEME("main1.ogg");
+    MAIN_THEME("theme-main.ogg"),
+    ALTERNATE_THEME("theme-alt.ogg"),
+    TITLE_THEME("intro.ogg");
 
     private final Asset<Music> asset;
     private final String path;
