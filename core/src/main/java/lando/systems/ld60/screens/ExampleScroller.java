@@ -19,6 +19,7 @@ import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameStrikes;
 import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.movement.BrawlerMotion;
+import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HitSystem;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
@@ -42,6 +43,7 @@ public class ExampleScroller extends ExampleScreen {
         this.skeletonDebug.setRegionAttachments(false);
 
         this.hitSystem = new HitSystem(new GameStrikes());
+        world.addSystem(new BrawlerPresentSystem());
         world.addSystem(hitSystem);
 
         spawner .on(Factory.PLAYER, this::spawnPlayer)

@@ -6,6 +6,7 @@ import com.zendogames.zenlib.collision.shapes.CollisionShape;
 import com.zendogames.zenlib.ecs.components.Mover;
 import com.zendogames.zenlib.ecs.movement.Motion;
 import com.zendogames.zenlib.ecs.movement.MoveIntent;
+import com.zendogames.zenlib.ecs.movement.MoveStep;
 import com.zendogames.zenlib.ecs.movement.MoveWorld;
 import com.zendogames.zenlib.utils.Calc;
 
@@ -108,13 +109,23 @@ public class BrawlerMotion implements Motion {
         if (ix != 0) facing = ix;
     }
 
+    /** A ramp cell is a 45-degree wall on the floor: the sweep slips one pixel along it per pixel walked instead of stopping. */
+    @Override
+    public int slide(CollisionShape shape) {
+        return 1;
+    }
+
     @Override
     public void after(Mover mover, MoveIntent intent, PointI2 pos, CollisionShape shape, MoveWorld world) {
         if (shape == null) { wallX = 0; wallY = 0; return; }
-        wallX = (world.probe(shape, pos.x, pos.y, -1,  0) == Block.SOLID) ? -1
-              : (world.probe(shape, pos.x, pos.y, +1,  0) == Block.SOLID) ? +1 : 0;
-        wallY = (world.probe(shape, pos.x, pos.y,  0, -1) == Block.SOLID) ? -1
-              : (world.probe(shape, pos.x, pos.y,  0, +1) == Block.SOLID) ? +1 : 0;
+        wallX = isWall(shape, pos, world, -1,  0, intent.moveY()) ? -1 : isWall(shape, pos, world, +1,  0, intent.moveY()) ? +1 : 0;
+        wallY = isWall(shape, pos, world,  0, -1, intent.moveX()) ? -1 : isWall(shape, pos, world,  0, +1, intent.moveX()) ? +1 : 0;
+    }
+
+    /** A SOLID one pixel away that the slide cannot slip past toward {@code prefer}: a diagonal the sweep would slide along is not a wall. */
+    private boolean isWall(CollisionShape shape, PointI2 pos, MoveWorld world, int dx, int dy, int prefer) {
+        return world.probe(shape, pos.x, pos.y, dx, dy) == Block.SOLID
+            && MoveStep.slide(shape, pos, world, dx, dy, slide(shape), prefer) == 0;
     }
 
     /**
