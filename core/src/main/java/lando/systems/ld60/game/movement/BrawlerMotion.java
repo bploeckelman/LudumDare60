@@ -75,7 +75,15 @@ public class BrawlerMotion implements Motion {
         // Airborn (or thrown): the take-off velocity carries, no steering, no friction
         if (!grounded) return;
 
-        if (intent.actionPressed() && !launched) {
+        // Shoved along the floor: slide to rest under friction, no steering until then
+        if (launched) {
+            mover.xVel = Calc.approach(mover.xVel, 0, tuning.frictionX() * dt);
+            mover.yVel = Calc.approach(mover.yVel, 0, tuning.frictionY() * dt);
+            launched   = (mover.xVel != 0) || (mover.yVel != 0);
+            return;
+        }
+
+        if (intent.actionPressed()) {
             zVel     = tuning.jumpImpulse();
             grounded = false;
             jumped   = true;
@@ -115,13 +123,18 @@ public class BrawlerMotion implements Motion {
      * ignored until then. Facing is left alone, so a hit fighter keeps facing the attacker.
      */
     public void launch(Mover mover, int dir, float dist, float height) {
-        zVel       = tuning.impulseForHeight(height);
-        grounded   = false;
         launched   = true;
-        mover.xVel = dir * dist * tuning.unit() / tuning.hangTime(height);
         mover.yVel = 0;
         mover.xRem = 0;
         mover.yRem = 0;
+        if (height > 0) {
+            zVel       = tuning.impulseForHeight(height);
+            grounded   = false;
+            mover.xVel = dir * dist * tuning.unit() / tuning.hangTime(height);
+        } else {
+            // v^2 = 2 a d: the speed friction (a) takes dist (d) to bring to rest
+            mover.xVel = dir * (float) Math.sqrt(2f * tuning.frictionX() * dist * tuning.unit());
+        }
     }
 
     /** Straight up from where it stands, for a hop that keeps the current walk. */

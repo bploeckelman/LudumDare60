@@ -10,6 +10,7 @@ import com.zendogames.zenlib.ecs.movement.topdown.TopDownMotion;
 import com.zendogames.zenlib.input.InputControls;
 import com.zendogames.zenlib.state.State;
 import com.zendogames.zenlib.state.StateMachine;
+import lando.systems.ld60.game.components.GameInput;
 import lando.systems.ld60.game.components.Health;
 import lando.systems.ld60.game.components.Hitboxes;
 import lando.systems.ld60.game.movement.BrawlerMotion;
@@ -24,15 +25,20 @@ public enum ExamplePlayerState implements State<Entity> {
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
             var mover = Mover.get(e);
             if (!mover.is(BrawlerMotion.class)) return this;
-            if (Input.get(e).actionPressed) return ATTACK_SPINEBOY;
+            if (GameInput.get(e).attack.pressed) return ATTACK_SPINEBOY;
 
             var anim   = SpineAnimator.get(e);
             var motion = mover.motion(BrawlerMotion.class);
-            Hitboxes.get(e).lift = motion.z;
-            anim.facing   = motion.facing;
-            anim.origin.y = -motion.z / anim.scale.y; // lift the skeleton by its height; Position, Collider stay on the floor
-            anim.order    = -Position.get(e).y;       // lower on the street draws in front of higher
-            if      (!motion.grounded) { anim.play("jump", false); }
+            present(e, anim, motion);
+
+            if (!motion.grounded) {
+                var entry = anim.play("jump", false);
+                // run the animation clip at the jump's speed, so its tuck
+                // and landing poses line up with take-off and touchdown
+                var animDuration = entry.getAnimation().getDuration();
+                var hangTimeDuration = motion.tuning.hangTime(motion.tuning.jumpHeight());
+                entry.setTimeScale(animDuration / hangTimeDuration);
+            }
             else if (motion.landed)    { anim.start("run-to-idle", false); anim.queue("idle", true, 0); }
             else                       { locomotion(anim, mover, motion.tuning.maxSpeedX() * 0.5f); }
 
@@ -53,22 +59,48 @@ public enum ExamplePlayerState implements State<Entity> {
             anim.play(want); // crossfade from the mixes table; also drops a queued idle if the player moves again
         }
     },
+    /** Stands and shoots; {@code GameHitboxes.SPINEBOY}'s "shoot" window puts the hit box out while the muzzle flash shows. */
     ATTACK_SPINEBOY {
         @Override
         public void enter(StateMachine<Entity> m, Entity e) {
             Mover.get(e).stop();
-            var anim = SpineAnimator.get(e);
-            anim.start("shoot", false);
-            anim.queue("idle", true, 0);
+            shoot(SpineAnimator.get(e));
         }
 
         @Override
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
-            // the keyboard wrote Input already (INPUT runs before DECIDE): hold still until the clip ends
+            // the keyboard wrote Input already (INPUT runs before DECIDE): hold still, no jump, until the clip ends
             var input = Input.get(e);
             input.moveX = 0;
             input.moveY = 0;
+            input.actionPressed = false;
             return SpineAnimator.get(e).is("shoot") ? this : NORMAL_SPINEBOY;
+        }
+    },
+    /** Thrown by a hit ({@code GameStrikes} already turned and launched the mover): no controls until the motion is done with it. */
+    HURT_SPINEBOY {
+        @Override
+        public void enter(StateMachine<Entity> m, Entity e) {
+            var anim = SpineAnimator.get(e);
+            anim.scale.set(anim.defaultScale.x * 1.2f, anim.defaultScale.y * 0.8f); // squash, eases back
+        }
+
+        @Override
+        public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
+            var input = Input.get(e);
+            input.moveX = 0;
+            input.moveY = 0;
+
+            var anim   = SpineAnimator.get(e);
+            var motion = Mover.get(e).motion(BrawlerMotion.class);
+            present(e, anim, motion);
+            anim.play(motion.grounded ? "idle" : "jump", motion.grounded);
+            return motion.launched ? this : NORMAL_SPINEBOY;
+        }
+
+        @Override
+        public boolean interruptible(StateMachine<Entity> m, Entity e, State<Entity> by) {
+            return false; // runs its course; a second hit re-launches the mover without re-entering
         }
     },
     NORMAL {
@@ -180,5 +212,29 @@ public enum ExamplePlayerState implements State<Entity> {
         Health.get(e).restore();
         Input.get(e).controls = controls;
         Behavior.get(e).machine.force(e, ExamplePlayerState.NORMAL);
+    }
+
+    /** Where spineboy's 'aim' IK points the gun: the crosshair bone's position from the feet, in skeleton units (x is always ahead, facing flips the skeleton). */
+    static final float AIM_X = 300, AIM_Y = 85;
+
+    /**
+     * spineboy fires: "shoot" on track 0 then idle, and "aim" on track 1 for half a second so the
+     * gun levels at the crosshair instead of the clip's pointing-down rest pose (the gun's recoil key
+     * gives way to the aim pose). The player's attack and the dummy's timer both use it.
+     */
+    public static void shoot(SpineAnimator anim) {
+        anim.skeleton.findBone("crosshair").getPose().setPosition(AIM_X, AIM_Y);
+        anim.start("shoot", false);
+        anim.queue("idle", true, 0);
+        anim.start(1, "aim", true);
+        anim.state.addEmptyAnimation(1, /*mix*/ 0.2f, /*delay*/ 0.5f);
+    }
+
+    /** Brawler presentation every tick: the art and the hitboxes lift by the height, face the motion, and depth-sort by street y. */
+    static void present(Entity e, SpineAnimator anim, BrawlerMotion motion) {
+        Hitboxes.get(e).lift = motion.z;
+        anim.facing   = motion.facing;
+        anim.origin.y = -motion.z / anim.scale.y; // lift the skeleton by its height; Position, Collider stay on the floor
+        anim.order    = -Position.get(e).y;       // lower on the street draws in front of higher
     }
 }

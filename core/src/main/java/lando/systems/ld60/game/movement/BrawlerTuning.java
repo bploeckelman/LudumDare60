@@ -31,8 +31,8 @@ public record BrawlerTuning(
 
     public float maxSpeedX() { return unit * speedX; }
     public float maxSpeedY() { return unit * speedY; }
-    public float accelX()    { return maxSpeedX() * accelTime; }
-    public float accelY()    { return maxSpeedY() * accelTime; }
+    public float accelX()    { return maxSpeedX() / accelTime; }
+    public float accelY()    { return maxSpeedY() / accelTime; }
     public float frictionX() { return maxSpeedX() / stopTime; }
     public float frictionY() { return maxSpeedY() / stopTime; }
 

@@ -2,6 +2,8 @@ package lando.systems.ld60.assets;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Array;
+import com.esotericsoftware.spine.Animation;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.zendogames.zenlib.assets.Asset;
 import com.zendogames.zenlib.assets.SpineData;
@@ -24,6 +26,23 @@ public enum GameSpine implements SpineType {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
+
+            // The 'aim' clip shows the editor's crosshair sprite at its IK target; drop t from the skin so the clip finds nothing
+            var data = mixes.getSkeletonData();
+            data.getDefaultSkin().removeAttachment(data.findSlot("crosshair").getIndex(), "crosshair");
+
+            // The 'jump' clip carries its own 90 px leap (hip and IK-target translations);
+            // BrawlerMotion.z owns the height, keep only the pose
+            var jump = data.findAnimation("jump");
+            var risers = Array.with("hip", "front-foot-target", "rear-foot-target", "front-leg-target", "rear-leg-target");
+            var timelines = jump.getTimelines();
+            for (int i = timelines.size - 1; i >= 0; i--) {
+                if (timelines.get(i) instanceof Animation.TranslateTimeline tl
+                 && risers.contains(data.getBones().get(tl.getBoneIndex()).getName(), false)) {
+                    timelines.removeIndex(i);
+                }
+            }
+            jump.setTimelines(timelines, jump.getBones()); // recomputes the property ids the mixer checks
         }
     };
 

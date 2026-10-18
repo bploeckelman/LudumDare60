@@ -14,11 +14,8 @@ import com.zendogames.zenlib.ecs.components.Name;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import lando.systems.ld60.game.combat.Hitbox;
-import lando.systems.ld60.game.combat.HitboxSet;
 import lando.systems.ld60.game.combat.Strike;
 import lando.systems.ld60.game.components.Hitboxes;
-
-import java.util.ArrayDeque;
 
 /**
  * Resolves every fighter's {@link Hitboxes} for the tick, finds HIT boxes overlapping opposing HURT
@@ -27,29 +24,24 @@ import java.util.ArrayDeque;
  * so the boxes match the frame that is drawn. All strikes are found first, then responded to in
  * order, so a trade (two fighters hitting each other on the same tick) reports both.
  * <p>
- * <b>One strike per target per activation.</b> A window strikes each target once while it stays
- * open; it forgets when it closes or the clip changes, restarts or loops. A base box or a box added
- * from code strikes once while it stays out. Of an attacker's boxes from one source, the first to
- * overlap a target lands; of the target's HURT boxes, the first overlapped (resolve order) is the
- * one reported, so list a "head" before a "body" to let it win.
+ * <b>One strike per target per activation.</b> An activation is the set of boxes out for one
+ * stretch of a clip: it ends, and the struck targets are forgotten, when the clip changes, restarts
+ * or loops, or a window opens or closes. So a window strikes each target once while it stays open
+ * and a two-hit move is two windows. Of the target's HURT boxes, the first overlapped (resolve
+ * order) is the one reported, so list a "head" before a "body" to let it win.
  * <p>
- * {@link #strikes} and {@link #log} are for the debug view: this tick's strikes, and one line per
- * strike, capped. Every pair of fighters is tested, no broadphase, the {@code CollisionWorld} stance.
+ * {@link #strikes} holds this tick's strikes for a debug view. Every pair of fighters is tested,
+ * no broadphase, the {@code CollisionWorld} stance.
  */
 public class HitSystem extends IteratingSystem {
 
     public static final int PRIORITY = SystemOrder.PRESENT + 10;
-    private static final int LOG_CAPACITY = 256;
     private static final String TAG = HitSystem.class.getSimpleName();
 
     public Strike.Responder responder;
 
     /** This tick's strikes, in detection order; valid until the next update. */
     public final Array<Strike> strikes = new Array<>(16);
-
-    /** Strike log, oldest first. */
-    public final ArrayDeque<String> log = new ArrayDeque<>(LOG_CAPACITY);
-    public boolean logPaused = false;
 
     // Scratch for the overlap test: body-plane positions, and the zero offset the shapes' overlaps() takes
     private final PointI2 planeA = new PointI2();
@@ -61,7 +53,7 @@ public class HitSystem extends IteratingSystem {
         this.responder = (responder != null) ? responder : Strike.Responder.NONE;
     }
 
-    /** Every entity with {@link Position} and {@link Hitboxes}, a live view; what the overlay and the debug view walk. */
+    /** Every entity with {@link Position} and {@link Hitboxes}, a live view; what the overlay walks. */
     public Family fighters() {
         return family();
     }
@@ -79,9 +71,6 @@ public class HitSystem extends IteratingSystem {
                 if (i != j) detect(attacker, fighters.get(j));
             }
         }
-        for (int i = 0; i < fighters.size; i++) {
-            forget(Hitboxes.get(fighters.get(i)));
-        }
         for (int i = 0; i < strikes.size; i++) {
             responder.strike(strikes.get(i));
         }
@@ -95,13 +84,20 @@ public class HitSystem extends IteratingSystem {
     protected void process(Entity e, float dt) {
         var boxes = Hitboxes.get(e);
 
-        // What is playing: Spine track 0, else a sprite Animator; with neither only base and timed boxes are out
+        // What is playing: a sprite Animator, or Spine track 0; with neither only the base boxes are out
         String clip = null;
         Object entry = null;
         float time = 0;
-        var spine = SpineAnimator.get(e);
         var sprite = Animator.get(e);
-        if (spine != null) {
+        var spine  = SpineAnimator.get(e);
+        if (sprite != null) {
+            boxes.facing = sprite.facing;
+            if (sprite.hasAnimation()) {
+                clip  = (sprite.type != null) ? sprite.type.name() : null;
+                time  = clipTime(sprite.animation, sprite.time);
+                entry = sprite.animation;
+            }
+        } else if (spine != null) {
             boxes.facing = spine.facing;
             var track = spine.state.getTrack(0);
             if (track != null) {
@@ -109,46 +105,38 @@ public class HitSystem extends IteratingSystem {
                 time  = track.getAnimationTime(); // wrapped for a loop, clamped at the end otherwise
                 entry = track;
             }
-        } else if (sprite != null) {
-            boxes.facing = sprite.facing;
-            if (sprite.hasAnimation()) {
-                clip  = (sprite.type != null) ? sprite.type.name() : null;
-                time  = clipTime(sprite.animation, sprite.time);
-                entry = sprite.animation;
-            }
         }
 
-        // A new clip, a restart or a loop closes every window, even one whose time range is open again at once
-        if (entry != boxes.clipEntry || time < boxes.clipTime) {
-            forgetWindows(boxes);
-        }
-        boxes.clip = clip;
-        boxes.clipTime = time;
-        boxes.clipEntry = entry;
-
+        // The boxes out now: base, then the windows of the clip that contain its time; a later box replaces an earlier one of its name
         boxes.clearActive();
+        int open = 0;
         if (boxes.set != null) {
             for (var box : boxes.set.base) {
-                put(e, boxes, box, box);
+                put(e, boxes, box);
             }
             var windows = boxes.set.windows(clip);
             if (windows != null) {
-                for (var window : windows) {
+                for (int i = 0; i < windows.size; i++) {
+                    var window = windows.get(i);
                     if (!window.contains(time)) continue;
+                    open |= 1 << i;
                     for (var box : window.boxes()) {
-                        put(e, boxes, box, window);
+                        put(e, boxes, box);
                     }
                 }
             }
         }
-        for (int i = 0; i < boxes.timed.size; i++) {
-            var timed = boxes.timed.get(i);
-            if (timed.remaining <= 0) {
-                boxes.timed.removeIndex(i--);
-                continue;
-            }
-            put(e, boxes, timed.box, timed);
-            timed.remaining -= dt;
+
+        // A new activation forgets who was struck: a new clip, a restart or loop (time went back), a window opened or closed
+        if (entry != boxes.clipEntry || time < boxes.clipTime || open != boxes.open) {
+            boxes.struck.clear();
+        }
+        boxes.clip      = clip;
+        boxes.clipTime  = time;
+        boxes.clipEntry = entry;
+        boxes.open      = open;
+        for (int i = boxes.struck.size - 1; i >= 0; i--) {
+            if (!boxes.struck.get(i).isAlive()) boxes.struck.removeIndex(i);
         }
     }
 
@@ -162,16 +150,14 @@ public class HitSystem extends IteratingSystem {
     }
 
     /** Puts {@code box} out in place of an earlier one with the same name, or after the rest. */
-    private void put(Entity e, Hitboxes boxes, Hitbox box, Object source) {
+    private void put(Entity e, Hitboxes boxes, Hitbox box) {
         var slot = boxes.find(box.name());
         if (slot == null) {
             slot = boxes.obtain();
             boxes.active.add(slot);
         }
         slot.box = box;
-        slot.source = source;
         slot.touching = false;
-        slot.connected = false;
         slot.x = 0;
         slot.y = 0;
         if (box.bone() == null) return;
@@ -201,26 +187,24 @@ public class HitSystem extends IteratingSystem {
 
         var aPos = Position.get(attacker);
         var tPos = Position.get(target);
-        var dy = aPos.y - tPos.y;
+        int dx = tPos.x - aPos.x;
+        int dy = aPos.y - tPos.y;
+        Hitbox hit = null, hurt = null;
         for (int i = 0; i < a.active.size; i++) {
-            var hit = a.active.get(i);
-            if (!hit.box.isHit()) continue;
-
-            Hitboxes.Active first = null;
+            var h = a.active.get(i);
+            if (!h.box.isHit()) continue;
             for (int j = 0; j < t.active.size; j++) {
-                var hurt = t.active.get(j);
-                if (!hurt.box.isHurt() || !touch(a, aPos, hit, t, tPos, hurt, dy)) continue;
-                hit.touching = true;
-                hurt.touching = true;
-                if (first == null) first = hurt;
+                var u = t.active.get(j);
+                if (!u.box.isHurt() || !touch(a, aPos, h, t, tPos, u, dy)) continue;
+                h.touching = true;
+                u.touching = true;
+                if (hit == null) { hit = h.box; hurt = u.box; }
             }
-            if (first == null || a.hasStruck(hit.source, target)) continue;
-
-            a.struck.add(new Hitboxes.Struck(hit.source, target));
-            var strike = new Strike(attacker, hit.box, target, first.box, a.facing, dy);
-            strikes.add(strike);
-            record(strike);
         }
+        if (hit == null || a.struck.contains(target, true)) return;
+
+        a.struck.add(target);
+        strikes.add(new Strike(attacker, hit, target, hurt, a.facing, dx, dy));
     }
 
     /** Floor lines within the two depths, then the shapes in the body plane: x along the street, y the height above each floor line. */
@@ -229,46 +213,5 @@ public class HitSystem extends IteratingSystem {
         planeA.set(aPos.x + hit.x,  MathUtils.round(a.lift) + hit.y);
         planeB.set(tPos.x + hurt.x, MathUtils.round(t.lift) + hurt.y);
         return hit.box.shape(a.facing).overlaps(hurt.box.shape(t.facing), planeA, planeB, zero);
-    }
-
-    // ------------------------------------------------------------------------
-    // Memory: who each open source has struck
-    // ------------------------------------------------------------------------
-
-    /** Drops what closed sources and dead targets struck, then marks the boxes whose source has connected. */
-    private static void forget(Hitboxes boxes) {
-        for (int i = boxes.struck.size - 1; i >= 0; i--) {
-            var s = boxes.struck.get(i);
-            if (!s.target().isAlive() || !boxes.isSourceOut(s.source())) {
-                boxes.struck.removeIndex(i);
-            }
-        }
-        for (int i = 0; i < boxes.active.size; i++) {
-            var slot = boxes.active.get(i);
-            slot.connected = slot.box.isHit() && boxes.hasStruckAny(slot.source);
-        }
-    }
-
-    private static void forgetWindows(Hitboxes boxes) {
-        for (int i = boxes.struck.size - 1; i >= 0; i--) {
-            if (boxes.struck.get(i).source() instanceof HitboxSet.Window) {
-                boxes.struck.removeIndex(i);
-            }
-        }
-    }
-
-    private void record(Strike strike) {
-        if (logPaused) return;
-        if (log.size() >= LOG_CAPACITY) log.pollFirst();
-        log.addLast(format(strike));
-    }
-
-    public String format(Strike strike) {
-        var attack = strike.attack();
-        return "%6d  %s.%s -> %s.%s  dmg %d  push %.1f/%.1f  dy %+d".formatted(
-                world.step.tick,
-                Name.of(strike.attacker()), strike.hit().name(),
-                Name.of(strike.target()), strike.hurt().name(),
-                attack.damage(), attack.knockback(), attack.height(), strike.dy());
     }
 }

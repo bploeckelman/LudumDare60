@@ -23,6 +23,7 @@ import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameContacts;
 import lando.systems.ld60.game.GameMask;
+import lando.systems.ld60.game.systems.GameInputSystem;
 import lando.systems.ld60.particles.effects.CloneEffect;
 
 /**
@@ -57,6 +58,7 @@ public abstract class ExampleScreen extends BaseScreen {
                 .on(Factory.MARKER, (m, obj) -> {}); // point objects other objects reference; nothing to spawn
 
         world.addSystem(new InputSystem(inputProcessor));
+        world.addSystem(new GameInputSystem(inputProcessor));
         world.addSystem(new SensorSystem(collision));
         world.addSystem(new TimerSystem());
         world.addSystem(new BehaviorSystem());

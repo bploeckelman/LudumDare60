@@ -13,17 +13,16 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 /**
  * Debug outlines for this tick's hitboxes, drawn with the screen's {@link ShapeDrawer} between the
  * batch's begin and end, at the interpolated position like {@code CollisionDraw.all}. Colors say
- * the state: HURT green, HIT red; yellow (and thicker) while touching an opposing box; orange once
- * a HIT box's window has landed; grey for the HURT boxes of a fighter that is not vulnerable. A
- * lifted fighter gets a line from its floor line up to its boxes.
+ * the state: HURT green, HIT red; yellow (and thicker) while touching an opposing box; grey for the
+ * HURT boxes of a fighter that is not vulnerable. A lifted fighter gets a line from its floor line
+ * up to its boxes.
  */
 public final class HitboxDraw {
 
-    public static final Color HURT      = new Color(0.2f, 0.9f, 0.3f, 0.8f);
-    public static final Color HIT       = new Color(1.0f, 0.2f, 0.2f, 0.9f);
-    public static final Color TOUCHING  = new Color(1.0f, 1.0f, 0.2f, 1.0f);
-    public static final Color CONNECTED = new Color(1.0f, 0.6f, 0.1f, 1.0f);
-    public static final Color IMMUNE    = new Color(0.6f, 0.6f, 0.6f, 0.6f);
+    public static final Color HURT     = new Color(0.2f, 0.9f, 0.3f, 0.8f);
+    public static final Color HIT      = new Color(1.0f, 0.2f, 0.2f, 0.9f);
+    public static final Color TOUCHING = new Color(1.0f, 1.0f, 0.2f, 1.0f);
+    public static final Color IMMUNE   = new Color(0.6f, 0.6f, 0.6f, 0.6f);
 
     private HitboxDraw() {}
 
@@ -50,11 +49,8 @@ public final class HitboxDraw {
     }
 
     private static Color color(Hitboxes boxes, Hitboxes.Active slot) {
-        if (slot.box.isHurt()) {
-            if (!boxes.vulnerable) return IMMUNE;
-            return slot.touching ? TOUCHING : HURT;
-        }
-        if (slot.connected) return CONNECTED;
-        return slot.touching ? TOUCHING : HIT;
+        if (slot.box.isHurt() && !boxes.vulnerable) return IMMUNE;
+        if (slot.touching) return TOUCHING;
+        return slot.box.isHurt() ? HURT : HIT;
     }
 }

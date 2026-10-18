@@ -5,9 +5,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.zendogames.zenlib.assets.ZenAnimHero;
 import com.zendogames.zenlib.collision.CollisionMask;
+import com.zendogames.zenlib.collision.shapes.CollisionCaps;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.World;
 import com.zendogames.zenlib.ecs.components.*;
@@ -22,10 +24,7 @@ import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameSpine;
-import lando.systems.ld60.game.components.Emitter;
-import lando.systems.ld60.game.components.Health;
-import lando.systems.ld60.game.components.Hitboxes;
-import lando.systems.ld60.game.components.Trigger;
+import lando.systems.ld60.game.components.*;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.movement.BrawlerTuning;
 import lando.systems.ld60.game.movement.FlightMotion;
@@ -71,6 +70,16 @@ public class Factory {
 
     /** The top-down enemies' movement: half the player's speed, a slow start, stops very quickly. */
     static final TopDownTuning PATROL_TUNING = new TopDownTuning(UNIT, 3, 0.3f, 0.05f);
+
+    /** The scroller's brawlers, player and dummy: ten tiles a second along the street, five up it. */
+    static final BrawlerTuning BRAWLER_TUNING = new BrawlerTuning(
+            UNIT,    // authoring unit -> pixels
+            10,      // x-axis speed (tiles/sec)
+            5,       // y-axis speed (tiles/sec)
+            0.1f,    // accel time
+            0.08f,   // stop time
+            2.5f,    // 'jump' height (tiles)
+            0.35f);  // 'jump' time to peak (seconds)
 
     private final World world;
     private final TextureRegion pixel;
@@ -325,16 +334,8 @@ public class Factory {
     }
 
     public Entity spineboyScroller(int x, int y) {
-        var controls = InputControls.wasd(com.badlogic.gdx.Input.Keys.SPACE);
-        var tuning = new BrawlerTuning(
-                UNIT,    // authoring unit -> pixels
-                10,      // x-axis speed (tiles/sec)
-                5,       // y-axis speed (tiles/sec)
-                1.5f,    // accel time
-                0.08f,   // stop time
-                2.5f,    // 'jump' height (tiles)
-                0.35f);  // 'jump' time to peak (seconds)
-
+        var controls = InputControls.wasd(com.badlogic.gdx.Input.Keys.SPACE); // the motion's button: jump
+        var buttons  = new GameInput(com.badlogic.gdx.Input.Keys.ENTER);      // the states' buttons: attack
         return world.createEntity()
                 .add(new Name("spineboy"))
                 .add(new Position(x, y))
@@ -342,10 +343,11 @@ public class Factory {
                 .add(new Health(3))
                 .add(new Contacts())
                 .add(new Input(controls))
+                .add(buttons)
                 .add(new SpineAnimator(GameSpine.SPINEBOY, "idle"))
                 .add(new Behavior(ExamplePlayerState.NORMAL_SPINEBOY))
-                .add(new Mover(new BrawlerMotion(tuning)))
-                .add(Collider.circ(GameMask.PLAYER, 0, 0, 5) // only covers feet: sprite's top half may overlap a wall behind it
+                .add(new Mover(new BrawlerMotion(BRAWLER_TUNING)))
+                .add(Collider.capsule(GameMask.PLAYER, new Rectangle(-18, 0, 36, 12), CollisionCaps.Axis.HORIZONTAL) // only covers feet: sprite's top half may overlap a wall behind it
                         .blockedBy(GameMask.SOLID)
                         .detects(GameMask.ENEMY, GameMask.TRIGGER, GameMask.HAZARD))
                 .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.PLAYER, GameMask.ENEMY)); // the body that gets hit, the shot that hits
@@ -363,15 +365,12 @@ public class Factory {
                 .add(new Name("dummy"))
                 .add(new Position(x, y))
                 .add(new Health(5))
+                .add(new Mover(new BrawlerMotion(BRAWLER_TUNING)))
                 .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.ENEMY, GameMask.PLAYER))
                 .add(timers)
                 .add(anim);
 
-        timers.every("attack", 2f, attack -> {
-            var a = SpineAnimator.get(attack.entity());
-            a.start("shoot", false);
-            a.queue("idle", true, 0);
-        });
+        timers.every("attack", 2f, attack -> ExamplePlayerState.shoot(SpineAnimator.get(attack.entity())));
 
         return entity;
     }

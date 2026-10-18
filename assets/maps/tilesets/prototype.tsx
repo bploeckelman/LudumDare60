@@ -490,42 +490,70 @@
  </tile>
  <tile id="160" type="region">
   <properties>
+   <property name="shape" value="full"/>
    <property name="color" value="red"/>
   </properties>
  </tile>
  <tile id="161" type="region">
   <properties>
+   <property name="shape" value="full"/>
    <property name="color" value="orange"/>
   </properties>
  </tile>
  <tile id="162" type="region">
   <properties>
+   <property name="shape" value="full"/>
    <property name="color" value="yellow"/>
   </properties>
  </tile>
  <tile id="163" type="region">
   <properties>
+   <property name="shape" value="full"/>
    <property name="color" value="green"/>
   </properties>
  </tile>
  <tile id="164" type="region">
   <properties>
+   <property name="shape" value="full"/>
    <property name="color" value="cyan"/>
   </properties>
  </tile>
  <tile id="165" type="region">
   <properties>
+   <property name="shape" value="full"/>
    <property name="color" value="blue"/>
   </properties>
  </tile>
  <tile id="166" type="region">
   <properties>
+   <property name="shape" value="full"/>
    <property name="color" value="purple"/>
   </properties>
  </tile>
  <tile id="167" type="region">
   <properties>
+   <property name="shape" value="full"/>
    <property name="color" value="pink"/>
+  </properties>
+ </tile>
+ <tile id="176" type="region">
+  <properties>
+   <property name="shape" value="ramp_sw"/>
+  </properties>
+ </tile>
+ <tile id="192" type="region">
+  <properties>
+   <property name="shape" value="ramp_ne"/>
+  </properties>
+ </tile>
+ <tile id="208" type="region">
+  <properties>
+   <property name="shape" value="ramp_se"/>
+  </properties>
+ </tile>
+ <tile id="224" type="region">
+  <properties>
+   <property name="shape" value="ramp_nw"/>
   </properties>
  </tile>
 </tileset>
