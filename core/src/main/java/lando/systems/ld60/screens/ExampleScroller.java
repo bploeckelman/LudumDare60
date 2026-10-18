@@ -130,9 +130,17 @@ public class ExampleScroller extends ExampleScreen implements SignalListener<Com
 
     @Override
     public void receive(Signal<CombatEvent> signal, CombatEvent event) {
-        if (event instanceof CombatEvent.Died died && Position.has(died.entity)) {
-            var pos = Position.get(died.entity);
-            factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x, pos.y), RenderLayer.BACKGROUND);
+        switch (event) {
+            case CombatEvent.Died d:
+                var pos = Position.get(d.entity);
+                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x, pos.y), RenderLayer.BACKGROUND);
+                break;
+//            case CombatEvent.Struck s:
+//                var pos = Position.get(player);
+//                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x, pos.y), RenderLayer.BACKGROUND);
+//                break;
+            default:
+                break;
         }
     }
 
