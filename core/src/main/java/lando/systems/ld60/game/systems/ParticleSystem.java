@@ -42,6 +42,10 @@ public class ParticleSystem extends IteratingSystem implements Disposable {
         // Remove dead particle entities
         for (int i = activeParticles.size() - 1; i >= 0; i--) {
             var entity = activeParticles.get(i);
+            if (!entity.isAlive()) {
+                activeParticles.remove(i);
+                continue;
+            }
             var particle = Particle.get(entity);
             if (particle != null && particle.data.isDead()) {
                 activeParticles.remove(i);

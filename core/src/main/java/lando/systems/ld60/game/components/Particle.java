@@ -16,4 +16,9 @@ public class Particle implements Component {
     public Particle(ParticleData data) {
         this.data = data;
     }
+
+    @Override
+    public void onRemove(Entity e) {
+        data.dead = true;
+    }
 }
