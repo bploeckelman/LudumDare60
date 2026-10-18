@@ -27,12 +27,10 @@ import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.ui.DebugActions;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.GameFlags;
-import lando.systems.ld60.Main;
 import lando.systems.ld60.assets.GameUIAnim;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.systems.ParticleSystem;
-import lando.systems.ld60.ui.GameDebugViews;
 import lando.systems.ld60.ui.SettingsUI;
 
 public class BaseScreen extends ZenScreen {

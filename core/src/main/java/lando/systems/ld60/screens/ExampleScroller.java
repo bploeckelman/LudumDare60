@@ -16,6 +16,9 @@ import com.zendogames.zenlib.tilemap.TiledProps;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameMap;
+import lando.systems.ld60.events.CombatEvent;
+import lando.systems.ld60.events.Signal;
+import lando.systems.ld60.events.SignalListener;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameStrikes;
 import lando.systems.ld60.game.GameTags;
@@ -23,9 +26,10 @@ import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HitSystem;
+import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
-public class ExampleScroller extends ExampleScreen {
+public class ExampleScroller extends ExampleScreen implements SignalListener<CombatEvent> {
 
     private static final String TAG = ExampleScroller.class.getSimpleName();
 
@@ -47,6 +51,7 @@ public class ExampleScroller extends ExampleScreen {
         this.hitSystem = new HitSystem(new GameStrikes());
         world.addSystem(new BrawlerPresentSystem());
         world.addSystem(hitSystem);
+        CombatEvent.signal.register(this);
 
         spawner .on(Factory.PLAYER, this::spawnPlayer)
                 .on(Factory.DUMMY,  this::spawnDummy)
@@ -121,5 +126,19 @@ public class ExampleScroller extends ExampleScreen {
         var motion = mover.motion(BrawlerMotion.class);
         motion.facing = 1;
         motion.launch(mover, -1, /*dist*/ 5f, /*height*/ 0.2f);
+    }
+
+    @Override
+    public void receive(Signal<CombatEvent> signal, CombatEvent event) {
+        if (event instanceof CombatEvent.Died died && Position.has(died.entity)) {
+            var pos = Position.get(died.entity);
+            factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x, pos.y), RenderLayer.BACKGROUND);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        CombatEvent.signal.remove(this);
+        super.dispose();
     }
 }
