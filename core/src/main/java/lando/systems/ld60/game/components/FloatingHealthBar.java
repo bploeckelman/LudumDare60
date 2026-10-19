@@ -75,8 +75,9 @@ public class FloatingHealthBar extends Renderable {
         batch.setShader(shader);
         shader.setUniformf("u_healthPct", targetPct);
         shader.setUniformf("u_damagePct", trailingPct);
-
         var rect = rect(x, y);
+        shader.setUniformf("u_size", rect.width, rect.height);
+
         batch.setColor(tint);
         batch.draw(pixel, rect.x, rect.y, rect.width, rect.height);
 

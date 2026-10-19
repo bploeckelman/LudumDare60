@@ -19,7 +19,7 @@ public class HUDHealthWidget extends Widget {
     private final Texture whitePixel;
 
     private float displayPct = 1f;
-    private final float lerpSpeed = 0.5f;
+    private final float lerpSpeed = 0.2f;
 
     /**
      * @param entitySupplier A function that returns the Entity to track (e.g. () -> screen.player)
@@ -71,11 +71,6 @@ public class HUDHealthWidget extends Widget {
         float width = getWidth();
         float height = getHeight();
 
-        // 1. Draw Background (Dark Gray/Black border) without the shader
-        batch.setColor(0.1f, 0.1f, 0.1f, 0.8f * parentAlpha);
-        batch.draw(whitePixel, x - 2, y - 2, width + 4, height + 4);
-
-        // 2. Draw the actual health bar using the custom shader
         ShaderProgram shader = GameShader.HEALTH_BAR.get();
         ShaderProgram prevShader = batch.getShader();
 
@@ -85,6 +80,7 @@ public class HUDHealthWidget extends Widget {
         batch.setShader(shader);
         shader.setUniformf("u_healthPct", currentPct);
         shader.setUniformf("u_damagePct", displayPct);
+        shader.setUniformf("u_size", width, height);
 
         // Draw a full-width white pixel; the shader will color and clip it based on the uniforms
         batch.setColor(1f, 1f, 1f, parentAlpha);
