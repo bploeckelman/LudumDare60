@@ -26,7 +26,7 @@ import lando.systems.ld60.game.movement.BrawlerMotion;
  * outside.
  */
 public enum BrawlerState implements State<Entity> {
-    /** Walks, jumps (the motion's action), attacks on attack, picks up on down + attack, throws on special. */
+    /** Walks, jumps (the motion's action), attacks on attack, picks up on attack over an item, kicks on down + attack, throws on special. */
     NORMAL {
         @Override
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
@@ -35,17 +35,18 @@ public enum BrawlerState implements State<Entity> {
 
             var buttons = GameInput.get(e);
             if (buttons.attack.pressed) {
-                if (Input.get(e).moveY < 0) { // down + attack: pickup what is underfoot, else the low move (a kick) if this wield has one
-                    var item = Weapons.under(e);
-                    if (item != null && Weapons.pickUp(e, item)) {
-                        return this;
-                    }
+                var item = Weapons.under(e); // attack over an item: pick it up instead of swinging
+                if (item != null && Weapons.pickUp(e, item)) {
+                    return this;
+                }
+                if (Input.get(e).moveY < 0) { // down + attack: the low move (a kick) if this wield has one
                     var wield = Fighter.wieldOf(e);
                     if (wield != null && wield.low() != null) {
                         return begin(e, wield.low());
                     }
                 }
-                return (attackOf(e) != null) ? ATTACK : this;
+                var move = attackOf(e);
+                return (move != null) ? begin(e, move) : this;
             }
             if (buttons.special.pressed && Weapons.throwHeld(e) != null) {
                 return THROW;
@@ -67,6 +68,13 @@ public enum BrawlerState implements State<Entity> {
             hold(e);
             var move = current(e);
             return (move != null && move.playing(e)) ? this : NORMAL;
+        }
+
+        @Override
+        public void exit(StateMachine<Entity> m, Entity e) {
+            // clear the move so it can't outlive its state
+            var fighter = Fighter.get(e);
+            if (fighter != null) fighter.move = null;
         }
     },
     /** The weapon left the hand on the way in ({@code NORMAL}); plays the throw clip (the attack's) through. */

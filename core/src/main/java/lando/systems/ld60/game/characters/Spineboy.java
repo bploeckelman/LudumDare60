@@ -16,6 +16,8 @@ import lando.systems.ld60.game.components.BrawlerAnimClips;
 import lando.systems.ld60.game.movement.BrawlerTuning;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
+import java.util.Map;
+
 /** The stock Spine example as a fighter: the blaster is its hands, a pipe is swung on the same 'shoot' clip (it has no swing). */
 public final class Spineboy {
 
@@ -73,8 +75,6 @@ public final class Spineboy {
             Spineboy::animator,
             Spineboy::clips,
             GameWeapons.BLASTER,
-            java.util.Map.of(
-                    GameWeapons.BLASTER.name(), Wield.of(GameHitboxes.SPINEBOY, SHOOT),
-                    GameWeapons.PIPE.name(),    Wield.of(PIPE_SET, SHOOT)),
+            Map.of(GameWeapons.BLASTER.name(), Wield.of(GameHitboxes.SPINEBOY, SHOOT)),
             Spineboy::dress);
 }

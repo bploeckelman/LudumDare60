@@ -83,7 +83,8 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         world.addSystem(new HealthBarSystem());
         world.addSystem(levelControl);
 
-        spawner .on(Factory.PLAYER,     (_, obj) -> spawnPlayer(factory.player(obj)))
+        spawner //.on(Factory.PLAYER,     (_, obj) -> spawnPlayer(factory.fighter(Awol.KIND, Roles.PLAYER, TiledProps.x(obj), TiledProps.y(obj), 1)))
+                .on(Factory.PLAYER,     (_, obj) -> spawnPlayer(factory.player(obj)))
                 .on(Factory.WALL,       (_, obj) -> factory.wall(obj))
                 .on(Factory.ENEMY,      (_, obj) -> levelControl.queueEnemy(obj)) // Defer spawning
                 .on(Factory.PICKUP,     (_, obj) -> factory.pickup(obj))
@@ -103,18 +104,18 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         actions .arm("spawn thug",          Input.Keys.N, (x, y) -> factory.thug(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
                 .arm("spawn pipe",          Input.Keys.K, (x, y) -> factory.pickup(GameWeapons.PIPE, x, y))
                 .add("next level",          Input.Keys.RIGHT_BRACKET, () -> game.setScreen(new GameScreen(game, level.next()), ScreenTransitionEffectType.random()))
-                .add("toggle debug render", Input.Keys.B, () -> debugRender  = !debugRender)
+                .add("toggle debug render", Input.Keys.Y, () -> debugRender  = !debugRender)
                 .add("toggle hitboxes",     Input.Keys.H, () -> showHitboxes = !showHitboxes)
                 // TEMP: the clips a thug's brain never triggers on its own (jump; knockback without a weapon that lifts)
                 .add("enemies hop",         Input.Keys.J, () -> eachEnemy((_, mover, motion) -> motion.jump(mover)))
                 .add("enemies knocked back",Input.Keys.L, () -> eachEnemy((e, mover, motion) -> motion.launch(mover, awayFromPlayer(e), /*dist*/ 3f, /*height*/ 2f)));
 
-        HUDHealthWidget healthWidget = new HUDHealthWidget(() -> this.player);
+        var healthWidget = new HUDHealthWidget(() -> this.player);
         healthWidget.setSize(300f, 25f);
         healthWidget.setPosition(20f, uiStage.getHeight() - healthWidget.getHeight() - 30f);
         uiStage.addActor(healthWidget);
 
-        TypingLabel playerLabel = new TypingLabel("{OUTLINECOLOR=BLACK}{OUTLINE=2}{SPEED=2.5}PLAYER 1", GameFont.DOS_FONT.get());
+        var playerLabel = new TypingLabel("{OUTLINECOLOR=BLACK}{OUTLINE=2}{SPEED=2.5}PLAYER 1", GameFont.DOS_FONT.get());
         playerLabel.setPosition(healthWidget.getX(), healthWidget.getY() - 30);
         uiStage.addActor(playerLabel);
 

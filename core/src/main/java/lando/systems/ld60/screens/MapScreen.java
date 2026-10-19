@@ -85,7 +85,7 @@ public abstract class MapScreen extends BaseScreen {
         debugViews.add(GameDebugViews.particlePool(world));
         actions .add("back to menu",  Input.Keys.ESCAPE, () -> game.setScreen(new IntroScreen(game), ScreenTransitionEffectType.DOORWAY))
                 .add("reload map",    Input.Keys.M, this::reloadMap)
-                .add("rebuild level", Input.Keys.F, this::buildLevel)
+                .add("rebuild level", Input.Keys.B, this::buildLevel)
                 .add("pause",         Input.Keys.P, () -> {
                     var animSystem = world.getSystem(AnimationSystem.class);
                     animSystem.enabled = !animSystem.enabled;

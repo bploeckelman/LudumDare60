@@ -15,14 +15,25 @@ public final class Roles {
 
     private Roles() {}
 
+
+    /** The player's movement tuning. */
+    public static final BrawlerTuning PLAYER_TUNING = new BrawlerTuning(
+            Factory.UNIT, // authoring unit -> pixels
+            12,            // x-axis speed (tiles/sec)
+            6,             // y-axis speed (tiles/sec)
+            0.1f,         // accel time
+            0.08f,        // stop time
+            3.0f,         // 'jump' height (tiles)
+            0.25f);       // 'jump' time to peak (seconds)
+
     /** The one on the keyboard: {@code BrawlerState} reads its buttons, hits go through its states, the death clip is the look. */
     public static final Role PLAYER = new Role("player", GameTags.PLAYER,
-            GameMask.PLAYER, masks(GameMask.TRIGGER, GameMask.PICKUP),
-            GameMask.PLAYER, masks(GameMask.ENEMY),
-            null,
+            /*body*/ GameMask.PLAYER, /*detects*/ masks(GameMask.TRIGGER, GameMask.PICKUP),
+            /*team*/ GameMask.PLAYER, /*targets*/ masks(GameMask.ENEMY),
+            PLAYER_TUNING,
             () -> new Hurtable().hurtState(BrawlerState.HURT).deadState(BrawlerState.DEAD).deathTint(null),
             Minds.player(),
-            false);
+            /*healthBar*/ false);
 
     /** The rank and file's pace, whatever the kind: five tiles a second along the street, two up it (the {@code thug} builder's numbers). */
     public static final BrawlerTuning THUG_TUNING = new BrawlerTuning(
