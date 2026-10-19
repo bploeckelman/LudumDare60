@@ -6,7 +6,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.kotcrab.vis.ui.VisUI;
 import com.zendogames.zenlib.*;
@@ -31,6 +33,7 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
 
     private float accum;
     private boolean imguiOnce;
+    private ShaderProgram loadingShader;
 
     public Main() {
         Main.game = this;
@@ -41,6 +44,14 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
     @Override
     protected void init() {
         prefs = Gdx.app.getPreferences(Config.preferencesName);
+
+        String vert = Gdx.files.internal("shaders/default.vert").readString();
+        String frag = Gdx.files.internal("shaders/loading.frag").readString();
+
+        loadingShader = new ShaderProgram(vert,frag);
+        if (!loadingShader.isCompiled()) {
+            Log.error("Main", "Shader compilation failed: " + loadingShader.getLog());
+        }
 
         GameFlags.INVULNERABILITY.set(prefs.getBoolean("invulnerability", false));
         //ZenFlag.LOG_DEBUG.enable();
@@ -176,5 +187,18 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
     public void setScreen(ZenScreen newScreen, ScreenTransitionEffect effect, boolean instant) {
         super.setScreen(newScreen, effect, instant);
         DistortionEvent.trigger();
+    }
+
+    @Override
+    protected void renderLoading(float progress) {
+        ScreenUtils.clear(Color.BLACK);
+        batch.setProjectionMatrix(windowCamera.combined);
+        batch.setShader(loadingShader);
+        batch.begin();
+        loadingShader.setUniformf("u_progress", progress); // e.g., 0.0f to 1.0f
+    // Draw a simple fullscreen quad (the shader generates its own imagery)
+        batch.draw(game.pixel, 0, windowCamera.viewportHeight, windowCamera.viewportWidth, -windowCamera.viewportHeight);
+        batch.end();
+        batch.setShader(null);
     }
 }
