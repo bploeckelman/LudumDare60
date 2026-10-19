@@ -62,6 +62,7 @@ public enum SoundType implements AssetType<Sound> {
     , BANG1("bang1.ogg", 1f)
     , BANG2("bang2.ogg", 1f)
     , WHACK1("whack1.ogg", 1f)
+    , MARIO("mario.wav", 1f)
     ;
 
     private final Asset<Sound> asset;
@@ -145,6 +146,17 @@ public enum SoundType implements AssetType<Sound> {
         ,POCKS(
             new WeightedSound(SoundType.POCK1, 50f)
             ,new WeightedSound(SoundType.POCK2, 50f)
+        )
+        ,THUNKS(
+            new WeightedSound(SoundType.THUNK1, 33f)
+            ,new WeightedSound(SoundType.THUNK2, 33f)
+            ,new WeightedSound(SoundType.THUNK3, 34f)
+        )
+        ,
+        TADAS(
+            new WeightedSound(SoundType.TADA, 33f)
+            ,new WeightedSound(SoundType.CHORD, 33f)
+            ,new WeightedSound(SoundType.CHIMES, 34f)
         )
         ;
 

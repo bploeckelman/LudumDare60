@@ -9,6 +9,7 @@ public enum MusicType implements AssetType<Music> {
     MAIN_THEME("theme-main.mp3")
     , JAZZY_THEME("theme-jazzy.mp3")
     , CHIPTUNE_THEME("theme-chiptune.mp3")
+    , SHRED_THEME("theme-shred.mp3")
     , INTRO_THEME("intro.ogg")
     , READING_RAINBOW("reading.mp3")
     ;

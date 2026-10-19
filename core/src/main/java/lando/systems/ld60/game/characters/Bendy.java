@@ -122,9 +122,9 @@ public final class Bendy {
         factory.emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(e));
         SpineAnimator.get(e).onEvent(event -> {
             switch (event.getData().getName()) {
-                case "hurt"  -> AudioEvent.playSound(SoundType.SoundGroup.GRUNTS);
+                case "hurt"  -> AudioEvent.playSound(SoundType.SoundGroup.GRUNTS, .5f);
                 case "swing" -> AudioEvent.playSound(SoundType.SWING1, .75f);
-                case "thud"  -> AudioEvent.playSound(SoundType.BELL_LOW);
+                case "thud"  -> AudioEvent.playSound(SoundType.SoundGroup.THUNKS, .7f);
                 default -> {} // footstep: the emitter; jump / throw: a landed hit is better heard from CombatEvent
             }
         });

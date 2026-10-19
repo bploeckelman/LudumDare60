@@ -186,7 +186,7 @@ public final class N64 {
         boxes.vulnerable = false; // nothing to hit on it; keeps the range cue off it too
         boxes.facing = facing;
 
-        AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: a launch sound
+        AudioEvent.playSound(SoundType.MARIO); // TODO: a launch sound
         return boss.world().createEntity()
                 .tag(GameTags.PROJECTILE)
                 .add(new Name("rumble-pak"))

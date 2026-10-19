@@ -13,6 +13,8 @@ import com.zendogames.zenlib.render.RenderLayer;
 import lando.systems.ld60.Main;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameAtlas;
+import lando.systems.ld60.assets.SoundType;
+import lando.systems.ld60.events.AudioEvent;
 import lando.systems.ld60.events.ParticleEvent;
 import lando.systems.ld60.game.combat.Strike;
 import lando.systems.ld60.game.components.Health;
@@ -66,6 +68,8 @@ public final class Drops {
             image.layer = RenderLayer.BACKGROUND;
             e.add(image);
         }
+        AudioEvent.playSound(SoundType.SoundGroup.TADAS, 1f);
+
         return e;
     }
 

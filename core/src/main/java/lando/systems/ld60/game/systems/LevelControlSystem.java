@@ -13,6 +13,8 @@ import com.zendogames.zenlib.ecs.components.*;
 import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import lando.systems.ld60.assets.EmitterType;
+import lando.systems.ld60.assets.MusicType;
+import lando.systems.ld60.events.AudioEvent;
 import lando.systems.ld60.events.ParticleEvent;
 import lando.systems.ld60.game.GameTags;
 import lando.systems.ld60.game.components.GameInput;
@@ -163,6 +165,7 @@ public class LevelControlSystem extends EntitySystem {
                 Entity e = enemySpawner.spawn(obj);
                 if (e != null && e.hasTag(GameTags.BOSS)) {
                     bossSpawned = true;
+                    AudioEvent.playMusic(MusicType.SHRED_THEME);
                 }
                 if (e != null) {
                     var pos = Position.get(e);
