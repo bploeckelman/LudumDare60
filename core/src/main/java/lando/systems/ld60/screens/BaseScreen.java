@@ -39,6 +39,7 @@ import lando.systems.ld60.game.components.Television;
 import lando.systems.ld60.game.input.Gamepad;
 import lando.systems.ld60.game.input.KeyEvents;
 import lando.systems.ld60.game.systems.ParticleSystem;
+import lando.systems.ld60.ui.ControlsUI;
 import lando.systems.ld60.ui.MenuStage;
 import lando.systems.ld60.ui.SettingsUI;
 import lando.systems.ld60.utils.screenshake.ScreenShakeCameraController;
@@ -59,8 +60,9 @@ public class BaseScreen extends ZenScreen implements SignalListener<ShakeEvent> 
     final TextureRegion pixel;
     final DebugActions actions;
     public ScreenShakeCameraController shakeController;
+    public final ControlsUI controlsUI = new ControlsUI();
 
-    public final SettingsUI settingsUI = new SettingsUI();
+    public final SettingsUI settingsUI = new SettingsUI(controlsUI);
 
     /** {@link #uiStage} as the focus-navigable stage every screen gets from {@link #createUiStage()}. */
     public final MenuStage menu = (MenuStage) uiStage;
@@ -94,6 +96,7 @@ public class BaseScreen extends ZenScreen implements SignalListener<ShakeEvent> 
         actions.add("crt shader", Input.Keys.C, GameFlags.CRT_SHADER::toggle);
 
         uiStage.addActor(settingsUI);
+        uiStage.addActor(controlsUI);
         menu.addFocusableActor(settingsUI.crtShaderCheckBox);
         menu.addFocusableActor(settingsUI.invulnerabilityCheckBox);
         menu.addFocusableActor(settingsUI.musicSlider);

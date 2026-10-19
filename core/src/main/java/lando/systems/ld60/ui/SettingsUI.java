@@ -32,7 +32,9 @@ public class SettingsUI extends VisWindow {
     public VisCheckBox invulnerabilityCheckBox;
     public ControllerSlider musicSlider;
     public ControllerSlider soundSlider;
+    public VisTextButton controlsButton;
     public VisTextButton closeButton;
+    private ControlsUI controlsUI;
 
     /** Whoever had focus when the window opened, focused again when it closes. */
     private Actor returnFocusTo;
@@ -41,9 +43,9 @@ public class SettingsUI extends VisWindow {
     float panelHeight = Config.windowHeight * 0.9f;
     Preferences prefs = Main.game.prefs;
 
-    public SettingsUI() {
+    public SettingsUI(ControlsUI controlsUI) {
         super("");
-
+        this.controlsUI = controlsUI;
         GameFlags.CRT_SHADER.set(prefs.getBoolean("crtShader", true));
 
         setBackground(new TextureRegionDrawable(GameUIAnim.SETTINGS.get().getKeyFrame(0)));
@@ -112,6 +114,16 @@ public class SettingsUI extends VisWindow {
         add(soundSlider).width(panelWidth / 2f).row();
 
         add().height(20f).row();
+
+        this.controlsButton = new VisTextButton("View Controls");
+        controlsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Keep settings open underneath, but bring controls to the front
+                controlsUI.open();
+            }
+        });
+        add(controlsButton).height(35f).padBottom(5f).row();
 
         this.closeButton = new VisTextButton("Close");
         closeButton.addListener(new ClickListener() {

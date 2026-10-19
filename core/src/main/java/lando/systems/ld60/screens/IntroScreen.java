@@ -38,6 +38,7 @@ public class IntroScreen extends BaseScreen {
         var dialog   = buttonWithOnClick("Dialog",   () -> start(() -> new DialogScreenIntro(game)));
         var settings = buttonWithOnClick("Settings", settingsUI::toggle);
         var credits  = buttonWithOnClick("Credits",  () -> start(() -> new CreditsScreen(game)));
+        var controls = buttonWithOnClick("Controls", controlsUI::toggle);
 
         var table = new VisTable();
         table.setFillParent(true);
@@ -45,6 +46,7 @@ public class IntroScreen extends BaseScreen {
         table.add(play)     .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(dialog)   .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(settings) .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(controls) .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         table.add(credits)  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         //table.add(buttonWithOnClick("Example: Platformer", () -> start(() -> new ExamplePlatformer(game)))).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         //table.add(buttonWithOnClick("Example: Overhead",   () -> start(() -> new ExampleOverhead(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();

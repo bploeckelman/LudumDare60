@@ -1,5 +1,7 @@
 package lando.systems.ld60.screens;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -84,7 +86,10 @@ public abstract class MapScreen extends BaseScreen {
         debugViews.add(DebugViews.sensors(world));
         debugViews.add(DebugViews.timers(world));
         debugViews.add(GameDebugViews.particlePool(world));
-        actions .add("back to menu",  Input.Keys.ESCAPE, () -> game.setScreen(new IntroScreen(game), ScreenTransitionEffectType.DOORWAY))
+        actions .add("back to menu",  Input.Keys.ESCAPE, () -> {
+                    if (Gdx.app.getType() == Application.ApplicationType.Desktop)
+                        game.setScreen(new IntroScreen(game), ScreenTransitionEffectType.DOORWAY);
+                    })
                 .add("reload map",    Input.Keys.M, this::reloadMap)
                 .add("rebuild level", Input.Keys.B, this::buildLevel)
                 .add("pause",         Input.Keys.P, () -> {
@@ -101,6 +106,11 @@ public abstract class MapScreen extends BaseScreen {
             afterWorldUpdate(dt);
         }
         uiStage.act(dt);
+
+        if (Gdx.app.getType() == Application.ApplicationType.WebGL &&
+            Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            settingsUI.toggle();
+        }
 
     }
 
