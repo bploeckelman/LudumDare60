@@ -96,7 +96,7 @@ public class LauncherScreen extends BaseScreen {
         drawTextAt("╔═══════════════════════════════════════╗", 6, 4, Color.WHITE);
         drawTextAt("║ The Coalition of Obsolete Technology  ║", 6, 5, Color.WHITE);
         drawTextAt("╠═══════════════════════════════════════╣", 6, 6, Color.WHITE);
-        drawTextAt("║     Book II: Return of the Audio      ║", 6, 7, Color.WHITE);
+        drawTextAt("║         Book II: Even COOTER          ║", 6, 7, Color.WHITE);
         drawTextAt("╚═══════════════════════════════════════╝", 6, 8, Color.WHITE);
 
 
