@@ -268,7 +268,6 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
             case CombatEvent.Struck s:
                 pos = Position.get(s.strike.target());
                 anim = SpineAnimator.get(s.strike.target());
-                Log.info("blah", Name.get(s.strike.target()).name);
 //                anim.skeleton.getData() == GameSpine.SPINEBOY.get().skeleton()
                 entityName = Name.get(s.strike.target()).name;
                 isHumanoid = entityName.equals("hero") || entityName.equals("thug");
