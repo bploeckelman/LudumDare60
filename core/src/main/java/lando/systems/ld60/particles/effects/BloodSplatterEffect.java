@@ -55,9 +55,10 @@ public class BloodSplatterEffect implements ParticleEffect {
                     .startPos(params.x + reach, params.y + MathUtils.random(-Hitbox.DEPTH, Hitbox.DEPTH))
                     .startSize(size * 1.25f, size * 0.5f)
                     .startColor(color.r * .5f, color.g * .5f, color.b * .5f, 1f)
-                    .endColor(color.r * .2f, color.g * .2f, color.b * .2f, 0f)
+                    .endColor(color.r * .2f, color.g * .2f, color.b * .2f, 0.75f)
                     .interpolation(Interpolation.pow4In)
                     .timeToLive(MathUtils.random(4f, 6f))
+                    .persist()
                     .init());
         }
         return particles;
