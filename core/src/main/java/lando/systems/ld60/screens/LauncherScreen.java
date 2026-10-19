@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.Align;
 import com.zendogames.zenlib.ZenGame;
+import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import lando.systems.ld60.Main;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
@@ -51,7 +52,7 @@ public class LauncherScreen extends BaseScreen {
             if (!transitioning){
                 transitioning = true;
                 AudioEvent.playSound(SoundType.DEGAUSS);
-                game.setScreen(new IntroScreen(game));
+                game.setScreen(new IntroScreen(game), ScreenTransitionEffectType.DOOM_DRIP);
             }
         }
     }

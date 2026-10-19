@@ -85,7 +85,7 @@ public class GameScreen extends MapScreen {
             () -> {
                 // Go to credits (or outro story if we have one) when done with level 3
                 if (level == GameLevel.LEVEL_3) {
-                    game.setScreen(new CreditsScreen(game), ScreenTransitionEffectType.RIPPLE);
+                    game.setScreen(new DialogScreenOutro(game), ScreenTransitionEffectType.RIPPLE);
                 } else {
                     var next = level.next();
                     game.setScreen(new GameScreen(game, next), ScreenTransitionEffectType.random());

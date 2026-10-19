@@ -130,7 +130,7 @@ public class DialogScreenOutro extends BaseScreen {
         Log.info(TAG, "line: " + line);
         if (line >= LINES.length - 1) {
             //TODO: set it to next screen
-            game.setScreen(new GameScreen(game, GameLevel.LEVEL_1), ScreenTransitionEffectType.DOORWAY);
+            game.setScreen(new CreditsScreen(game), ScreenTransitionEffectType.HEART);
             return;
         }
         line++;
