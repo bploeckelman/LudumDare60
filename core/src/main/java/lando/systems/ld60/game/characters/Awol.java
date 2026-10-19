@@ -126,11 +126,11 @@ public final class Awol {
                         AudioEvent.playSound(SoundType.SoundGroup.FOOTSTEPS, .925f);
                     }
                 }
-                case "hurt"     -> AudioEvent.playSound(SoundType.SoundGroup.GRUNTS); // TODO: change me (or remove, see default)
+                case "hurt"     -> AudioEvent.playSound(SoundType.SoundGroup.GRUNTS, .5f); // TODO: change me (or remove, see default)
                 case "jump"     -> AudioEvent.playSound(SoundType.BONG1, .5f); // TODO: change me (or remove, see default)
-                case "swing"    -> AudioEvent.playSound(SoundType.SWING1, .75f); // TODO: change me (swing a weapon)
-                case "throw"    -> AudioEvent.playSound(SoundType.WHOOSH); // TODO: change me (throw a weapon)
-                case "thud"     -> AudioEvent.playSound(SoundType.LOWTHUNK1);
+                case "swing"    -> AudioEvent.playSound(SoundType.SWING1, .35f); // TODO: change me (swing a weapon)
+                case "throw"    -> AudioEvent.playSound(SoundType.WHOOSH, .5f); // TODO: change me (throw a weapon)
+                case "thud"     -> AudioEvent.playSound(SoundType.LOWTHUNK1, .5f);
                 default -> {} // a landed hit is better heard from CombatEvent, which knows whether a glove connected
             }
         });

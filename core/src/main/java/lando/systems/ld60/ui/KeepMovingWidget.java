@@ -71,7 +71,7 @@ public class KeepMovingWidget  extends Widget {
             typingLabel.restart("{SPEED=1.5}" + currentPrompt.text);
 
             if (currentPrompt.sound != null) {
-                AudioEvent.playSound(currentPrompt.sound, .5f);
+                AudioEvent.playSound(currentPrompt.sound, .25f);
             }
         }
     }

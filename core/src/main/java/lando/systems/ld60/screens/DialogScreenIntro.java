@@ -19,9 +19,9 @@ import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
-import lando.systems.ld60.assets.EmitterType;
-import lando.systems.ld60.assets.GameSpine;
-import lando.systems.ld60.assets.GameUIAnim;
+import lando.systems.ld60.assets.*;
+import lando.systems.ld60.events.AudioEvent;
+import lando.systems.ld60.game.GameLevel;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 
 public class DialogScreenIntro extends BaseScreen {
@@ -43,13 +43,20 @@ public class DialogScreenIntro extends BaseScreen {
     private static Actor floppyd(String animation) { return new Actor(GameSpine.BRICKPHONE, animation); }
 
     private static final Line[] LINES = {
-        new Line(Side.LEFT, null, null, "This is how the story starts."),
-        new Line(Side.LEFT, awol("idle"), floppyd("idle"), "Hey there."),
-        new Line(Side.RIGHT, awol("idle"), floppyd("punch"), "Oh, hello! BANG!"),
-        new Line(Side.LEFT, awol("punch"), floppyd("jump"), "Rude, Take that!"),
-        new Line(Side.RIGHT, awol("idle"), floppyd("death"), "(dying sound)"),
-        new Line(Side.LEFT, awol("run"), null, "Good"),
-        new Line(Side.LEFT, null, null, "And that is how the story starts"),
+        new Line(Side.LEFT, null, null, "The year is 2026.\n\nDevices that were once coveted by millions must fight for their very existence.\n\nStreets are now battlefields, and the only way to survive is to outlast the past."),
+//        new Line(Side.LEFT, null, null, "Devices that were once coveted by millions now battle for their very existence."),
+
+        new Line(Side.RIGHT, awol("idle"), floppyd("punch"), "I was forged in the crucible of Zack Morris's backpack while you were stuck in magazine shrink-wrap! "),
+
+        new Line(Side.LEFT, awol("punch"), floppyd("idle"), "I've got a thousand free minutes that say your ass is grass!"),
+
+
+        new Line(Side.LEFT, awol("kick"), floppyd("jump"), "There can be only one!"),
+
+                new Line(Side.RIGHT, awol("idle"), floppyd("death"), "*spluttering gasps for breath*"),
+
+        new Line(Side.LEFT, awol("run"), null, "The first of many to fall before me.\nOnward to victory!"),
+        new Line(Side.RIGHT, null, null, "And so it begins..."),
     };
 
     private final Speaker left;
@@ -63,10 +70,11 @@ public class DialogScreenIntro extends BaseScreen {
         addCommonSystems();
         var dosFont = new BitmapFont(Gdx.files.internal("fonts/dos.fnt"));
 
+//        var style = new Label.LabelStyle(text.getStyle());
         var style = new Label.LabelStyle(text.getStyle());
-        style.font = dosFont;
+
         text.setStyle(style);
-        text.setFontScale(.5f);
+        text.setFontScale(.70f);
         var width = Zen.config.framebufferWidth();
         var height = Zen.config.framebufferHeight();
         worldCamera.position.set(width / 2f, height / 2f, 0f);
@@ -80,6 +88,8 @@ public class DialogScreenIntro extends BaseScreen {
 
         var box = new VisTable();
         box.setBackground(new TextureRegionDrawable(GameUIAnim.DIALOG.get().getKeyFrame(0)));
+
+
         box.add(text).pad(BOX_PADDING).align(Align.center).grow();
 
         var table = new VisTable();
@@ -88,6 +98,7 @@ public class DialogScreenIntro extends BaseScreen {
         table.add(box).size(BOX_WIDTH, BOX_HEIGHT);
         table.add().size(CHARACTER_SIZE).expandX();
         dialogStage.addActor(table);
+        AudioEvent.playMusic(MusicType.INTRO_THEME);
     }
 
     @Override
@@ -116,7 +127,7 @@ public class DialogScreenIntro extends BaseScreen {
         Log.info(TAG, "line: " + line);
         if (line >= LINES.length - 1) {
             //TODO: set it to next screen
-            game.setScreen(new IntroScreen(game), ScreenTransitionEffectType.DOORWAY);
+            game.setScreen(new GameScreen(game, GameLevel.LEVEL_1), ScreenTransitionEffectType.DOORWAY);
             return;
         }
         line++;
