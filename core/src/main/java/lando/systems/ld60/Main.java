@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.kotcrab.vis.ui.VisUI;
 import com.zendogames.zenlib.*;
@@ -58,6 +57,7 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
         //ZenFlag.LOG_INPUT.enable();
         //ZenFlag.DEBUG_FRAME_POOL.enable();
 
+
         if (!VisUI.isLoaded()) {
             VisUI.load(VisUI.SkinScale.X2);
         }
@@ -84,6 +84,8 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
         audioSystem = new AudioSystem();
 
         DistortionEvent.signal.register(this);
+
+        prodMode();
     }
 
     @Override
@@ -108,7 +110,7 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
     protected void update() {
         super.update();
         accum += Time.delta;
-        if (imguiOnce && ImGuiGdx.isInitialized() && ZenFlag.SHOW_IMGUI.off()) {
+        if (imguiOnce && ImGuiGdx.isInitialized() && ZenFlag.SHOW_IMGUI.off() && GameFlags.RELEASE.off()) {
             imguiOnce = false;
             ZenFlag.SHOW_IMGUI.enable();
         }
@@ -201,5 +203,24 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
         batch.draw(game.pixel, 0, windowCamera.viewportHeight, windowCamera.viewportWidth, -windowCamera.viewportHeight);
         batch.end();
         batch.setShader(null);
+    }
+
+
+    public void prodMode() {
+        ZenFlag.GLOBAL.off();
+        ZenFlag.FIXED_TIMESTEP.off();
+        ZenFlag.LOG_INFO.off();
+        ZenFlag.LOG_DEBUG.off();
+        ZenFlag.LOG_WARN.off();
+        ZenFlag.LOG_INPUT.off();
+        ZenFlag.LOG_TIMERS.off();
+        ZenFlag.LOG_STATE.off();
+        ZenFlag.RENDER_INTERP.off();
+        ZenFlag.FRAME_STEP.off();
+        ZenFlag.DEBUG_ASSET_LOAD.off();
+        ZenFlag.DEBUG_ECS.off();
+        ZenFlag.DEBUG_FRAME_POOL.off();
+        ZenFlag.DEBUG_RENDER.off();
+        ZenFlag.SHOW_IMGUI.off();
     }
 }

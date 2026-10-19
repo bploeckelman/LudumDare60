@@ -43,7 +43,6 @@ import lando.systems.ld60.ui.ControlsUI;
 import lando.systems.ld60.ui.MenuStage;
 import lando.systems.ld60.ui.SettingsUI;
 import lando.systems.ld60.utils.screenshake.ScreenShakeCameraController;
-import lombok.Builder;
 
 public class BaseScreen extends ZenScreen implements SignalListener<ShakeEvent> {
 
@@ -106,6 +105,7 @@ public class BaseScreen extends ZenScreen implements SignalListener<ShakeEvent> 
         menu.setEscapeActor(settingsUI.closeButton); // Esc / Backspace / pad B close the window while it is up
 
         initializeUI();
+
     }
 
     /** Every screen's UI stage is a {@link MenuStage}; one with no focusable actors passes every key through untouched. */
@@ -137,18 +137,26 @@ public class BaseScreen extends ZenScreen implements SignalListener<ShakeEvent> 
                 return actions.click((int) this.pointer.x, (int) this.pointer.y);
             }
             @Override protected boolean onKeyDown(int keycode) {
-                return actions.key(keycode);
+                if (GameFlags.RELEASE.off()) {
+                    return actions.key(keycode);
+                }
+                return false;
             }
             @Override protected boolean onScrolled(float amountX, float amountY) {
-                zoom(amountY > 0 ? +1 : -1); // wheel down zooms out
+                if (GameFlags.RELEASE.off()) {
+                    zoom(amountY > 0 ? +1 : -1); // wheel down zooms out
+                }
                 return true;
             }
             @Override protected boolean debugKey(int keycode) {
-                if (keycode == Input.Keys.NUM_9) {
-                    world.step.requestStep();
-                    return true;
+                if (GameFlags.RELEASE.off()) {
+                    if (keycode == Input.Keys.NUM_9) {
+                        world.step.requestStep();
+                        return true;
+                    }
+                    return super.debugKey(keycode);
                 }
-                return super.debugKey(keycode);
+                return false;
             }
         };
     }
