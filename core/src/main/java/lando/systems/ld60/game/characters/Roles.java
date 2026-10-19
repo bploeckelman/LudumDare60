@@ -66,7 +66,7 @@ public final class Roles {
                 GameMask.ENEMY, masks(GameMask.PICKUP),
                 GameMask.ENEMY, masks(GameMask.PLAYER),
                 null,
-                () -> new Hurtable().knockback(0).recoverTime(0.5f),
+                () -> new Hurtable().knockback(0).recoverTime(0.5f).despawnAfter(2.5f),
                 mind,
                 true);
     }

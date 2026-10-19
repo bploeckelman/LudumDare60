@@ -1,6 +1,7 @@
 package lando.systems.ld60.game.systems;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleShader;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.math.Polyline;
@@ -14,6 +15,7 @@ import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.events.ParticleEvent;
 import lando.systems.ld60.game.GameTags;
 import lando.systems.ld60.game.components.GameInput;
+import lando.systems.ld60.game.components.Health;
 import lando.systems.ld60.particles.effects.SpawnCloudEffect;
 import lando.systems.ld60.screens.GameScreen;
 
@@ -263,7 +265,33 @@ public class LevelControlSystem extends EntitySystem {
         // 3. NORMAL PLAYING STATE
         if (sequenceState == SequenceState.PLAYING) {
 
-            // Check win condition
+            // NEW: Instantly kill remaining enemies if the boss drops to 0 health
+            if (bossSpawned && !bossFamily.entities().isEmpty()) {
+                Entity boss = bossFamily.entities().get(0);
+                Health bossHealth = Health.get(boss);
+
+                // If the boss is dead (but perhaps still playing its death animation)
+                if (bossHealth != null && bossHealth.current <= 0) {
+                    var enemies = enemyFamily.entities();
+                    for (int i = 0; i < enemies.size; i++) {
+                        Entity e = enemies.get(i);
+                        // Make sure we don't try to kill the boss again, only the minions
+                        if (!e.hasTag(GameTags.BOSS)) {
+                            Health enemyHealth = Health.get(e);
+                            if (enemyHealth != null && enemyHealth.current > 0) {
+                                world.despawn(e); // Instantly kill them
+
+                                var pos = Position.get(e);
+                                SpawnCloudEffect.Params params = new SpawnCloudEffect.Params(pos);
+                                ParticleEvent.spawn(EmitterType.SPAWN_CLOUD, params, RenderLayer.OVERLAY);
+                                Log.info(TAG, "Boss died! Instantly killing minion " + e.id);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Check win condition (when boss is fully despawned and enemies are dead)
             if (bossSpawned && bossFamily.entities().isEmpty() && enemyFamily.entities().isEmpty()) {
                 stageClear = true;
                 sequenceState = SequenceState.BOSS_DIALOGUE;

@@ -85,6 +85,11 @@
             "id": 17,
             "members": [
                 {
+                    "name": "boss",
+                    "type": "bool",
+                    "value": false
+                },
+                {
                     "name": "kind",
                     "type": "string",
                     "value": "thug"

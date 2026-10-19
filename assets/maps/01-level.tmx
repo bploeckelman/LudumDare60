@@ -92,6 +92,7 @@
   </object>
   <object id="26" name="n64Boss" type="enemy" gid="52" x="4708" y="289.667" width="32" height="32">
    <properties>
+    <property name="boss" type="bool" value="true"/>
     <property name="kind" value="awol"/>
    </properties>
   </object>

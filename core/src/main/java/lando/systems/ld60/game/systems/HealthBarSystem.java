@@ -31,7 +31,7 @@ public class HealthBarSystem extends IteratingSystem  {
         var pos = Position.get(entity);
 
         var health = Health.get(entity);
-        if (health == null || health.isDead()) {
+        if (health == null) {
             return;
         }
 
