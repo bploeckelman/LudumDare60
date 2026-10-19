@@ -56,7 +56,6 @@ public class BrawlerAnimClips implements Component {
         return name.equals(idle.name()) || name.equals(walk.name()) || name.equals(run.name()) || name.equals(jump.name())
                 || (hurt != null && name.equals(hurt.name()))
                 || (dead != null && name.equals(dead.name()))
-                || (stop != null && name.equals(stop.name()))
-                || (throwing != null && name.equals(throwing.name()));
+                || (stop != null && name.equals(stop.name()));
     }
 }
