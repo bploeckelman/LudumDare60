@@ -19,7 +19,7 @@ import com.zendogames.zenlib.tilemap.MapObjectSpawner;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.assets.GameAtlas;
 import lando.systems.ld60.assets.GameMap;
-import lando.systems.ld60.game.Factory;
+import lando.systems.ld60.game.FactoryExample;
 import lando.systems.ld60.game.GameContacts;
 import lando.systems.ld60.game.GameMask;
 import lando.systems.ld60.game.input.GameKeys;
@@ -58,7 +58,7 @@ public abstract class MapScreen extends BaseScreen {
         this.mapCenter = new Vector2();
         this.keys = new GameKeys(inputProcessor, Gamepad.player());
         this.contactSystem = new ContactSystem(collision, createContactResponder());
-        this.spawner = new MapObjectSpawner().on(Factory.MARKER, (_, _) -> {}); // point objects other objects reference; nothing to spawn
+        this.spawner = new MapObjectSpawner().on(FactoryExample.MARKER, (_, _) -> {}); // point objects other objects reference; nothing to spawn
 
         world.addSystem(new InputSystem(keys));
         world.addSystem(new GameInputSystem(keys));

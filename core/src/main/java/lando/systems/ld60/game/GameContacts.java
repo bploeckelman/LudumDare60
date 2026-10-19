@@ -20,6 +20,8 @@ public class GameContacts implements ContactResponder {
     private final World world;
     private final Factory factory;
 
+    public FactoryExample factoryExample;
+
     public GameContacts(World world, Factory factory) {
         this.world   = world;
         this.factory = factory;
@@ -150,7 +152,9 @@ public class GameContacts implements ContactResponder {
                 xOffset = (int) renderable.origin.x;
                 yOffset = (int) renderable.origin.y;
             }
-            factory.pop(otherPos.x - xOffset, otherPos.y - yOffset);
+            if (factoryExample != null) {
+                factoryExample.pop(otherPos.x - xOffset, otherPos.y - yOffset);
+            }
             world.despawn(other);
         }
     }

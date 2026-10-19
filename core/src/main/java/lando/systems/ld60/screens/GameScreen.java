@@ -83,7 +83,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         world.addSystem(new HealthBarSystem());
         world.addSystem(levelControl);
 
-        spawner .on(Factory.PLAYER,     (_, obj) -> spawnPlayer(factory.hero(obj)))
+        spawner .on(Factory.PLAYER,     (_, obj) -> spawnPlayer(factory.player(obj)))
                 .on(Factory.WALL,       (_, obj) -> factory.wall(obj))
                 .on(Factory.ENEMY,      (_, obj) -> levelControl.queueEnemy(obj)) // Defer spawning
                 .on(Factory.PICKUP,     (_, obj) -> factory.pickup(obj))

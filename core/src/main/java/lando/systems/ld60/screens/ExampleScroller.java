@@ -19,10 +19,7 @@ import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.events.CombatEvent;
 import lando.systems.ld60.events.Signal;
 import lando.systems.ld60.events.SignalListener;
-import lando.systems.ld60.game.BrawlContacts;
-import lando.systems.ld60.game.Factory;
-import lando.systems.ld60.game.GameStrikes;
-import lando.systems.ld60.game.GameWeapons;
+import lando.systems.ld60.game.*;
 import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HealthBarSystem;
@@ -38,6 +35,7 @@ public class ExampleScroller extends MapScreen implements SignalListener<CombatE
     final Family skeletons;
     final SkeletonRendererDebug skeletonDebug;
     final HitSystem hitSystem;
+    final FactoryExample factoryExample;
 
     boolean debugRender = false;
     boolean showHitboxes = false;
@@ -49,6 +47,7 @@ public class ExampleScroller extends MapScreen implements SignalListener<CombatE
         this.skeletonDebug = new SkeletonRendererDebug();
         this.skeletonDebug.setBoundingBoxes(false);
         this.skeletonDebug.setRegionAttachments(false);
+        this.factoryExample = new FactoryExample(world, pixel);
 
         this.hitSystem = new HitSystem(new GameStrikes());
         world.addSystem(new BrawlerPresentSystem());
@@ -57,14 +56,13 @@ public class ExampleScroller extends MapScreen implements SignalListener<CombatE
         CombatEvent.signal.register(this);
 
         spawner .on(Factory.PLAYER, this::spawnPlayer)
-                .on(Factory.DUMMY,  this::spawnDummy)
+                .on(FactoryExample.DUMMY,  this::spawnDummy)
                 .on(Factory.WALL, (map, obj) -> factory.wall(obj));
 
         buildLevel();
 
         this.debugViews.add(DebugViews.spine(world));
         actions.defaultClick((x, y) -> factory.emitter(EmitterType.CLONE, new CloneEffect.Params(x, y), RenderLayer.BACKGROUND))
-//                .arm("spawn dummy",         Input.Keys.N, (x, y) -> factory.dummy(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
                 .arm("spawn dummy",         Input.Keys.N, (x, y) -> factory.thug(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
                 .arm("spawn pipe",          Input.Keys.K, (x, y) -> factory.pickup(GameWeapons.PIPE, x, y))
                 .add("toggle debug render", Input.Keys.B, () -> debugRender  = !debugRender)
@@ -100,11 +98,11 @@ public class ExampleScroller extends MapScreen implements SignalListener<CombatE
     }
 
     private void spawnPlayer(Tilemap map, MapObject object) {
-        var hero = factory.hero(object);
-        var anim = SpineAnimator.get(hero);
+        var entity = factory.player(object);
+        var anim = SpineAnimator.get(entity);
         anim.onEvent(event -> Log.debug(TAG, "event: %s", event.getData().getName()));
-        factory.emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(hero));
-        setPlayer(hero);
+        factory.emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(entity));
+        setPlayer(entity);
     }
 
     private void spawnDummy(Tilemap map, MapObject object) {
@@ -112,7 +110,7 @@ public class ExampleScroller extends MapScreen implements SignalListener<CombatE
         int y = TiledProps.y(object);
         int playerX = (player != null) ? Position.get(player).x : 0;
         int facing  = (playerX < x) ? -1 : +1;
-        factory.dummy(x, y, facing);
+        factoryExample.dummy(x, y, facing);
     }
 
     @Override

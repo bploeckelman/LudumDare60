@@ -17,6 +17,7 @@ import lando.systems.ld60.game.components.Held;
 import lando.systems.ld60.game.components.Hitboxes;
 import lando.systems.ld60.game.components.Pickup;
 import lando.systems.ld60.game.movement.BrawlerMotion;
+import lando.systems.ld60.game.movement.BrawlerTuning;
 
 /**
  * Picking up, dropping, throwing and wearing out weapons: the moves that change a fighter's
@@ -135,7 +136,15 @@ public final class Weapons {
         var pos    = Position.get(thrower);
         var boxes  = Hitboxes.get(thrower);
         var facing = (Mover.has(thrower) && Mover.get(thrower).motion instanceof BrawlerMotion m) ? m.facing : boxes.facing;
-        var motion = new BrawlerMotion(Factory.BRAWLER_PLAYER_TUNING);
+        var tuning = new BrawlerTuning(
+                Factory.UNIT,    // authoring unit -> pixels
+                5,       // x-axis speed (tiles/sec)
+                2,       // y-axis speed (tiles/sec)
+                0.1f,    // accel time
+                0.08f,   // stop time
+                2.5f,    // 'jump' height (tiles)
+                0.35f);  // 'jump' time to peak (seconds)
+        var motion = new BrawlerMotion(tuning);
         var mover  = new Mover(motion);
         var timers = new Timers();
         var set    = new HitboxSet().base(Hitbox.hit("item", Hitbox.rect(-ITEM / 2, -ITEM / 2, ITEM, ITEM), weapon.thrown()).depth(ITEM_DEPTH));

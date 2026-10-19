@@ -37,9 +37,6 @@ import lando.systems.ld60.ui.SettingsUI;
 
 public class BaseScreen extends ZenScreen {
 
-    static final int UNIT = Factory.UNIT;
-    static final int WALL = 8;
-
     /** Camera zoom steps for seeing more of a level; 1 is the screen's own view size. */
     static final float[] ZOOMS = { 1f, 1.5f, 2f, 3f, 4f, 6f };
 
@@ -52,8 +49,8 @@ public class BaseScreen extends ZenScreen {
     final CollisionWorld collision; // null when withCollision is false
     final TextureRegion pixel;
     final DebugActions actions;
-    public final SettingsUI settingsUI = new SettingsUI();
 
+    public final SettingsUI settingsUI = new SettingsUI();
 
     int zoomIndex = 0;
 
@@ -61,7 +58,7 @@ public class BaseScreen extends ZenScreen {
         super(game);
         this.pixel = new TextureRegion(game.pixel);
         this.world = new World();
-        this.factory = new Factory(world, pixel);
+        this.factory = new Factory(world);
         this.collision = withCollision ? new CollisionWorld(world) : null;
         this.actions = new DebugActions();
         this.debugViews.add(actions);                // 'Screen' section first, after the switcher Main pins
