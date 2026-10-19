@@ -1,7 +1,10 @@
 package lando.systems.ld60.game.state;
 
 import com.zendogames.zenlib.ecs.Entity;
-import com.zendogames.zenlib.ecs.components.*;
+import com.zendogames.zenlib.ecs.components.Animator;
+import com.zendogames.zenlib.ecs.components.Input;
+import com.zendogames.zenlib.ecs.components.Mover;
+import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import com.zendogames.zenlib.state.State;
 import com.zendogames.zenlib.state.StateMachine;
 import lando.systems.ld60.game.anim.AnimClip;
@@ -23,7 +26,7 @@ import lando.systems.ld60.game.movement.BrawlerMotion;
  * outside.
  */
 public enum BrawlerState implements State<Entity> {
-    /** Walks, jumps (the motion's action), attacks on attack, picks up on attack over an item, kicks on down + attack, throws on special. */
+    /** Walks, jumps (the motion's action), attacks on a tap of attack, picks up on a tap over an item, kicks on down + tap, winds up the power move on attack held, throws on special. */
     NORMAL {
         @Override
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
@@ -32,8 +35,11 @@ public enum BrawlerState implements State<Entity> {
 
             var buttons = GameInput.get(e);
             var wield   = Fighter.wieldOf(e);
-            var charges = wield != null && wield.power() != null; // this wield has a hold move, so a tap acts on the release
-            var tap     = charges ? buttons.attack.released && buttons.attack.heldTime < POWER_HOLD : buttons.attack.pressed;
+            var power   = (wield != null) ? wield.power() : null;
+            if (power != null && buttons.attack.held && buttons.attack.heldTime >= POWER_HOLD) { // held on past a tap: wind up, swing on the release
+                return CHARGE;
+            }
+            var tap = (power != null) ? buttons.attack.released : buttons.attack.pressed; // a wield with a hold move acts on the release
             if (tap) {
                 var item = Weapons.under(e); // attack over an item: pick it up instead of swinging
                 if (item != null && Weapons.pickUp(e, item)) {
@@ -48,14 +54,51 @@ public enum BrawlerState implements State<Entity> {
             if (buttons.special.pressed && Weapons.throwHeld(e) != null) {
                 return THROW;
             }
-            if (charges && buttons.attack.held && buttons.attack.heldTime >= POWER_HOLD) { // held past a tap: the power move, once per cooldown
-                var timers = Timers.get(e);
-                if (timers != null && !timers.has(POWER_COOLDOWN)) {
-                    timers.after(POWER_COOLDOWN, wield.powerCooldown(), rest -> {});
-                    return begin(e, wield.power());
-                }
-            }
             return this;
+        }
+    },
+    /**
+     * Attack held past {@link #POWER_HOLD}: the wield's power move wound up and parked at its wind-up,
+     * left / right still turns the fighter to aim it, and the release lets it go ({@link #ATTACK} plays
+     * the rest of the clip). Only the release leaves, apart from a hit.
+     */
+    CHARGE {
+        @Override
+        public void enter(StateMachine<Entity> m, Entity e) {
+            Mover.get(e).stop();
+            var wield = Fighter.wieldOf(e);
+            if (wield != null && wield.power() != null) {
+                wield.power().move().start(e);
+                AnimClip.freeze(e, wield.power().windup());
+            }
+        }
+
+        @Override
+        public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
+            var motion = Mover.get(e).motion(BrawlerMotion.class);
+            if (motion.launched) return HURT;
+
+            var input = Input.get(e);
+            if (input.moveX != 0) motion.facing = Integer.signum(input.moveX); // aim: turn, no walking
+            var released = GameInput.get(e).attack.released;
+            hold(e);
+            if (!released) return this;
+
+            var wield = Fighter.wieldOf(e);
+            if (wield == null || wield.power() == null) return NORMAL;
+            AnimClip.resume(e);
+            return begin(e, wield.power().move()); // ATTACK plays the rest of the clip
+        }
+
+        /**
+         * Any way out but the release (a hit, death) drops the parked clip: the present system
+         * animates nothing while a move is under way, and a parked one never ends.
+         */
+        @Override
+        public void exit(StateMachine<Entity> m, Entity e) {
+            var fighter = Fighter.get(e);
+            if (fighter != null && fighter.move != null) return; // the release handed the clip to ATTACK
+            AnimClip.clear(e, 0.1f);
         }
     },
     /** Stands and plays the chosen move ({@code Fighter.move}) through; the hit boxes come from its windows. */
@@ -64,7 +107,10 @@ public enum BrawlerState implements State<Entity> {
         public void enter(StateMachine<Entity> m, Entity e) {
             Mover.get(e).stop();
             var move = current(e);
-            if (move != null) move.start(e);
+            // unless it is already under way ({@link #CHARGE} wound it up)
+            if (move != null && !move.playing(e)) {
+                move.start(e);
+            }
         }
 
         @Override
@@ -141,11 +187,8 @@ public enum BrawlerState implements State<Entity> {
         return this;
     }
 
-    /** Attack held this long starts the wield's power move (after the press's own punch has played through). */
+    /** Attack held this long winds up the wield's power move ({@link #CHARGE}); released sooner, it is a tap (the jab, the kick, a pickup). */
     public static final float POWER_HOLD = 0.3f;
-
-    /** The {@code Timers} name that holds the power move's cooldown. */
-    static final String POWER_COOLDOWN = "power";
 
     /** Records {@code move} as the one {@link #ATTACK} plays. */
     static State<Entity> begin(Entity e, Move move) {

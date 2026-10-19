@@ -38,10 +38,11 @@ public class GameInput implements Component {
             held     =  h;
         }
 
-        /** {@link #setHeld} plus the hold clock: {@code dt} more while held, back to 0 when up. */
+        /** {@link #setHeld} plus the hold clock: restarts on the press, counts while held, keeps its value on the release tick and after. */
         public void setHeld(boolean h, float dt) {
             setHeld(h);
-            heldTime = h ? heldTime + dt : 0;
+            if (pressed) heldTime = 0;
+            if (held)    heldTime += dt;
         }
 
         void clearFrameEvents() {
