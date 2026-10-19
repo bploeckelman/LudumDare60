@@ -82,7 +82,15 @@ public class GameScreen extends MapScreen {
         this.levelControl = new LevelControlSystem(
             this,
             factory::enemy,
-            () -> game.setScreen(new GameScreen(game, level.next()), ScreenTransitionEffectType.random()),
+            () -> {
+                // Go to credits (or outro story if we have one) when done with level 3
+                if (level == GameLevel.LEVEL_3) {
+                    game.setScreen(new CreditsScreen(game), ScreenTransitionEffectType.RIPPLE);
+                } else {
+                    var next = level.next();
+                    game.setScreen(new GameScreen(game, next), ScreenTransitionEffectType.random());
+                }
+            },
             this::respawnPlayer
         );
 
