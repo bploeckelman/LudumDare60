@@ -15,7 +15,7 @@ import java.util.List;
 
 public class BloodSprayEffect implements ParticleEffect {
 
-    private static final int DROPLETS = 50;
+    private static final int DROPLETS = 10;
 
     public static class Params implements ParticleEffectParams {
         public final float x;
