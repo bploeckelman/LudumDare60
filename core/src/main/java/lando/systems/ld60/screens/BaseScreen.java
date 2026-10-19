@@ -101,6 +101,7 @@ public class BaseScreen extends ZenScreen implements SignalListener<ShakeEvent> 
         menu.addFocusableActor(settingsUI.invulnerabilityCheckBox);
         menu.addFocusableActor(settingsUI.musicSlider);
         menu.addFocusableActor(settingsUI.soundSlider);
+        menu.addFocusableActor(settingsUI.controlsButton);
         menu.addFocusableActor(settingsUI.closeButton);
         menu.setEscapeActor(settingsUI.closeButton); // Esc / Backspace / pad B close the window while it is up
 
