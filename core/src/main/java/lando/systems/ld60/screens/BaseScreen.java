@@ -88,6 +88,7 @@ public class BaseScreen extends ZenScreen {
 
         uiStage.addActor(settingsUI);
         menu.addFocusableActor(settingsUI.crtShaderCheckBox);
+        menu.addFocusableActor(settingsUI.invulnerabilityCheckBox);
         menu.addFocusableActor(settingsUI.musicSlider);
         menu.addFocusableActor(settingsUI.soundSlider);
         menu.addFocusableActor(settingsUI.closeButton);
