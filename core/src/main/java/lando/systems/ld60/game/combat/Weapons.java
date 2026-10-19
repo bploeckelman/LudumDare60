@@ -6,9 +6,12 @@ import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.World;
 import com.zendogames.zenlib.ecs.components.*;
+import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.sim.SimulationStep;
 import lando.systems.ld60.Main;
+import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameAtlas;
+import lando.systems.ld60.events.ParticleEvent;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameMask;
 import lando.systems.ld60.game.GameTags;
@@ -16,6 +19,7 @@ import lando.systems.ld60.game.anim.Move;
 import lando.systems.ld60.game.components.*;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.movement.BrawlerTuning;
+import lando.systems.ld60.particles.effects.WeaponPickupEffect;
 
 /**
  * Picking up, dropping, throwing and wearing out weapons: the moves that change a fighter's
@@ -65,6 +69,9 @@ public final class Weapons {
 
         if (held.armed()) drop(fighter);
         arm(fighter, held, pickup.weapon());
+        var pos = Position.get(fighter);
+        ParticleEvent.spawn(EmitterType.WEAPON_PICKUP,
+                new WeaponPickupEffect.Params(pos.x, pos.y), RenderLayer.WORLD);
         item.world().despawn(item);
 
         Log.info(TAG, "%s picked up %s", Name.of(fighter), pickup.weapon().name());
