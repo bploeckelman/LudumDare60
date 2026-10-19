@@ -30,8 +30,8 @@ import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HealthBarSystem;
 import lando.systems.ld60.game.systems.HitSystem;
 import lando.systems.ld60.game.systems.LevelControlSystem;
-import lando.systems.ld60.particles.effects.BloodSprayEffect;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
+import lando.systems.ld60.particles.effects.BloodSprayEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 import lando.systems.ld60.ui.HUDHealthWidget;
 
@@ -259,17 +259,30 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
 
     @Override
     public void receive(Signal<CombatEvent> signal, CombatEvent event) {
+        Position pos;
+        SpineAnimator anim;
+        boolean isHumanoid = false;
+        Color bloodTint;
+        String entityName;
         switch (event) {
             case CombatEvent.Struck s:
-                var pos = Position.get(s.strike.target());
-                var anim = SpineAnimator.get(s.strike.target());
-                factory.emitter(EmitterType.BLOOD_SPRAY, new BloodSprayEffect.Params(pos.x, pos.y + 40f, s.strike.away()), RenderLayer.BACKGROUND);
-                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + -anim.facing * 50f, pos.y, 1), RenderLayer.BACKGROUND);
+                pos = Position.get(s.strike.target());
+                anim = SpineAnimator.get(s.strike.target());
+                Log.info("blah", Name.get(s.strike.target()).name);
+//                anim.skeleton.getData() == GameSpine.SPINEBOY.get().skeleton()
+                entityName = Name.get(s.strike.target()).name;
+                isHumanoid = entityName.equals("hero") || entityName.equals("thug");
+                bloodTint = isHumanoid ? Color.RED : Color.BLUE;
+                factory.emitter(EmitterType.BLOOD_SPRAY, new BloodSprayEffect.Params(pos.x, pos.y + 40f, s.strike.away(), bloodTint), RenderLayer.BACKGROUND);
+                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + -anim.facing * 50f, pos.y, 1, bloodTint), RenderLayer.BACKGROUND);
                 break;
             case CombatEvent.Died d:
-                var deadPos = Position.get(d.entity);
-                var deadAnim = SpineAnimator.get(d.entity);
-                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(deadPos.x + -deadAnim.facing * 50f, deadPos.y, 12), RenderLayer.BACKGROUND);
+                pos = Position.get(d.entity);
+                anim = SpineAnimator.get(d.entity);
+                entityName = Name.get(d.strike.target()).name;
+                isHumanoid = entityName.equals("hero") || entityName.equals("thug");
+                bloodTint = isHumanoid ? Color.RED : Color.BLUE;
+                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + -anim.facing * 50f, pos.y, 12, bloodTint), RenderLayer.BACKGROUND);
                 break;
             default:
                 break;

@@ -127,8 +127,8 @@ public class DialogScreen extends BaseScreen {
                 entity.add(anim);
             }
             var anim = SpineAnimator.get(entity);
-            anim.play(actor.animation(), !actor.animation.equals("death"));
-            if (actor.animation.equals("death")) {
+            anim.play(actor.animation(), !anim.is("death"));
+            if (anim.is("death")) {
                 var pos = Position.get(entity);
                 var params = new BloodSplatterEffect.Params(pos.x + 50f * -facing, pos.y, 25);
                 factory.emitter(EmitterType.BLOOD, params, RenderLayer.OVERLAY);

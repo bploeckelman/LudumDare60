@@ -1,5 +1,6 @@
 package lando.systems.ld60.particles.effects;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
@@ -21,11 +22,17 @@ public class BloodSprayEffect implements ParticleEffect {
         public final float y;
         public final int direction;
         public boolean spawned;
+        public Color tint;
 
-        public Params(float x, float y, int direction) {
+        public Params(float x, float y, int direction, Color tint) {
             this.x = x;
             this.y = y;
             this.direction = direction;
+            this.tint = tint;
+        }
+
+        public Params(float x, float y, int direction) {
+            this(x, y, direction, Color.BLUE);
         }
 
         @Override
@@ -42,6 +49,7 @@ public class BloodSprayEffect implements ParticleEffect {
         var baseAngle = (params.direction < 0) ? 170f : 10f;
         var particles = new ArrayList<ParticleData>(DROPLETS);
         var pixel = new TextureRegion(Main.game.pixel);
+        var color = params.tint;
         for (int i = 0; i < DROPLETS; i++) {
             var size = MathUtils.random(5f, 10f);
             particles.add(ParticleData.initializer(pool.obtain())
@@ -52,8 +60,8 @@ public class BloodSprayEffect implements ParticleEffect {
                     .acceleration(0f, -200f)
                     .startSize(size)
                     .endSize(size * 0.5f)
-                    .startColor(0.1f, 0.1f, 0.8f, 1f)
-                    .endColor(0f, 0f, 0.2f, 0f)
+                    .startColor(color.r * .5f, color.g * .5f, color.b * .5f, 1f)
+                    .endColor(color.r * .2f, color.g * .2f, color.b * .2f, 0f)
                     .interpolation(Interpolation.pow2In)
                     .timeToLive(MathUtils.random(0.5f, 0.9f))
                     .init());

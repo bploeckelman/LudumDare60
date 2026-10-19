@@ -1,5 +1,6 @@
 package lando.systems.ld60.particles.effects;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Pool;
@@ -19,11 +20,17 @@ public class BloodSplatterEffect implements ParticleEffect {
         public final float y;
         public final int count;
         public boolean spawned;
+        public Color tint;
 
-        public Params(float x, float y, int count) {
+        public Params(float x, float y, int count, Color tint) {
             this.x = x;
             this.y = y;
             this.count = count;
+            this.tint = tint;
+        }
+
+        public Params(float x, float y, int count) {
+            this(x, y, count, Color.BLUE);
         }
 
         @Override
@@ -39,15 +46,16 @@ public class BloodSplatterEffect implements ParticleEffect {
 
         var frames = ParticleAnim.SPLAT.get().getKeyFrames();
         var particles = new ArrayList<ParticleData>(params.count);
+        var color = params.tint;
         for (int i = 0; i < params.count; i++) {
             var reach = MathUtils.random(-30f, 30f);
-            var size = MathUtils.random(12f, 32f);
+            var size = MathUtils.random(32f, 64f);
             particles.add(ParticleData.initializer(pool.obtain())
                     .keyframe(frames[MathUtils.random(frames.length - 1)])
                     .startPos(params.x + reach, params.y + MathUtils.random(-Hitbox.DEPTH, Hitbox.DEPTH))
                     .startSize(size * 1.25f, size * 0.5f)
-                    .startColor(0f, 0f, 0.45f, 1f)
-                    .endColor(0f, 0f, 0.2f, 0f)
+                    .startColor(color.r * .5f, color.g * .5f, color.b * .5f, 1f)
+                    .endColor(color.r * .2f, color.g * .2f, color.b * .2f, 0f)
                     .interpolation(Interpolation.pow4In)
                     .timeToLive(MathUtils.random(4f, 6f))
                     .init());
