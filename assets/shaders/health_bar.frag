@@ -57,9 +57,13 @@ void main() {
         vec3 healthColor = hsv2rgb(vec3(hue, 0.85, 0.9));
         outColor = vec4(healthColor, 1.0);
     }
-    // 3. Trailing damage catch-up (Orange)
+    // 3. Trailing damage catch-up (Desaturated Ghost Health)
     else if (x <= u_damagePct) {
-        outColor = vec4(1.0, 0.55, 0.1, 1.0);
+        // Find the hue of the health that was just lost
+        float hue = u_damagePct * 0.33;
+        // Drop saturation to 0.2 (from 0.85) and push brightness to 1.0
+        vec3 ghostColor = hsv2rgb(vec3(hue, 0.2, .6));
+        outColor = vec4(ghostColor, 1.0);
     }
     // 4. Empty / lost health (Dark background)
     else {
