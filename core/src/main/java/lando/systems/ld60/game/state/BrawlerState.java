@@ -5,8 +5,12 @@ import com.zendogames.zenlib.ecs.components.Animator;
 import com.zendogames.zenlib.ecs.components.Input;
 import com.zendogames.zenlib.ecs.components.Mover;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
+import com.zendogames.zenlib.ecs.components.*;
+import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.state.State;
 import com.zendogames.zenlib.state.StateMachine;
+import lando.systems.ld60.assets.EmitterType;
+import lando.systems.ld60.events.ParticleEvent;
 import lando.systems.ld60.game.anim.AnimClip;
 import lando.systems.ld60.game.anim.Move;
 import lando.systems.ld60.game.combat.Weapons;
@@ -15,6 +19,9 @@ import lando.systems.ld60.game.components.Fighter;
 import lando.systems.ld60.game.components.GameInput;
 import lando.systems.ld60.game.components.Hurtable;
 import lando.systems.ld60.game.movement.BrawlerMotion;
+import lando.systems.ld60.particles.effects.KickEffect;
+import lando.systems.ld60.particles.effects.PunchEffect;
+import lando.systems.ld60.particles.effects.ThrowTrailEffect;
 
 /**
  * The player's brawler: what the buttons do and what the fighter refuses while busy.
@@ -46,13 +53,22 @@ public enum BrawlerState implements State<Entity> {
                     return this;
                 }
                 if (Input.get(e).moveY < 0 && wield != null && wield.low() != null) { // down + attack: the low move (a kick) if this wield has one
+                    var pos = Position.get(e);
+                    ParticleEvent.spawn(EmitterType.KICK, new KickEffect.Params(pos.x + 20 * motion.facing, pos.y + 15, motion.facing), RenderLayer.WORLD);
                     return begin(e, wield.low());
                 }
                 var move = attackOf(e);
-                return (move != null) ? begin(e, move) : this;
+                if (move == null) return this;
+                var pos = Position.get(e);
+                ParticleEvent.spawn(EmitterType.PUNCH, new PunchEffect.Params(pos.x + 30 * motion.facing, pos.y + 50, motion.facing), RenderLayer.WORLD);
+                return begin(e, move);
             }
-            if (buttons.special.pressed && Weapons.throwHeld(e) != null) {
-                return THROW;
+            if (buttons.special.pressed) {
+                var thrown = Weapons.throwHeld(e);
+                if (thrown != null) {
+                    ParticleEvent.spawn(EmitterType.THROW_TRAIL, new ThrowTrailEffect.Params(thrown), RenderLayer.BACKGROUND);
+                    return THROW;
+                }
             }
             return this;
         }

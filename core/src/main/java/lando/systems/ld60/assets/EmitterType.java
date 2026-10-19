@@ -12,6 +12,9 @@ public enum EmitterType {
     , HEALTH_BAR_DAMAGE(new HealthBarParticleEffect())
     , SPAWN_CLOUD(new SpawnCloudEffect())
     , HEART_PICKUP(new HeartPickupEffect())
+    , PUNCH(new PunchEffect())
+    , KICK(new KickEffect())
+    , THROW_TRAIL(new ThrowTrailEffect())
     ;
 
     public final ParticleEffect effect;
