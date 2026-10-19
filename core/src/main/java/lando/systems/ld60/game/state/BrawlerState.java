@@ -67,9 +67,14 @@ public enum BrawlerState implements State<Entity> {
         @Override
         public void enter(StateMachine<Entity> m, Entity e) {
             Mover.get(e).stop();
-            var move = attackOf(e);
-            if (move != null) {
-                move.clip().start(e, false);
+            var clips = BrawlerAnimClips.get(e);
+            if (clips != null && clips.throwing != null) {
+                clips.throwing.start(e, false);
+            } else {
+                var move = attackOf(e);
+                if (move != null) {
+                    move.clip().start(e, false);
+                }
             }
         }
 

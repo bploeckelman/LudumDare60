@@ -46,10 +46,13 @@ public enum GameSpine implements SpineType {
             jump.setTimelines(timelines, jump.getBones()); // recomputes the property ids the mixer checks
         }
     },
-    AWOL ("spine/awol/awol-rig.json", "spine/awol/awol-rig.atlas", 1f) {
+    AWOL ("spine/awol/awol.json", "spine/awol/awol.atlas", 1f) {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
+            mixes.setMix("run", "punch", 0.05f);
+            mixes.setMix("run", "kick",  0.05f);
+            mixes.setMix("run", "swing", 0.05f);
         }
     };
 

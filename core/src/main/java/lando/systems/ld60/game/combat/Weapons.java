@@ -8,6 +8,7 @@ import com.zendogames.zenlib.ecs.World;
 import com.zendogames.zenlib.ecs.components.*;
 import com.zendogames.zenlib.sim.SimulationStep;
 import lando.systems.ld60.Main;
+import lando.systems.ld60.assets.GameAtlas;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameMask;
 import lando.systems.ld60.game.GameTags;
@@ -98,7 +99,15 @@ public final class Weapons {
         held.weapon = weapon;
         held.hits = 0;
         var boxes = Hitboxes.get(fighter);
-        if (boxes != null) boxes.set = weapon.set();
+        if (boxes != null) {
+            boxes.set = weapon.set();
+        }
+        // a rig with a 'weapon' slot shows the held item: the attachment named after the weapon, nothing when unarmed or unknown
+        var spine = SpineAnimator.get(fighter);
+        if (spine != null && spine.skeleton.findSlot("weapon") != null) {
+            var shown = held.armed() && spine.skeleton.getAttachment("weapon", weapon.name()) != null;
+            spine.skeleton.setAttachment("weapon", shown ? weapon.name() : null);
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -167,9 +176,15 @@ public final class Weapons {
 
     /** The weapon's picture, or a tinted pixel block when it has none; null headless. */
     private static Image image(Weapon weapon, Color tint) {
-        if (weapon.region() != null) {
-            var image = new Image(weapon.region());
-            image.origin.set(weapon.region().getRegionWidth() / 2f, 0);
+        var region = weapon.region();
+        if (region == null) {
+            // try to find the region in the sprite atlas if not already set on the weapon
+            var atlas = GameAtlas.SPRITES.get();
+            region = atlas.findRegion("weapons/" + weapon.name());
+        }
+        if (region != null) {
+            var image = new Image(region);
+            image.origin.set(region.getRegionWidth() / 2f, 0);
             return image;
         }
         if (Main.game == null || Main.game.pixel == null) return null;

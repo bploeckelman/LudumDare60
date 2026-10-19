@@ -69,8 +69,9 @@ public record Hitbox(
         }
     }
 
-    public static Hitbox hurt(String name, CollisionShape shape)                { return new Hitbox(name, Kind.HURT, shape, mirror(shape), DEPTH, null, null); }
-    public static Hitbox hit (String name, CollisionShape shape, Attack attack) { return new Hitbox(name, Kind.HIT,  shape, mirror(shape), DEPTH, null, attack); }
+    public static Hitbox hurt(String name, CollisionShape shape)                  { return new Hitbox(name, Kind.HURT, shape, mirror(shape), DEPTH, null, null); }
+    public static Hitbox hit (String name, CollisionShape shape, Attack attack)   { return new Hitbox(name, Kind.HIT,  shape, mirror(shape), DEPTH, null, attack); }
+    public static Hitbox.Attack attack(int damage, float knockback, float height) { return new Hitbox.Attack(damage, knockback, height); }
 
     /** A copy {@code depth} pixels thick either side of the floor line: wider for a sweep, narrower for a jab. */
     public Hitbox depth(float depth) { return new Hitbox(name, kind, right, left, depth, bone, attack); }

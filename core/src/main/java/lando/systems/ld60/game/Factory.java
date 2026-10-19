@@ -29,6 +29,7 @@ import lando.systems.ld60.assets.GameSpine;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
 import lando.systems.ld60.game.anim.AnimClip;
+import lando.systems.ld60.game.characters.Awol;
 import lando.systems.ld60.game.combat.Weapon;
 import lando.systems.ld60.game.combat.Weapons;
 import lando.systems.ld60.game.components.*;
@@ -534,55 +535,61 @@ public class Factory {
     }
 
     public Entity awol(int x, int y, int facing) {
-        var timers = new Timers();
-        var motion = new BrawlerMotion(BRAWLER_THUG_TUNING);
-        motion.facing = facing;
-        var hurtable = new Hurtable()
-                .despawnAfter(1.5f)
-                .onHurt((e, strike) -> { if (motion.grounded) AWOL_FLINCH.start(e, false); }) // shoved along the floor: flinch; the present system leaves a clip it doesn't own alone until it completes
-                .onDeath((e, strike) -> { timers.cancel("think"); Input.get(e).reset(); });
+        var timers   = new Timers();
+        var motion   = Awol.motion(facing);
+        var animator = Awol.animator(facing);
 
-        var anim = awolAnimator(facing);
         var entity = world.createEntity()
                 .tag(GameTags.ENEMY)
                 .add(new Name("awol"))
                 .add(new Position(x, y))
-                .add(new Health(3))
-                .add(new Contacts())
+                .add(new Health(Awol.Props.maxHealth))
                 .add(new Input())
-                .add(new Held(GameWeapons.AWOL_FIST))
+                .add(new Contacts())
+                .add(new Held(Awol.Props.unarmedWeapon))
                 .add(new Mover(motion))
-                .add(Collider.capsule(GameMask.ENEMY, new Rectangle(-18, 0, 36, 12), CollisionCaps.Axis.HORIZONTAL)
-                        .blockedBy(GameMask.SOLID)
-                        .detects(GameMask.PICKUP))
-                .add(new Hitboxes(GameWeapons.AWOL_FIST.set(), GameMask.ENEMY, GameMask.PLAYER))
-                .add(anim)
-                .add(awolClips())
-                .add(hurtable)
+                .add(Awol.collider())
+                .add(Awol.animClips())
+                .add(Awol.hurtable(motion, timers))
+                .add(Awol.hitboxes())
+                .add(animator)
                 .add(timers);
 
+        // TODO: don't need entity in FloatingHealthBar, instead skip processing in HealthBarSystem if appropriate
         entity.add(new FloatingHealthBar(entity, 90f));
 
         // The rig's events: "footstep" goes to a dust emitter; the rest are logged and play stand-in sounds until there are real ones
         emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(entity));
-        anim.onEvent(event -> {
+
+        // Available events in Awol spine anim: [footstep, hurt, jump, swing, throw, thud]
+        animator.onEvent(event -> {
             var name = event.getData().getName();
             Log.info("awol", "event '%s' at %.2fs of '%s'", name, event.getTime(), AnimClip.current(entity));
             switch (name) {
-                case "swing" -> AudioEvent.playSound(SoundType.BELL_HIGH);
-                case "thud"  -> AudioEvent.playSound(SoundType.BELL_LOW);
+                case "footstep" -> AudioEvent.playSound(SoundType.BELL_LOW);  // TODO: change me
+                case "hurt"     -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (or remove, see default)
+                case "jump"     -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (or remove, see default)
+                case "swing"    -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (swing a weapon)
+                case "throw"    -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (throw a weapon)
+                case "thud"     -> AudioEvent.playSound(SoundType.BELL_LOW);  // TODO: change me (hit ground on death)
                 default -> {} // "jump", "hurt": a landed hit is better heard from CombatEvent, which knows whether a glove connected
             }
         });
 
-        timers.every("think", 0.25f, think -> {
+        timers.every(Awol.Props.thinkTimer, 0.25f, think -> {
             var e      = think.entity();
             var input  = Input.get(e);
             var target = nearestPlayer(e);
-            if (target == null) { input.moveX = 0; input.moveY = 0; return; }
+            if (target == null) {
+                input.moveX = 0;
+                input.moveY = 0;
+                return;
+            }
 
             var item = Weapons.under(e);
-            if (item != null) Weapons.pickUp(e, item);
+            if (item != null) {
+                Weapons.pickUp(e, item);
+            }
 
             var pos  = Position.get(e);
             var tPos = Position.get(target);
@@ -593,9 +600,13 @@ public class Factory {
             input.moveY = (Math.abs(dy) > 6)     ? Integer.signum(dy) : 0;
             if (input.moveX == 0 && input.moveY == 0 && Math.abs(dx) <= reach + UNIT / 2) {
                 if (dx != 0) motion.facing = Integer.signum(dx);
-                var attack = Weapons.attackOf(e);
-                if (attack != null && !attack.playing(e) && motion.grounded && !motion.launched) {
+                var held = Held.get(e);
+                var attack = (held.armed() || MathUtils.randomBoolean()) ? Weapons.attackOf(e) : Awol.Props.kickWeapon;
+                if (attack != null && !attack.playing(e) && !timers.has("cooldown") && motion.grounded && !motion.launched) {
                     attack.start(e);
+
+                    // wait a bit before attacking again
+                    timers.after("cooldown", 1.2f, cooldown -> {});
                 }
             }
         });

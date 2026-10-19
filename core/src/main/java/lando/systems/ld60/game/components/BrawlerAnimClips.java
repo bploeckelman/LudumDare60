@@ -27,7 +27,7 @@ public class BrawlerAnimClips implements Component {
 
     public final AnimClip idle, walk, run, jump;
 
-    public AnimClip hurt, dead, stop;
+    public AnimClip hurt, dead, stop, throwing;
     public Move attack;
 
     /** Speed in px/s at and above which the run clip plays instead of walk. */
@@ -41,10 +41,11 @@ public class BrawlerAnimClips implements Component {
         this.runSpeed = runSpeed;
     }
 
-    public BrawlerAnimClips hurt(AnimClip clip)   { this.hurt   = clip; return this; }
-    public BrawlerAnimClips dead(AnimClip clip)   { this.dead   = clip; return this; }
-    public BrawlerAnimClips stop(AnimClip clip)   { this.stop   = clip; return this; }
-    public BrawlerAnimClips attack(Move move) { this.attack = move; return this; }
+    public BrawlerAnimClips hurt(AnimClip clip)     { this.hurt     = clip; return this; }
+    public BrawlerAnimClips dead(AnimClip clip)     { this.dead     = clip; return this; }
+    public BrawlerAnimClips stop(AnimClip clip)     { this.stop     = clip; return this; }
+    public BrawlerAnimClips throwing(AnimClip clip) { this.throwing = clip; return this; }
+    public BrawlerAnimClips attack(Move move)       { this.attack   = move; return this; }
 
     public AnimClip hurtOrJump() { return (hurt != null) ? hurt : jump; }
     public AnimClip deadOrHurt() { return (dead != null) ? dead : hurtOrJump(); }
@@ -55,6 +56,7 @@ public class BrawlerAnimClips implements Component {
         return name.equals(idle.name()) || name.equals(walk.name()) || name.equals(run.name()) || name.equals(jump.name())
                 || (hurt != null && name.equals(hurt.name()))
                 || (dead != null && name.equals(dead.name()))
-                || (stop != null && name.equals(stop.name()));
+                || (stop != null && name.equals(stop.name()))
+                || (throwing != null && name.equals(throwing.name()));
     }
 }
