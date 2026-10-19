@@ -15,6 +15,7 @@ java.sourceCompatibility = "25"
 dependencies {
   implementation "com.github.xpenatan.gdx-teavm:backend-web:$gdxTeaVMVersion"
   implementation "com.github.xpenatan.gdx-teavm:gdx-freetype-web:$gdxTeaVMVersion"
+  implementation "com.github.xpenatan.gdx-teavm:gdx-controllers-web:$gdxTeaVMVersion"
   implementation project(':core')
   implementation "com.github.xpenatan.jImGui:imgui-web:$jImGuiVersion"
   implementation "com.github.xpenatan.jImGui:imgui-web_wasm:$jImGuiVersion"

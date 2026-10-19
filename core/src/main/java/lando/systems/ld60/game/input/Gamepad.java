@@ -1,6 +1,5 @@
 package lando.systems.ld60.game.input;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerMapping;
@@ -10,6 +9,8 @@ import com.zendogames.zenlib.input.HeldKeys;
 import com.zendogames.zenlib.input.InputControls;
 
 import java.util.function.Supplier;
+
+import static com.badlogic.gdx.Application.ApplicationType;
 
 /**
  * A controller read as if it were keys: each binding says which pad input stands in for which
@@ -50,9 +51,15 @@ public class Gamepad implements HeldKeys {
         this.source = source;
     }
 
-    /** Follows whatever controller is first in the list each query, so plugging one in mid-game just works; nothing off desktop. */
+    /**
+     * Follows whatever controller is first in the list each query, so plugging one in mid-game just works;
+     * Desktop (Jamepad) and web (gdx-controllers-web in the teavm module); anywhere else the Controllers
+     * lookup would throw, so those get {@link #NONE}.
+     */
     public static Gamepad first() {
-        if (Gdx.app == null || Gdx.app.getType() != Application.ApplicationType.Desktop) return NONE;
+        if (Gdx.app == null) return NONE;
+        var type = Gdx.app.getType();
+        if (type != ApplicationType.Desktop && type != ApplicationType.WebGL) return NONE;
         return new Gamepad(() -> {
             var pads = Controllers.getControllers();
             return pads.isEmpty() ? null : pads.first();
