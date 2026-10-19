@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleShader;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.math.Polyline;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ecs.*;
@@ -26,10 +27,16 @@ public class LevelControlSystem extends EntitySystem {
 
     public enum SequenceState {
         PLAYING,
+        PLAYER_DEAD,   // Waiting for death delay / camera pause
+        RESPAWNING,    // Triggering spawn and temporary invulnerability
         BOSS_DIALOGUE, // Place to run your custom script/dialogue
         PLAYER_EXIT,   // Auto-walk player to bottom right
         DONE           // Finished, waiting for transition
     }
+
+    private final Runnable playerRespawnAction;
+    private float respawnTimer = 0f;
+    private static final float RESPAWN_DELAY = 2.0f;
 
     private final GameScreen gameScreen;
     private final EnemySpawner enemySpawner;
@@ -55,11 +62,12 @@ public class LevelControlSystem extends EntitySystem {
         Entity spawn(MapObject obj);
     }
 
-    public LevelControlSystem(GameScreen gameScreen, EnemySpawner enemySpawner, Runnable onLevelComplete) {
+    public LevelControlSystem(GameScreen gameScreen, EnemySpawner enemySpawner, Runnable onLevelComplete, Runnable playerRespawnAction) {
         super(PRIORITY);
         this.gameScreen = gameScreen;
         this.enemySpawner = enemySpawner;
         this.onLevelComplete = onLevelComplete;
+        this.playerRespawnAction = playerRespawnAction;
     }
 
     @Override
@@ -217,6 +225,37 @@ public class LevelControlSystem extends EntitySystem {
 
         if (sequenceState == SequenceState.DONE) return;
 
+        // --- PLAYER DEATH & RESPAWN HANDLING ---
+        if (sequenceState == SequenceState.PLAYING) {
+            boolean playerIsDead = false;
+
+            if (gameScreen.player == null || !gameScreen.player.isAlive()) {
+                playerIsDead = true;
+            } else {
+                Health health = Health.get(gameScreen.player);
+                if (health != null && health.current <= 0) {
+                    playerIsDead = true;
+                }
+            }
+
+            if (playerIsDead) {
+                sequenceState = SequenceState.PLAYER_DEAD;
+                respawnTimer = RESPAWN_DELAY; // e.g., 2.0f
+            }
+        } else if (sequenceState == SequenceState.PLAYER_DEAD) {
+            respawnTimer -= dt;
+            if (respawnTimer <= 0f) {
+                Log.info(TAG, "Player Respawn");
+
+                sequenceState = SequenceState.RESPAWNING;
+                if (playerRespawnAction != null) {
+                    playerRespawnAction.run();
+                }
+                sequenceState = SequenceState.PLAYING;
+            }
+            return;
+        }
+
         // 1. BOSS DIALOGUE STATE
         if (sequenceState == SequenceState.BOSS_DIALOGUE) {
             if (gameScreen.player != null) {
@@ -351,5 +390,11 @@ public class LevelControlSystem extends EntitySystem {
                 }
             }
         }
+    }
+
+    public Vector2 getSafeRespawnPosition() {
+        float spawnX = activeLeftBound + 48f;
+        float spawnY = 32f; // Floor level or map default Y
+        return new Vector2(spawnX, spawnY);
     }
 }

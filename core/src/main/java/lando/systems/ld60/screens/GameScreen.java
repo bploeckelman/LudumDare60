@@ -4,6 +4,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
 import com.github.tommyettinger.textra.TypingLabel;
 import com.zendogames.zenlib.Log;
@@ -73,9 +74,12 @@ public class GameScreen extends MapScreen {
         this.televisions.clearColor.set(worldView.clearColor);
 
         // Initialize the control system to route map objects to the correct Factory method
-        this.levelControl = new LevelControlSystem(this, factory::enemy, () -> {
-            game.setScreen(new GameScreen(game, level.next()), ScreenTransitionEffectType.random());
-        });
+        this.levelControl = new LevelControlSystem(
+            this,
+            factory::enemy,
+            () -> game.setScreen(new GameScreen(game, level.next()), ScreenTransitionEffectType.random()),
+            this::respawnPlayer
+        );
 
         world.addSystem(new BrawlerPresentSystem());
         world.addSystem(hitSystem);
@@ -298,5 +302,16 @@ public class GameScreen extends MapScreen {
             default:
                 break;
         }
+    }
+
+    private void respawnPlayer() {
+        Vector2 spawnPos = levelControl.getSafeRespawnPosition();
+        Entity newHero = factory.player((int) spawnPos.x, (int) spawnPos.y);
+
+        // Spawn drop/dust particle effect and set as current player
+        spawnPlayer(newHero);
+
+        // Smoothly re-target the camera without hard snapping
+        cameraFollow.follow(newHero, /*snap*/ false);
     }
 }

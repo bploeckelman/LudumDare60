@@ -73,6 +73,7 @@ public abstract class MapScreen extends BaseScreen {
         GameAtlas.SPRITES.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
         this.cameraFollow = new CameraFollow(worldCamera);
+        this.cameraFollow.smoothing = 5f;
         worldCamera.position.set(VIEW_WIDTH / 2f, VIEW_HEIGHT / 2f, 0f);
 
         debugViews.add(DebugViews.tilemaps(world));
