@@ -85,7 +85,6 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
 
         DistortionEvent.signal.register(this);
 
-        prodMode();
     }
 
     @Override
@@ -203,24 +202,5 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
         batch.draw(game.pixel, 0, windowCamera.viewportHeight, windowCamera.viewportWidth, -windowCamera.viewportHeight);
         batch.end();
         batch.setShader(null);
-    }
-
-
-    public void prodMode() {
-        ZenFlag.GLOBAL.off();
-        ZenFlag.FIXED_TIMESTEP.off();
-        ZenFlag.LOG_INFO.off();
-        ZenFlag.LOG_DEBUG.off();
-        ZenFlag.LOG_WARN.off();
-        ZenFlag.LOG_INPUT.off();
-        ZenFlag.LOG_TIMERS.off();
-        ZenFlag.LOG_STATE.off();
-        ZenFlag.RENDER_INTERP.off();
-        ZenFlag.FRAME_STEP.off();
-        ZenFlag.DEBUG_ASSET_LOAD.off();
-        ZenFlag.DEBUG_ECS.off();
-        ZenFlag.DEBUG_FRAME_POOL.off();
-        ZenFlag.DEBUG_RENDER.off();
-        ZenFlag.SHOW_IMGUI.off();
     }
 }
