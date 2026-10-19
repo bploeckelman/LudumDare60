@@ -1,88 +1,138 @@
 package lando.systems.ld60.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Scaling;
-import com.kotcrab.vis.ui.widget.VisImage;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.zendogames.zenlib.Log;
+import com.zendogames.zenlib.Zen;
 import com.zendogames.zenlib.ZenGame;
-import com.zendogames.zenlib.assets.ZenAnimHero;
+import com.zendogames.zenlib.ecs.Entity;
+import com.zendogames.zenlib.ecs.components.Name;
+import com.zendogames.zenlib.ecs.components.Position;
+import com.zendogames.zenlib.ecs.components.SpineAnimator;
+import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
-import lando.systems.ld60.assets.GameUIAnim;
+import lando.systems.ld60.assets.EmitterType;
+import lando.systems.ld60.assets.GameSpine;
+import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 
 public class DialogScreen extends BaseScreen {
 
     private static final String TAG = DialogScreen.class.getSimpleName();
 
     private static final float CHARACTER_SIZE = 160f;
-    private static final float BOX_WIDTH      = 600f;
-    private static final float BOX_HEIGHT     = 400f;
-    private static final float BOX_PADDING    = 50f;
+    private static final float BOX_WIDTH = 600f;
+    private static final float BOX_HEIGHT = 400f;
+    private static final float BOX_PADDING = 50f;
 
-    private record Line(ZenAnimHero left, ZenAnimHero right, String text) {}
+    private enum Side { LEFT, RIGHT }
+
+    private record Actor(GameSpine spine, String animation) {}
+
+    private record Line(Side speaking, Actor left, Actor right, String text) {}
+
+    private static Actor awol(String animation) { return new Actor(GameSpine.AWOL, animation); }
+    private static Actor spineboy(String animation) { return new Actor(GameSpine.SPINEBOY, animation); }
 
     private static final Line[] LINES = {
-            new Line(ZenAnimHero.IDLE,   ZenAnimHero.IDLE,   "Left: Hey there."),
-            new Line(ZenAnimHero.IDLE,   ZenAnimHero.JUMP,   "Right: Oh, hello!"),
-            new Line(ZenAnimHero.ATTACK, ZenAnimHero.HURT,   "Left: Take that!"),
-            new Line(ZenAnimHero.RUN,    ZenAnimHero.DEATH,  "Right: (dying sound)"),
+        new Line(Side.LEFT, awol("idle"), spineboy("idle"), "Hey there."),
+        new Line(Side.RIGHT, awol("idle"), spineboy("shoot"), "Oh, hello! BANG!"),
+        new Line(Side.LEFT, awol("punch"), spineboy("jump"), "Rude, Take that!"),
+        new Line(Side.RIGHT, awol("idle"), spineboy("death"), "(dying sound)"),
+        new Line(Side.LEFT, awol("run"), null, "Good"),
     };
 
-    private final TextureRegionDrawable leftFrame = new TextureRegionDrawable(LINES[0].left().get().getKeyFrame(0f));
-    private final TextureRegionDrawable rightFrame = new TextureRegionDrawable(LINES[0].right().get().getKeyFrame(0f));
-    private VisImage leftImage  = new VisImage(leftFrame);
-    private VisImage rightImage = new VisImage(rightFrame);
-    private final VisLabel text = new VisLabel(LINES[0].text());
+    private final Speaker left;
+    private final Speaker right;
+    private final VisLabel text = new VisLabel();
     private int line = 0;
-    private float accum = 0f;
 
     public DialogScreen(ZenGame game) {
         super(game, false);
+        uiStage.setDebugAll(true);
         addCommonSystems();
-        actions.add("back to menu", Input.Keys.ESCAPE, () -> game.setScreen(new IntroScreen(game), ScreenTransitionEffectType.DOORWAY));
+
+        var width = Zen.config.framebufferWidth();
+        var height = Zen.config.framebufferHeight();
+        worldCamera.position.set(width / 2f, height / 2f, 0f);
+        worldCamera.update();
+
+        left = new Speaker("left", width * 0.2f, height * 0.2f, 1);
+        right = new Speaker("right", width * 0.8f, height * 0.2f, -1);
 
         text.setWrap(true);
-        text.setAlignment(Align.topLeft);
+        showLine();
 
         var box = new VisTable();
-        box.setBackground(new TextureRegionDrawable(GameUIAnim.SETTINGS.get().getKeyFrame(0)));
         box.pad(BOX_PADDING);
-        box.add(text).grow();
-        box.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                Log.info("Dialog","line: " + line);
-                if (line >= LINES.length - 1) {
-                    game.setScreen(new IntroScreen(game), ScreenTransitionEffectType.DOORWAY);
-                    return;
-                }
-                line = (line + 1);
-                accum = 0f;
-                text.setText(LINES[line].text());
-            }
-        });
-        leftImage .setScaling(Scaling.fit);
-        rightImage.setScaling(Scaling.fit);
-        rightImage.setScaleX(-1f);
-        rightImage.setOrigin(CHARACTER_SIZE / 2f, CHARACTER_SIZE / 2f); // cell size is fixed, so the mirror pivots on the center from the first frame
+        box.add(text).align(Align.center).grow();
+
         var table = new VisTable();
         table.setFillParent(true);
-        table.add(leftImage).size(CHARACTER_SIZE).expandX();
+        table.add().size(CHARACTER_SIZE).expandX();
         table.add(box).size(BOX_WIDTH, BOX_HEIGHT);
-        table.add(rightImage).size(CHARACTER_SIZE).expandX();
+        table.add().size(CHARACTER_SIZE).expandX();
         uiStage.addActor(table);
     }
 
     @Override
     public void update(float delta) {
-        if (transitioning) return;
         super.update(delta);
-        accum += delta;
-        leftFrame.setRegion(LINES[line].left().get().getKeyFrame(accum));
-        rightFrame.setRegion(LINES[line].right().get().getKeyFrame(accum));
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            nextLine();
+        }
+    }
+
+    private void nextLine() {
+        Log.info(TAG, "line: " + line);
+        if (line >= LINES.length - 1) {
+            //TODO: set it to next screen
+            game.setScreen(new IntroScreen(game), ScreenTransitionEffectType.DOORWAY);
+            return;
+        }
+        line++;
+        showLine();
+    }
+
+    private void showLine() {
+        var current = LINES[line];
+        text.setText(current.text());
+        text.setAlignment(current.speaking() == Side.LEFT ? Align.topLeft : Align.topRight);
+        left.startAnim(current.left());
+        right.startAnim(current.right());
+    }
+
+    public class Speaker {
+        Entity entity;
+        int facing;
+        GameSpine spine;
+
+        public Speaker(String name, float x, float y, int facing) {
+            this.entity = world.createEntity()
+                .add(new Name(name))
+                .add(new Position(x, y));
+            this.facing = facing;
+        }
+
+        private void startAnim(Actor actor) {
+            if (actor == null) {
+                return;
+            }
+            if (actor.spine() != spine) {
+                spine = actor.spine();
+                var anim = new SpineAnimator(spine);
+                anim.facing = facing;
+                entity.add(anim);
+            }
+            var anim = SpineAnimator.get(entity);
+            anim.play(actor.animation(), !actor.animation.equals("death"));
+            if (actor.animation.equals("death")) {
+                var pos = Position.get(entity);
+                var params = new BloodSplatterEffect.Params(pos.x + 50f * -facing, pos.y, 25);
+                factory.emitter(EmitterType.BLOOD, params, RenderLayer.OVERLAY);
+            }
+        }
     }
 }
