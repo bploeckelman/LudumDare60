@@ -64,6 +64,7 @@ public class DialogScreenIntro extends BaseScreen {
     private final VisLabel text = new VisLabel();
     private final Stage dialogStage = new Stage(worldView.viewport, batch);
     private int line = 0;
+    private float delay = .2f;
 
     public DialogScreenIntro(ZenGame game) {
         super(game, false);
@@ -99,6 +100,7 @@ public class DialogScreenIntro extends BaseScreen {
         table.add().size(CHARACTER_SIZE).expandX();
         dialogStage.addActor(table);
         AudioEvent.playMusic(MusicType.INTRO_THEME);
+        delay = .2f;
     }
 
     @Override
@@ -117,9 +119,11 @@ public class DialogScreenIntro extends BaseScreen {
     @Override
     public void update(float delta) {
         super.update(delta);
+        delay -= delta;
         dialogStage.act(delta);
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+        if (delay <= 0 && (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY))) {
             nextLine();
+            delay = .2f;
         }
     }
 

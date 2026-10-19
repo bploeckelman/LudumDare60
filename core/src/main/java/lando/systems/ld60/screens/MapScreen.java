@@ -101,7 +101,7 @@ public abstract class MapScreen extends BaseScreen {
     }
 
     @Override public void update(float dt) {
-        if (!settingsUI.isVisible) { // Pause if settings are visible
+        if (!settingsUI.isVisible && !controlsUI.isVisible) { // Pause if settings are visible
             world.update(dt);
             afterWorldUpdate(dt);
         }

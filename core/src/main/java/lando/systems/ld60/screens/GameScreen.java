@@ -148,6 +148,10 @@ public class GameScreen extends MapScreen {
         keepMovingWidget = new KeepMovingWidget();
         keepMovingWidget.setVisible(false);
         uiStage.addActor(keepMovingWidget);
+
+        if (level == GameLevel.LEVEL_1) {
+            controlsUI.open();
+        }
     }
 
     interface EnemyMotionAction { void run(Entity e, Mover mover, BrawlerMotion motion); }

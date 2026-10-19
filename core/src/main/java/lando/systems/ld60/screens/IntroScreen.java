@@ -51,7 +51,7 @@ public class IntroScreen extends BaseScreen {
         subTitle = new Texture(Gdx.files.internal("images/title-text-obsolete_00.png"));
         sequelTitle = new Texture(Gdx.files.internal("images/title-text-evencooter_00.png"));
 
-        var play     = buttonWithOnClick("Play",     () -> start(() -> new GameScreen(game, GameLevel.LEVEL_1)));
+        var play     = buttonWithOnClick("Play",     () -> start(() -> new DialogScreenIntro(game)));
         var settings = buttonWithOnClick("Settings", settingsUI::toggle);
         var credits  = buttonWithOnClick("Credits",  () -> start(() -> new CreditsScreen(game)));
 
