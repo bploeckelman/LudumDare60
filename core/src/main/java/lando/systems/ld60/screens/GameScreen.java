@@ -70,7 +70,8 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         this.televisions = new TelevisionFeed(VIEW_WIDTH / 2, VIEW_HEIGHT / 2);
         this.televisions.clearColor.set(worldView.clearColor);
 
-        this.levelControl = new LevelControlSystem(this, obj -> factory.enemy(obj));
+        // Initialize the control system to route map objects to the correct Factory method
+        this.levelControl = new LevelControlSystem(this, factory::enemy);
 
         world.addSystem(new BrawlerPresentSystem());
         world.addSystem(hitSystem);

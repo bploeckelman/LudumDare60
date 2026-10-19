@@ -341,11 +341,6 @@
             "drawFill": true,
             "id": 21,
             "members": [
-                {
-                    "name": "stage_num",
-                    "type": "int",
-                    "value": -1
-                }
             ],
             "name": "stage",
             "type": "class",

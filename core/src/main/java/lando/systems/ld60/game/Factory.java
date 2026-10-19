@@ -70,7 +70,7 @@ public class Factory {
     public static final String TELEVISION = "television"; // scroller: a region where the game world framebuffer is rendered back into for a "watch yourself play" effect
     public static final String STAGE_MARKER = "stage";
 
-    public static final List<String> ENEMY_KINDS = List.of("thug", /*TEMP: testing*/ "awol");
+    public static final List<String> ENEMY_KINDS = List.of("thug", /*TEMP: testing*/ "awol", "n64Boss");
 
     /** Seconds a bullet flies before it expires on its own. */
     public static final float BULLET_LIFETIME = 3f;
@@ -149,6 +149,7 @@ public class Factory {
         var enemy = switch (kind) {
             case "thug" -> thug(x + w / 2, y, -1);
             case "awol" -> awol(x + w / 2, y, -1);
+            case "n64Boss" -> n64Boss(x + w / 2, y, -1);
             default -> {
                 throw new GdxRuntimeException("enemy %s: unknown kind '%s', kinds available: %s"
                         .formatted(TiledProps.describe(object), kind, ENEMY_KINDS));
@@ -460,6 +461,76 @@ public class Factory {
         });
 
         return thug;
+    }
+
+    public Entity n64Boss(int x, int y, int facing) {
+        var timers = new Timers();
+        var motion = new BrawlerMotion(BRAWLER_THUG_TUNING);
+        motion.facing = facing;
+        var hurtable = new Hurtable()
+            .despawnAfter(1.5f)
+            .onHurt((e, strike) -> { if (motion.grounded) AWOL_FLINCH.start(e, false); }) // shoved along the floor: flinch; the present system leaves a clip it doesn't own alone until it completes
+            .onDeath((e, strike) -> { timers.cancel("think"); Input.get(e).reset(); });
+
+        var anim = awolAnimator(facing);
+        var entity = world.createEntity()
+            .tag(GameTags.BOSS)
+            .add(new Name("awol"))
+            .add(new Position(x, y))
+            .add(new Health(3))
+            .add(new Contacts())
+            .add(new Input())
+            .add(new Held(GameWeapons.AWOL_FIST))
+            .add(new Mover(motion))
+            .add(Collider.capsule(GameMask.ENEMY, new Rectangle(-18, 0, 36, 12), CollisionCaps.Axis.HORIZONTAL)
+                .blockedBy(GameMask.SOLID)
+                .detects(GameMask.PICKUP))
+            .add(new Hitboxes(GameWeapons.AWOL_FIST.set(), GameMask.ENEMY, GameMask.PLAYER))
+            .add(anim)
+            .add(awolClips())
+            .add(hurtable)
+            .add(timers);
+
+        entity.add(new FloatingHealthBar(entity, 90f));
+
+        // The rig's events: "footstep" goes to a dust emitter; the rest are logged and play stand-in sounds until there are real ones
+        emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(entity));
+        anim.onEvent(event -> {
+            var name = event.getData().getName();
+            Log.info("n64boss", "event '%s' at %.2fs of '%s'", name, event.getTime(), AnimClip.current(entity));
+            switch (name) {
+                case "swing" -> AudioEvent.playSound(SoundType.BELL_HIGH);
+                case "thud"  -> AudioEvent.playSound(SoundType.BELL_LOW);
+                default -> {} // "jump", "hurt": a landed hit is better heard from CombatEvent, which knows whether a glove connected
+            }
+        });
+
+        timers.every("think", 0.25f, think -> {
+            var e      = think.entity();
+            var input  = Input.get(e);
+            var target = nearestPlayer(e);
+            if (target == null) { input.moveX = 0; input.moveY = 0; return; }
+
+            var item = Weapons.under(e);
+            if (item != null) Weapons.pickUp(e, item);
+
+            var pos  = Position.get(e);
+            var tPos = Position.get(target);
+            int dx = tPos.x - pos.x;
+            int dy = tPos.y - pos.y;
+            int reach = 3 * UNIT;
+            input.moveX = (Math.abs(dx) > reach) ? Integer.signum(dx) : 0;
+            input.moveY = (Math.abs(dy) > 6)     ? Integer.signum(dy) : 0;
+            if (input.moveX == 0 && input.moveY == 0 && Math.abs(dx) <= reach + UNIT / 2) {
+                if (dx != 0) motion.facing = Integer.signum(dx);
+                var attack = Weapons.attackOf(e);
+                if (attack != null && !attack.playing(e) && motion.grounded && !motion.launched) {
+                    attack.start(e);
+                }
+            }
+        });
+
+        return entity;
     }
 
     public Entity awol(int x, int y, int facing) {
