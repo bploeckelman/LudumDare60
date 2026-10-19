@@ -70,7 +70,7 @@ public final class Spineboy {
 
     public static final Kind KIND = new Kind("spineboy",
             TUNING,
-            /*health*/ 10,
+            /*health*/ 6,
             /*feet*/ new Rectangle(-18, 0, 36, 12), // only the feet: the sprite's top half may overlap a wall behind it
             Spineboy::animator,
             Spineboy::clips,

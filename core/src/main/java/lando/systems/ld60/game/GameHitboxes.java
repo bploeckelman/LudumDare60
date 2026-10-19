@@ -9,8 +9,8 @@ import lando.systems.ld60.game.combat.HitboxSet;
  */
 public final class GameHitboxes {
 
-    /** The example's only attack: spineboy's shot. One damage, a tile and a half of shove, no lift. */
-    public static final Hitbox.Attack SHOT = new Hitbox.Attack(1, 1.5f, 0f);
+    /** The example's only attack: spineboy's shot. */
+    public static final Hitbox.Attack SHOT = new Hitbox.Attack(1, 2.5f, 1f);
 
     /**
      * spineboy at the scroller's size (load scale 0.25, {@code defaultScale} 0.5, about 85 px tall).
@@ -22,7 +22,7 @@ public final class GameHitboxes {
                   Hitbox.hurt("body", Hitbox.rect(-8, -28, 16, 46)).on("hip"))
             .window("shoot", 0.03f, 0.2f, Hitbox.hit("shot", Hitbox.rect(4, -6, 40, 12), SHOT).on("muzzle"));
 
-    public static final Hitbox.Attack AWOL_PUNCH = new Hitbox.Attack(/*dmg*/ 1, /*knockback*/ 4, /*height*/ 3);
+    public static final Hitbox.Attack AWOL_PUNCH = new Hitbox.Attack(/*dmg*/ 2, /*knockback*/ 5, /*height*/ 3);
 
     /**
      * The awol rig at 0.35 scale (about 85 px tall): the disc is a circle on the {@code body} bone;

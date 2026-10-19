@@ -9,6 +9,7 @@ import com.zendogames.zenlib.ecs.components.Name;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.Timers;
 import lando.systems.ld60.game.combat.Weapons;
+import lando.systems.ld60.game.components.HealthPickup;
 import lando.systems.ld60.game.components.Pickup;
 import lando.systems.ld60.game.components.Trigger;
 import lando.systems.ld60.game.movement.BrawlerMotion;
@@ -33,9 +34,20 @@ public class BrawlContacts implements ContactResponder {
 
         var pickup = Pickup.get(other);
         if (pickup != null) {
-            if (pickup.onTouch() && contact.isEnter()) Weapons.pickUp(contact.mover(), other);
+            if (pickup.onTouch() && contact.isEnter()) {
+                Weapons.pickUp(contact.mover(), other);
+            }
             return;
         }
+
+        var health = HealthPickup.get(other);
+        if (health != null) {
+            if (contact.isEnter() && contact.mover().hasTag(GameTags.PLAYER)) {
+                Drops.heal(contact.mover(), other);
+                return;
+            }
+        }
+
         var trigger = Trigger.get(other);
         if (trigger != null) {
             trigger(contact, trigger.effect());

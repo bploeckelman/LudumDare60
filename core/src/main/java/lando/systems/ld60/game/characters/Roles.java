@@ -1,5 +1,6 @@
 package lando.systems.ld60.game.characters;
 
+import lando.systems.ld60.game.Drops;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameMask;
 import lando.systems.ld60.game.GameTags;
@@ -54,7 +55,7 @@ public final class Roles {
                 GameMask.ENEMY, masks(GameMask.PICKUP),
                 GameMask.ENEMY, masks(GameMask.PLAYER),
                 THUG_TUNING,
-                () -> new Hurtable().despawnAfter(1.5f),
+                () -> new Hurtable().despawnAfter(1.5f).onDeath(Drops::health),
                 mind,
                 true);
     }
