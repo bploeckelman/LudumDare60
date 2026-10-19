@@ -38,7 +38,7 @@
  </layer>
  <objectgroup id="2" name="objects">
   <object id="25" name="Stage Boss" type="stage" x="4192" y="208">
-   <polyline points="0,0 820,-6"/>
+   <polyline points="0,0 672,-6"/>
   </object>
   <object id="24" name="Stage 3" type="stage" x="2153" y="258">
    <polyline points="0,0 2227,-2"/>
