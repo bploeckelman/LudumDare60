@@ -8,7 +8,9 @@ import com.zendogames.zenlib.ecs.components.Mover;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.Timers;
 import lando.systems.ld60.game.characters.Kind;
+import lando.systems.ld60.game.combat.Strike;
 import lando.systems.ld60.game.combat.Weapons;
+import lando.systems.ld60.game.components.BrawlerAnimClips;
 import lando.systems.ld60.game.components.Fighter;
 import lando.systems.ld60.game.components.Hurtable;
 import lando.systems.ld60.game.movement.BrawlerMotion;
@@ -51,11 +53,35 @@ public final class ThugMind implements Mind {
         Timers.get(e).every("think", 0.25f, think -> think(think.entity(), senses, lane));
     }
 
+    /**
+     * A hit cuts the swing (the thug's {@code Hurtable.onHurt}): the move is dropped so the next beat
+     * starts over, and if its clip is still playing the hurt clip replaces it, else the present
+     * system would let the swing play out through the knockback. A hit that leaves the thug on
+     * the ground already started the flinch in {@code GameStrikes}; a launch leaves the ground at
+     * once, so that one is ours.
+     */
+    public static void cut(Entity e, Strike strike) {
+        var fighter = Fighter.get(e);
+        if (fighter == null || fighter.move == null) return;
+        if (fighter.move.playing(e)) {
+            var clips = BrawlerAnimClips.get(e);
+            if (clips != null) clips.hurtOrJump().start(e, false);
+        }
+        fighter.move = null;
+    }
+
+
     private void think(Entity e, Senses senses, int lane) {
         var input    = Input.get(e);
         var motion   = Mover.get(e).motion(BrawlerMotion.class);
         var hurtable = Hurtable.get(e);
-        if (hurtable != null && hurtable.dead) { input.reset(); return; }
+        var fighter  = Fighter.get(e);
+        if (fighter.move != null && !fighter.move.playing(e)) {
+            fighter.move = null; // the move played through (or a hit cut it short): the present system animates again
+        }
+        if (hurtable != null && hurtable.dead) {
+            input.reset(); return;
+        }
 
         var target = senses.nearestPlayer(e);
         if (target == null) { input.moveX = 0; input.moveY = 0; return; }
@@ -92,7 +118,7 @@ public final class ThugMind implements Mind {
             if (wield == null || timers.has("cooldown") || !motion.grounded || motion.launched) return;
             var move = (wield.low() != null && MathUtils.randomBoolean()) ? wield.low() : wield.attack();
             if (move != null && !move.playing(e)) {
-                Fighter.get(e).move = move;
+                fighter.move = move;
                 move.start(e);
                 timers.after("cooldown", cooldown, rest -> {}); // the wind-up is the tell; the rest is the opening
             }

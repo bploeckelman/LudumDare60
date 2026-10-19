@@ -58,7 +58,7 @@ public final class Roles {
                 GameMask.ENEMY, masks(GameMask.PICKUP),
                 GameMask.ENEMY, masks(GameMask.PLAYER),
                 THUG_TUNING,
-                () -> new Hurtable().despawnAfter(1.5f).onDeath(Drops::health),
+                () -> new Hurtable().despawnAfter(1.5f).onHurt(ThugMind::cut).onDeath(Drops::health),
                 mind,
                 true);
     }

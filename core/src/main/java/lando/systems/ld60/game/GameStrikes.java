@@ -92,8 +92,12 @@ public class GameStrikes implements Strike.Responder {
                 Hitboxes.get(e).vulnerable = true;
             });
         }
-        if (hurtable.hurtState != null && Behavior.has(target)) Behavior.get(target).request(hurtable.hurtState);
-        if (hurtable.onHurt != null) hurtable.onHurt.struck(target, strike);
+        if (hurtable.hurtState != null && Behavior.has(target)) {
+            Behavior.get(target).request(hurtable.hurtState);
+        }
+        if (hurtable.onHurt != null) {
+            hurtable.onHurt.struck(target, strike);
+        }
     }
 
     private static void die(Entity target, Strike strike, Hurtable hurtable, Hitboxes boxes, Timers timers) {

@@ -73,6 +73,6 @@ public class Hurtable implements Component {
     public Hurtable despawnAfter(float seconds)        { this.despawnAfter = seconds; return this; }
     public Hurtable hurtState(State<Entity> state)     { this.hurtState    = state;   return this; }
     public Hurtable deadState(State<Entity> state)     { this.deadState    = state;   return this; }
-    public Hurtable onHurt(Strike.Callback callback)    { this.onHurt       = callback; return this; }
-    public Hurtable onDeath(Strike.Callback callback)   { this.onDeath      = callback; return this; }
+    public Hurtable onHurt(Strike.Callback callback)   { this.onHurt       = callback; return this; }
+    public Hurtable onDeath(Strike.Callback callback)  { this.onDeath      = callback; return this; }
 }
