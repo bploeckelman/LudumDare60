@@ -76,8 +76,8 @@ public final class N64 {
         public static final Set<String> heavyHits = Set.of("power", "swing");
         public static final int staggerEvery = 3;
         // The rumble pak -----------------------------------------------------
-        /** Flight speed along the floor; the airborne frames (the first two) loop for this long. */
-        public static final float pakSpeed = 240, pakFlightLoop = 0.2f;
+        /** Flight speed along the floor. */
+        public static final float pakSpeed = 240;
         /** Where the fall frames put the pack down, ahead of the frame origin (drawn px): the entity stops this short of the target. */
         public static final int pakLandX = 80;
         /** Blast reach along the street and up it (an ellipse on the floor). */

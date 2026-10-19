@@ -73,7 +73,7 @@ public final class Roles {
         return new Role("boss", GameTags.BOSS,
                 GameMask.ENEMY, masks(GameMask.PICKUP),
                 GameMask.ENEMY, masks(GameMask.PLAYER),
-                /*tuning*/ null, hurtable, mind, /*healthBar*/ true);
+                /*tuning*/ null, hurtable, mind, /*healthBar*/ false);
     }
 
     private static GameMask[] masks(GameMask... masks) { return masks; }

@@ -10,12 +10,12 @@ import lando.systems.ld60.game.characters.N64;
 import lando.systems.ld60.game.components.RumblePak;
 
 /**
- * The N64 boss's rumble pak from the muzzle to the floor: {@link #FLY} tumbles the first frames
- * of the projectile clip while the entity crosses the street to its landing spot, {@link #FALL}
+ * The N64 boss's rumble pak from the muzzle to the floor: {@link #FLY} holds the launch frame of
+ * the projectile clip while the entity crosses the street to its landing spot, {@link #FALL}
  * plays the rest (the pack dropping to the floor) and sets it off when the clip is done.
  */
 public enum RumblePakState implements State<Entity> {
-    /** Toward {@code RumblePak.landX/landY} at its speed, looping the airborne frames. */
+    /** Toward {@code RumblePak.landX/landY} at its speed, on the launch frame the whole way. */
     FLY {
         @Override
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
@@ -23,8 +23,9 @@ public enum RumblePakState implements State<Entity> {
             var pos  = Position.get(e);
             var anim = Animator.get(e);
 
-            // The airborne frames, over and over, until it is down (the animation system adds dt after this)
-            anim.time %= N64.Props.pakFlightLoop;
+            // Every frame of this clip is a point on one arc, so the only frame that reads as
+            // "in flight" at any position is the first: hold it (the animation system adds dt after this)
+            anim.time = 0;
 
             float dx = pak.landX - pak.x;
             float dy = pak.landY - pak.y;
@@ -48,7 +49,8 @@ public enum RumblePakState implements State<Entity> {
     FALL {
         @Override
         public void enter(StateMachine<Entity> m, Entity e) {
-            Animator.get(e).time = N64.Props.pakFlightLoop; // the first falling frame
+            var anim = Animator.get(e);
+            anim.time = anim.animation.getFrameDuration(); // start at the second frame: the first after the launch pose
         }
 
         @Override
