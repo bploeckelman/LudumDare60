@@ -265,7 +265,8 @@ public class LevelControlSystem extends EntitySystem {
             }
 
             // Normal stage clearing
-            if (!stageClear && enemyFamily.entities().isEmpty() && bossFamily.entities().isEmpty()) {                stageClear = true;
+            if (!stageClear && enemyFamily.entities().isEmpty() && bossFamily.entities().isEmpty()) {
+                stageClear = true;
                 if (unspawnedEnemies.isEmpty() && !bossSpawned) {
                     // Fallback if the map has no boss
                     sequenceState = SequenceState.BOSS_DIALOGUE;
@@ -278,8 +279,13 @@ public class LevelControlSystem extends EntitySystem {
             if (gameScreen.player != null) {
                 Position pos = Position.get(gameScreen.player);
                 if (pos != null) {
+
+                    float margin = 24f; // Player sprite half-width + a little padding
+
                     if (pos.x >= currentStageStartX && activeLeftBound < currentStageStartX) {
-                        activeLeftBound = Math.min(pos.x, currentStageStartX);
+                        // Make sure we don't snap the left bound further than the player's permitted margin
+                        activeLeftBound = Math.min(pos.x - margin, currentStageStartX);
+                        updateCameraBounds(dt);
                     }
 
                     if (stageClear && pos.x >= currentStageEndX) {
@@ -290,14 +296,14 @@ public class LevelControlSystem extends EntitySystem {
                         spawnEnemiesForStage(currentStage);
                     }
 
-                    if (pos.x < activeLeftBound) {
-                        pos.x = (int) activeLeftBound;
+                    // Apply the margin padding so the player is fully visible
+                    if (pos.x < activeLeftBound + margin) {
+                        pos.x = (int) (activeLeftBound + margin);
                     }
 
-                    float mapEndX = tilemap != null ? tilemap.width() : Float.MAX_VALUE;
-                    float playerRightConstraint = stageClear ? mapEndX : currentStageEndX;
-                    if (pos.x > playerRightConstraint) {
-                        pos.x = (int) playerRightConstraint;
+                    // Bound the player's right side to the ACTIVE animating camera right bound
+                    if (pos.x > currentCameraRightBound - margin) {
+                        pos.x = (int) (currentCameraRightBound - margin);
                     }
                 }
             }
