@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
+import com.github.tommyettinger.textra.TypingLabel;
 import lando.systems.ld60.Main;
+import lando.systems.ld60.assets.GameFont;
 import lando.systems.ld60.game.components.Health;
 import lando.systems.ld60.screens.MapScreen;
 
@@ -17,9 +19,12 @@ public class PlayerHealthWidget extends Widget {
     private float displayPct = 1f;
     private final float lerpSpeed = .5f;
 
+    TypingLabel typingLabel;
+
     public PlayerHealthWidget(MapScreen screen) {
         this.screen = screen;
         this.whitePixel = Main.game.pixel;
+        var playerLabel = new TypingLabel("Player Health: ", GameFont.DOS_FONT.get());
     }
 
     @Override

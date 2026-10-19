@@ -23,7 +23,7 @@ public enum GameFont implements FontType {
         this.path = path;
         this.asset = new Asset<>(this);
         this.params = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        this.params.borderColor = Color.CLEAR;
+        this.params.borderColor = Color.BLACK;
         this.params.borderWidth = 2;
         this.params.color = Color.WHITE;
         this.params.size = size;

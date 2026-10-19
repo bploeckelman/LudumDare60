@@ -5,21 +5,20 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
+import com.github.tommyettinger.textra.TypingLabel;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.Time;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.collision.ContactResponder;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.Family;
-import com.zendogames.zenlib.ecs.components.Mover;
-import com.zendogames.zenlib.ecs.components.Position;
-import com.zendogames.zenlib.ecs.components.SpineAnimator;
-import com.zendogames.zenlib.ecs.components.Tilemap;
+import com.zendogames.zenlib.ecs.components.*;
 import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.render.WorldView;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.assets.EmitterType;
+import lando.systems.ld60.assets.GameFont;
 import lando.systems.ld60.events.AudioEvent;
 import lando.systems.ld60.events.CombatEvent;
 import lando.systems.ld60.events.Signal;
@@ -54,6 +53,9 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
     final HitSystem hitSystem;
     final TelevisionFeed televisions;
     final LevelControlSystem levelControl; // Add this reference
+
+    private BossHealthWidget bossWidget;
+    private TypingLabel bossLabel;
 
     public boolean debugRender  = false;
     public boolean showHitboxes = false;
@@ -114,12 +116,20 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         healthWidget.setPosition(20f, uiStage.getHeight() - healthWidget.getHeight() - 30f);
         uiStage.addActor(healthWidget);
 
-        // --- NEW: Add the Boss HUD ---
-        BossHealthWidget bossWidget = new BossHealthWidget(levelControl);
+        TypingLabel playerLabel = new TypingLabel("{OUTLINECOLOR=BLACK}{OUTLINE=2}{SPEED=2.5}PLAYER 1", GameFont.DOS_FONT.get());        playerLabel.setPosition(healthWidget.getX(), healthWidget.getY() - 30);
+        uiStage.addActor(playerLabel);
+
+        // Initialize Boss Widget but make it invisible
+        bossWidget = new BossHealthWidget(levelControl);
         bossWidget.setSize(300f, 25f);
-        // Position it 20 pixels from the right and 20 pixels down from the top of the UI camera
         bossWidget.setPosition(uiStage.getWidth() - bossWidget.getWidth() - 20f, uiStage.getHeight() - bossWidget.getHeight() - 30f);
+        bossWidget.setVisible(false);
         uiStage.addActor(bossWidget);
+
+        // Initialize Boss Label but make it invisible
+        bossLabel = new TypingLabel("", GameFont.DOS_FONT.get());
+        bossLabel.setVisible(false);
+        uiStage.addActor(bossLabel);
     }
 
     interface EnemyMotionAction { void run(Entity e, Mover mover, BrawlerMotion motion); }
@@ -132,6 +142,36 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
             var mover = Mover.get(e);
             if (mover.motion instanceof BrawlerMotion motion && motion.grounded && !motion.launched) {
                 action.run(e, mover, motion);
+            }
+        }
+    }
+
+    @Override
+    public void update(float dt) {
+        super.update(dt);
+
+        Entity activeBoss = levelControl.getBossEntity();
+
+        if (activeBoss != null && activeBoss.isAlive()) {
+            if (!bossWidget.isVisible()) {
+                bossWidget.setVisible(true);
+
+                // Get the boss name from the entity
+                Name nameComp = Name.get(activeBoss);
+                String rawName = (nameComp != null) ? nameComp.name : "UNKNOWN BOSS";
+
+                // Set the text with the red color and black outline
+                bossLabel.restart("{COLOR=RED}{OUTLINECOLOR=BLACK}{OUTLINE=2}{SPEED=2.5}" + rawName.toUpperCase());
+
+                // Re-align the label to match the right-aligned health bar since text length changed
+                bossLabel.pack(); // forces it to compute its width immediately
+                bossLabel.setPosition(bossWidget.getX() + bossWidget.getWidth() - bossLabel.getWidth(), bossWidget.getY() - 30);
+                bossLabel.setVisible(true);
+            }
+        } else {
+            if (bossWidget.isVisible()) {
+                bossWidget.setVisible(false);
+                bossLabel.setVisible(false);
             }
         }
     }

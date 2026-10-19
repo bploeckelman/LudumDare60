@@ -257,7 +257,7 @@ public class LevelControlSystem extends EntitySystem {
         if (sequenceState == SequenceState.PLAYING) {
 
             // Check win condition
-            if (bossSpawned && bossFamily.entities().isEmpty()) {
+            if (bossSpawned && bossFamily.entities().isEmpty() && enemyFamily.entities().isEmpty()) {
                 stageClear = true;
                 sequenceState = SequenceState.BOSS_DIALOGUE;
                 Log.info(TAG, "Boss defeated! Starting dialogue sequence.");
