@@ -62,7 +62,10 @@ public final class Drops {
                 .add(new HealthPickup(amount))
                 .add(Collider.rect(GameMask.PICKUP, -Factory.UNIT / 2f, -4, Factory.UNIT, 8));
         var image = image();
-        if (image != null) e.add(image);
+        if (image != null) {
+            image.layer = RenderLayer.BACKGROUND;
+            e.add(image);
+        }
         return e;
     }
 
