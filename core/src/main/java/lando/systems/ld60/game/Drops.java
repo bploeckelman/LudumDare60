@@ -9,11 +9,15 @@ import com.zendogames.zenlib.ecs.components.Collider;
 import com.zendogames.zenlib.ecs.components.Image;
 import com.zendogames.zenlib.ecs.components.Name;
 import com.zendogames.zenlib.ecs.components.Position;
+import com.zendogames.zenlib.render.RenderLayer;
 import lando.systems.ld60.Main;
+import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameAtlas;
+import lando.systems.ld60.events.ParticleEvent;
 import lando.systems.ld60.game.combat.Strike;
 import lando.systems.ld60.game.components.Health;
 import lando.systems.ld60.game.components.HealthPickup;
+import lando.systems.ld60.particles.effects.HeartPickupEffect;
 
 /**
  * What a dead enemy leaves on the floor. {@link #health} is a {@code Hurtable.onDeath} callback
@@ -40,8 +44,11 @@ public final class Drops {
     public static boolean heal(Entity fighter, Entity item) {
         var pickup = HealthPickup.get(item);
         var health = Health.get(fighter);
+        var fighterPos = Position.get(fighter);
         if (pickup == null || health == null || !item.isAlive() || item.isRemoving()) return false;
         health.current = Math.min(health.max, health.current + pickup.amount());
+        ParticleEvent.spawn(EmitterType.HEART_PICKUP,
+                new HeartPickupEffect.Params(Position.get(item), Position.get(fighter)), RenderLayer.WORLD);
         item.world().despawn(item);
         Log.info(TAG, "%s healed %d, %d/%d", Name.of(fighter), pickup.amount(), health.current, health.max);
         return true;

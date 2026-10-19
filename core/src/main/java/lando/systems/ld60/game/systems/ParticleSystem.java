@@ -103,6 +103,7 @@ public class ParticleSystem extends IteratingSystem implements Disposable, Signa
 
     @Override
     public void dispose() {
+        ParticleEvent.signal.remove(this);
         clear();
     }
 
