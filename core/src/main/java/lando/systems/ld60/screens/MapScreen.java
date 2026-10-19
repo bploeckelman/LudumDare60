@@ -22,6 +22,7 @@ import lando.systems.ld60.assets.GameMap;
 import lando.systems.ld60.game.FactoryExample;
 import lando.systems.ld60.game.GameContacts;
 import lando.systems.ld60.game.GameMask;
+import lando.systems.ld60.game.GameTags;
 import lando.systems.ld60.game.input.GameKeys;
 import lando.systems.ld60.game.systems.GameInputSystem;
 import lando.systems.ld60.ui.GameDebugViews;
@@ -128,7 +129,7 @@ public abstract class MapScreen extends BaseScreen {
     /** The entity the camera follows; a previous one (a second player object on the map) is despawned. */
     protected void setPlayer(Entity spawned) {
         if (player != null && !player.isRemoving()) {
-            world.despawn(player);
+            player.untag(GameTags.PLAYER);
         }
         player = spawned;
     }

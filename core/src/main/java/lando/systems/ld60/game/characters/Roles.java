@@ -1,5 +1,6 @@
 package lando.systems.ld60.game.characters;
 
+import com.badlogic.gdx.graphics.Color;
 import lando.systems.ld60.game.Drops;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameMask;
@@ -32,7 +33,7 @@ public final class Roles {
             /*body*/ GameMask.PLAYER, /*detects*/ masks(GameMask.TRIGGER, GameMask.PICKUP),
             /*team*/ GameMask.PLAYER, /*targets*/ masks(GameMask.ENEMY),
             PLAYER_TUNING,
-            () -> new Hurtable().hurtState(BrawlerState.HURT).deadState(BrawlerState.DEAD).deathTint(null),
+            () -> new Hurtable().hurtState(BrawlerState.HURT).deadState(BrawlerState.DEAD).deathTint(Color.LIGHT_GRAY),
             Minds.player(),
             /*healthBar*/ false);
 
