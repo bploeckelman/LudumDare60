@@ -19,10 +19,7 @@ import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameFont;
-import lando.systems.ld60.events.AudioEvent;
-import lando.systems.ld60.events.CombatEvent;
-import lando.systems.ld60.events.Signal;
-import lando.systems.ld60.events.SignalListener;
+import lando.systems.ld60.events.*;
 import lando.systems.ld60.game.*;
 import lando.systems.ld60.game.combat.HitboxDraw;
 import lando.systems.ld60.game.movement.BrawlerMotion;
@@ -41,7 +38,7 @@ import lando.systems.ld60.ui.KeepMovingWidget;
  * contacts), spawning the level's objects through {@link Factory}. The scroller example stays
  * as reference; everything the real content needs accumulates here.
  */
-public class GameScreen extends MapScreen implements SignalListener<CombatEvent> {
+public class GameScreen extends MapScreen {
 
     static final int VIEW_WIDTH  = 320 * 2;
     static final int VIEW_HEIGHT = 180 * 2;
@@ -99,7 +96,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         worldCamera.position.set(VIEW_WIDTH / 2f, VIEW_HEIGHT / 2f, 0f);
         worldCamera.update();
 
-        CombatEvent.signal.register(this);
+        CombatEvent.signal.register(this::onCombatEvent);
         AudioEvent.playMusic(level.music);
 
         this.debugViews.add(DebugViews.spine(world));
@@ -234,6 +231,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
     @Override
     public void dispose() {
         televisions.dispose();
+        CombatEvent.signal.remove(this::onCombatEvent);
         super.dispose();
     }
 
@@ -264,8 +262,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         return view;
     }
 
-    @Override
-    public void receive(Signal<CombatEvent> signal, CombatEvent event) {
+    public void onCombatEvent(Signal<CombatEvent> signal, CombatEvent event) {
         Position pos;
         SpineAnimator anim;
         boolean isHumanoid = false;
@@ -281,6 +278,10 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
                 bloodTint = isHumanoid ? Color.RED : Color.BLUE;
                 factory.emitter(EmitterType.BLOOD_SPRAY, new BloodSprayEffect.Params(pos.x, pos.y + 40f, s.strike.away(), bloodTint), RenderLayer.BACKGROUND);
                 factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + -anim.facing * 50f, pos.y, 1, bloodTint), RenderLayer.BACKGROUND);
+
+                // Light trauma for standard hits
+                float hitTrauma = 0.3f;
+                ShakeEvent.trigger(hitTrauma);
                 break;
             case CombatEvent.Died d:
                 pos = Position.get(d.entity);
@@ -289,6 +290,10 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
                 isHumanoid = entityName.equals("hero") || entityName.equals("thug");
                 bloodTint = isHumanoid ? Color.RED : Color.BLUE;
                 factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + -anim.facing * 50f, pos.y, 12, bloodTint), RenderLayer.BACKGROUND);
+
+                // Heavier trauma for a kill
+                ShakeEvent.trigger(0.5f);
+                DistortionEvent.trigger();
                 break;
             default:
                 break;
