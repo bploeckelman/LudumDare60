@@ -167,6 +167,10 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
                 bossLabel.pack(); // forces it to compute its width immediately
                 bossLabel.setPosition(bossWidget.getX() + bossWidget.getWidth() - bossLabel.getWidth(), bossWidget.getY() - 30);
                 bossLabel.setVisible(true);
+
+                // TODO: Change music or other stuff?
+                Log.info("GameScreen", "Boss spawned!");
+
             }
         } else {
             if (bossWidget.isVisible()) {
