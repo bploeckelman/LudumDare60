@@ -1,3 +1,4 @@
+
 package lando.systems.ld60.game.combat;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -12,8 +13,6 @@ import lando.systems.ld60.game.anim.Move;
  * {@code Held} component.
  *
  * @param name        label for logs and the Tiled {@code pickup.weapon} member
- * @param set         the wielder's hit and hurt boxes, with the attack's windows under its clip name
- * @param attack      the basic attack
  * @param thrown      what the thrown item does on a hit; null for a weapon that cannot be thrown
  * @param throwDist   tiles the item flies along the street
  * @param throwHeight tiles the item arcs up
@@ -22,8 +21,6 @@ import lando.systems.ld60.game.anim.Move;
  */
 public record Weapon(
         String name,
-        HitboxSet set,
-        Move attack,
         Hitbox.Attack thrown,
         float throwDist,
         float throwHeight,
@@ -31,14 +28,12 @@ public record Weapon(
         TextureRegion region
 ) {
     public Weapon {
-        if (name == null || set == null || attack == null) {
-            throw new GdxRuntimeException("Weapon: name, set and attack must be non-null");
-        }
+        if (name == null) throw new GdxRuntimeException("Weapon: name must be non-null");
     }
 
-    /** Hands, or a weapon welded to the fighter: fights with {@code set}, cannot be thrown or lost. */
-    public static Weapon fixed(String name, HitboxSet set, Move attack) {
-        return new Weapon(name, set, attack, null, 0, 0, 0, null);
+    /** Hands, or a weapon welded to the fighter: cannot be thrown or lost. */
+    public static Weapon fixed(String name) {
+        return new Weapon(name, null, 0, 0, 0, null);
     }
 
     public boolean throwable() { return thrown != null; }
@@ -46,6 +41,6 @@ public record Weapon(
 
     /** A copy with a picture. */
     public Weapon region(TextureRegion region) {
-        return new Weapon(name, set, attack, thrown, throwDist, throwHeight, durability, region);
+        return new Weapon(name, thrown, throwDist, throwHeight, durability, region);
     }
 }

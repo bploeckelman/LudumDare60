@@ -13,6 +13,7 @@ import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameMask;
 import lando.systems.ld60.game.GameTags;
 import lando.systems.ld60.game.anim.Move;
+import lando.systems.ld60.game.components.Fighter;
 import lando.systems.ld60.game.components.Held;
 import lando.systems.ld60.game.components.Hitboxes;
 import lando.systems.ld60.game.components.Pickup;
@@ -34,10 +35,10 @@ public final class Weapons {
 
     private Weapons() {}
 
-    /** The basic attack of whatever the fighter holds; null for a fighter without {@link Held}. */
+    /** The basic attack of whatever the fighter holds, the way its kind swings; null for a fighter without {@link Held}. */
     public static Move attackOf(Entity e) {
-        var held = Held.get(e);
-        return (held == null) ? null : held.weapon.attack();
+        var wield = Fighter.wieldOf(e);
+        return (wield == null) ? null : wield.attack();
     }
 
     /** The pickup entity the fighter stands over (its contacts this tick), null when none. */
@@ -55,10 +56,20 @@ public final class Weapons {
     public static boolean pickUp(Entity fighter, Entity item) {
         var held = Held.get(fighter);
         var pickup = Pickup.get(item);
-        if (held == null || pickup == null || !item.isAlive() || item.isRemoving()) return false;
+        if (held == null || pickup == null || !item.isAlive() || item.isRemoving()) {
+            return false;
+        }
+
+        var kind = Fighter.get(fighter);
+        if (kind != null && !kind.kind.canWield(pickup.weapon())) {
+            Log.info(TAG, "%s cannot use a %s", Name.of(fighter), pickup.weapon().name());
+            return false;
+        }
+
         if (held.armed()) drop(fighter);
         arm(fighter, held, pickup.weapon());
         item.world().despawn(item);
+
         Log.info(TAG, "%s picked up %s", Name.of(fighter), pickup.weapon().name());
         return true;
     }
@@ -99,9 +110,11 @@ public final class Weapons {
     private static void arm(Entity fighter, Held held, Weapon weapon) {
         held.weapon = weapon;
         held.hits = 0;
+        // the boxes are the kind's for this weapon (an entity that is not a fighter keeps what it has)
         var boxes = Hitboxes.get(fighter);
-        if (boxes != null) {
-            boxes.set = weapon.set();
+        var kind = Fighter.get(fighter);
+        if (boxes != null && kind != null && kind.kind.wield(weapon) != null) {
+            boxes.set = kind.kind.wield(weapon).set();
         }
         // a rig with a 'weapon' slot shows the held item: the attachment named after the weapon, nothing when unarmed or unknown
         var spine = SpineAnimator.get(fighter);
@@ -186,10 +199,9 @@ public final class Weapons {
     /** The weapon's picture, or a tinted pixel block when it has none; null headless. */
     private static Image image(Weapon weapon, Color tint) {
         var region = weapon.region();
-        if (region == null) {
+        if (region == null && GameAtlas.SPRITES.asset().isLoaded()) {
             // try to find the region in the sprite atlas if not already set on the weapon
-            var atlas = GameAtlas.SPRITES.get();
-            region = atlas.findRegion("weapons/" + weapon.name());
+            region = GameAtlas.SPRITES.get().findRegion("weapons/" + weapon.name());
         }
         if (region != null) {
             var image = new Image(region);

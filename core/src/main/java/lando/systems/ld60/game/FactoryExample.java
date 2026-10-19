@@ -23,7 +23,10 @@ import com.zendogames.zenlib.ecs.movement.topdown.TopDownTuning;
 import com.zendogames.zenlib.input.InputControls;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import lando.systems.ld60.assets.GameSpine;
+import lando.systems.ld60.game.ai.Minds;
 import lando.systems.ld60.game.anim.AnimClip;
+import lando.systems.ld60.game.characters.Roles;
+import lando.systems.ld60.game.characters.Spineboy;
 import lando.systems.ld60.game.combat.Weapons;
 import lando.systems.ld60.game.components.*;
 import lando.systems.ld60.game.input.GameControls;
@@ -241,7 +244,7 @@ public final class FactoryExample {
                 .hurtState(BrawlerState.HURT)
                 .deadState(BrawlerState.DEAD)
                 .deathTint(null); // the death clip is the look
-        var boxes = new Hitboxes(GameWeapons.BLASTER.set(), GameMask.PLAYER, GameMask.ENEMY);
+        var boxes = new Hitboxes(GameHitboxes.SPINEBOY, GameMask.PLAYER, GameMask.ENEMY);
         boxes.onStrike = (e, strike) -> Weapons.wear(e);
 
         var anim = new SpineAnimator(GameSpine.SPINEBOY, "idle");
@@ -430,6 +433,7 @@ public final class FactoryExample {
                 .add(new Behavior(BrawlerState.NORMAL))
                 .add(new Mover(new BrawlerMotion(BRAWLER_PLAYER_TUNING)))
                 .add(new Hitboxes(GameHitboxes.SPINEBOY, GameMask.ENEMY, GameMask.PLAYER))
+                .add(new Fighter(Spineboy.KIND, Roles.thug(Minds.none()))) // BrawlerState.ATTACK plays the kind's wield for what it holds
                 .add(new Hurtable().despawnAfter(1.5f).onDeath((e, strike) -> Timers.get(e).cancel("attack")))
                 .add(timers)
                 .add(anim)

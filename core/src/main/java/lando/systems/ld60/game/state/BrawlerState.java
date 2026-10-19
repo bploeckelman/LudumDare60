@@ -11,6 +11,7 @@ import lando.systems.ld60.game.anim.AnimClip;
 import lando.systems.ld60.game.anim.Move;
 import lando.systems.ld60.game.combat.Weapons;
 import lando.systems.ld60.game.components.BrawlerAnimClips;
+import lando.systems.ld60.game.components.Fighter;
 import lando.systems.ld60.game.components.GameInput;
 import lando.systems.ld60.game.components.Hurtable;
 import lando.systems.ld60.game.movement.BrawlerMotion;
@@ -34,10 +35,14 @@ public enum BrawlerState implements State<Entity> {
 
             var buttons = GameInput.get(e);
             if (buttons.attack.pressed) {
-                if (Input.get(e).moveY < 0) { // down + attack: pickup what is underfoot, else a crouching swing is just a swing
+                if (Input.get(e).moveY < 0) { // down + attack: pickup what is underfoot, else the low move (a kick) if this wield has one
                     var item = Weapons.under(e);
                     if (item != null && Weapons.pickUp(e, item)) {
                         return this;
+                    }
+                    var wield = Fighter.wieldOf(e);
+                    if (wield != null && wield.low() != null) {
+                        return begin(e, wield.low());
                     }
                 }
                 return (attackOf(e) != null) ? ATTACK : this;
@@ -48,18 +53,20 @@ public enum BrawlerState implements State<Entity> {
             return this;
         }
     },
-    /** Stands and plays the held weapon's attack through; the hit boxes come from its windows. */
+    /** Stands and plays the chosen move ({@code Fighter.move}) through; the hit boxes come from its windows. */
     ATTACK {
         @Override
         public void enter(StateMachine<Entity> m, Entity e) {
             Mover.get(e).stop();
-            attackOf(e).start(e);
+            var move = current(e);
+            if (move != null) move.start(e);
         }
 
         @Override
         public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
             hold(e);
-            return attackOf(e).playing(e) ? this : NORMAL;
+            var move = current(e);
+            return (move != null && move.playing(e)) ? this : NORMAL;
         }
     },
     /** The weapon left the hand on the way in ({@code NORMAL}); plays the throw clip (the attack's) through. */
@@ -120,6 +127,19 @@ public enum BrawlerState implements State<Entity> {
     @Override
     public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
         return this;
+    }
+
+    /** Records {@code move} as the one {@link #ATTACK} plays. */
+    static State<Entity> begin(Entity e, Move move) {
+        var fighter = Fighter.get(e);
+        if (fighter != null) fighter.move = move;
+        return ATTACK;
+    }
+
+    /** The move in progress, else the basic attack (an entity without a {@code Fighter}). */
+    static Move current(Entity e) {
+        var fighter = Fighter.get(e);
+        return (fighter != null && fighter.move != null) ? fighter.move : attackOf(e);
     }
 
     /** The held weapon's attack, else the clips' basic attack, else null (a fighter that cannot attack). */

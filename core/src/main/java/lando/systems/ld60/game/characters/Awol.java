@@ -1,26 +1,30 @@
 package lando.systems.ld60.game.characters;
 
 import com.badlogic.gdx.math.Rectangle;
-import com.zendogames.zenlib.collision.CollisionMask;
-import com.zendogames.zenlib.collision.shapes.CollisionCaps;
-import com.zendogames.zenlib.ecs.components.Collider;
-import com.zendogames.zenlib.ecs.components.Input;
+import com.zendogames.zenlib.Log;
+import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
-import com.zendogames.zenlib.ecs.components.Timers;
+import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameSpine;
+import lando.systems.ld60.assets.SoundType;
+import lando.systems.ld60.events.AudioEvent;
 import lando.systems.ld60.game.Factory;
-import lando.systems.ld60.game.GameMask;
+import lando.systems.ld60.game.GameWeapons;
 import lando.systems.ld60.game.anim.AnimClip;
 import lando.systems.ld60.game.anim.Move;
 import lando.systems.ld60.game.combat.Hitbox;
 import lando.systems.ld60.game.combat.HitboxSet;
-import lando.systems.ld60.game.combat.Weapon;
 import lando.systems.ld60.game.components.BrawlerAnimClips;
-import lando.systems.ld60.game.components.Hitboxes;
-import lando.systems.ld60.game.components.Hurtable;
-import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.movement.BrawlerTuning;
+import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
+import java.util.Map;
+
+/**
+ * The AWOL fighter (the disc with gloves, {@code docs/spine/}): everything about the character
+ * and nothing about who it is for. {@link Props} is the authored data, the methods below build
+ * the components from it, {@link #KIND} is what the factory spawns.
+ */
 public final class Awol {
 
     private Awol() {}
@@ -28,6 +32,7 @@ public final class Awol {
     public static class Props {
         // Misc ---------------------------------------------------------------
         public static final int maxHealth = 10;
+        public static final float scale   = 0.35f; // TODO: might be a little small, test 0.5f
         // Movement tuning ----------------------------------------------------
         public static final int   unit           = Factory.UNIT; // authoring unit (tiles) -> pixels
         public static final int   speedX         = 6;    // tiles/sec
@@ -36,7 +41,7 @@ public final class Awol {
         public static final float stopTime       = 0.1f; // sec
         public static final float jumpHeight     = 2.0f; // tiles
         public static final float jumpTimeToPeak = 0.5f; // sec
-        // Animation ----------------------------------------------------------
+        // Animation: the clip names in the rig -------------------------------
         public static final GameSpine spineAnim  = GameSpine.AWOL;
         public static final String deathAnim     = "death";
         public static final String hurtAnim      = "hurt";
@@ -50,36 +55,23 @@ public final class Awol {
         public static final String throwAnim     = "throw";
         public static final String walkAnim      = "walk";
         public static final String initialAnim   = idleAnim;
-        public static final AnimClip flinchClip  = AnimClip.spine(hurtAnim);
-        public static final AnimClip punchClip   = AnimClip.spine(punchAnim);
-        public static final AnimClip kickClip    = AnimClip.spine(kickAnim);
-        public static final AnimClip swingClip   = AnimClip.spine(swingAnim);
-        // Durations / Timers -------------------------------------------------
-        public static final float despawnAfter = 2.0f; // sec
-        public static final String thinkTimer  = "think";
         // Collision ----------------------------------------------------------
-        public static final Rectangle       colliderBounds = new Rectangle(-18, 0, 36, 12);
-        public static final CollisionMask[] blockedByMasks = new CollisionMask[] { GameMask.SOLID };
-        public static final CollisionMask[] detectsMasks   = new CollisionMask[] { GameMask.PICKUP };
-        // Attacks / Hit, Hurt boxes ------------------------------------------
+        public static final Rectangle feet = new Rectangle(-18, 0, 36, 12);
+        // Attacks / Hit, Hurt boxes (drawn pixels at `scale`; windows in seconds into the clip) --
         public static final Hitbox.Attack attackPunch = Hitbox.attack(/*damage*/ 1, /*knockback*/ 4, /*height*/ 3);
         public static final Hitbox.Attack attackKick  = Hitbox.attack(/*damage*/ 2, /*knockback*/ 5, /*height*/ 2);
         public static final Hitbox.Attack attackPipe  = Hitbox.attack(/*damage*/ 2, /*knockback*/ 2, /*height*/ 1);
-        public static final Hitbox.Attack attackThrow = Hitbox.attack(/*damage*/ 2, /*knockback*/ 3, /*height*/ 1);
-        public static final Hitbox    hitboxPunch = Hitbox.hit("punch", Hitbox.circ(0,  0,  9),    Props.attackPunch).on("front-fist");
-        public static final Hitbox    hitboxKick  = Hitbox.hit("kick",  Hitbox.circ(0,  0, 10),    Props.attackKick) .on("front-toe");
-        public static final Hitbox    hitboxSwing = Hitbox.hit("swing", Hitbox.rect(0, -4, 24, 8), Props.attackPipe) .on("weapon");
-        public static final Hitbox    hurtboxBody = Hitbox.hurt("body", Hitbox.circ(0,  0, 25)).on("body");
-        public static final HitboxSet hitboxSet   = new HitboxSet().base(hurtboxBody)
-                .window(/*clip*/ "punch", /*start*/ 0.23f, /*end*/ 0.37f, /*boxes*/ Props.hitboxPunch)
-                .window(/*clip*/ "kick",  /*start*/ 0.23f, /*end*/ 0.37f, /*boxes*/ Props.hitboxKick);
-        public static final Weapon unarmedWeapon = Weapon.fixed("punch", hitboxSet, Move.of(punchClip));
-        public static final Move   kickWeapon    = Move.of(kickClip); // TODO: this is a little janky, stuff isn't built for two unarmed attacks at the moment
-        public static final Weapon pipeWeapon    = new Weapon("pipe",
-                new HitboxSet()
-                        .base(hurtboxBody)
-                        .window(/*clip*/ "swing", /*start*/ 0.27f, /*end*/ 0.42f, /*boxes*/ hitboxSwing),
-                Move.of(swingClip), /*thrown*/ attackThrow, /*dist*/ 6f, /*height*/ 1.5f, /*durability*/ 5, /*region*/ null);
+        public static final Hitbox hitboxPunch = Hitbox.hit("punch", Hitbox.circ(0,  0,  9),    attackPunch).on("front-fist");
+        public static final Hitbox hitboxKick  = Hitbox.hit("kick",  Hitbox.circ(0,  0, 10),    attackKick) .on("front-toe");
+        public static final Hitbox hitboxSwing = Hitbox.hit("swing", Hitbox.rect(0, -4, 24, 8), attackPipe) .on("weapon");
+        public static final Hitbox hurtboxBody = Hitbox.hurt("body", Hitbox.circ(0,  0, 25)).on("body");
+        /** Bare hands: the jab and the kick, held extended (frames 7 to 11 of 16). */
+        public static final HitboxSet fistsSet = new HitboxSet().base(hurtboxBody)
+                .window(punchAnim, /*start*/ 0.23f, /*end*/ 0.37f, hitboxPunch)
+                .window(kickAnim,  /*start*/ 0.23f, /*end*/ 0.37f, hitboxKick);
+        /** The pipe: the chop, held at the bottom (frames 8 to 12.5 of 18). */
+        public static final HitboxSet pipeSet = new HitboxSet().base(hurtboxBody)
+                .window(swingAnim, /*start*/ 0.27f, /*end*/ 0.42f, hitboxSwing);
     }
 
     public static final BrawlerTuning tuning = new BrawlerTuning(
@@ -92,55 +84,54 @@ public final class Awol {
             Props.jumpTimeToPeak
     );
 
-    public static BrawlerMotion motion(int facing) {
-        var motion = new BrawlerMotion(tuning);
-        motion.facing = facing;
-        return motion;
-    }
-
-    public static BrawlerAnimClips animClips() {
-        var clips = new BrawlerAnimClips(
-                AnimClip.spine(Props.idleAnim),
-                AnimClip.spine(Props.walkAnim),
-                AnimClip.spine(Props.runAnim),
-                AnimClip.spine(Props.jumpAnim),
-                tuning.maxSpeedX());
-        return clips
-                .hurt(AnimClip.spine(Props.knockbackAnim))
-                .dead(AnimClip.spine(Props.deathAnim))
-                .throwing(AnimClip.spine(Props.throwAnim));
-    }
-
-    public static SpineAnimator animator(int facing) {
-        var s = 0.35f; // TODO: might be a little small, test 0.5f
+    static SpineAnimator animator(int facing) {
         var anim = new SpineAnimator(Props.spineAnim, Props.initialAnim);
-        anim.defaultScale.set(s, s);
-        anim.scale.set(s, s);
+        anim.defaultScale.set(Props.scale, Props.scale);
+        anim.scale.set(Props.scale, Props.scale);
         anim.facing = facing;
         return anim;
     }
 
-    public static Collider collider() {
-        return Collider.capsule(GameMask.ENEMY, Props.colliderBounds, CollisionCaps.Axis.HORIZONTAL)
-                .blockedBy(Props.blockedByMasks)
-                .detects(Props.detectsMasks);
+    static BrawlerAnimClips animClips() {
+        return new BrawlerAnimClips(
+                AnimClip.spine(Props.idleAnim),
+                AnimClip.spine(Props.walkAnim),
+                AnimClip.spine(Props.runAnim),
+                AnimClip.spine(Props.jumpAnim),
+                tuning.maxSpeedX())
+                .hurt(AnimClip.spine(Props.knockbackAnim))   // thrown through the air
+                .flinch(AnimClip.spine(Props.hurtAnim))      // shoved along the floor
+                .dead(AnimClip.spine(Props.deathAnim))
+                .throwing(AnimClip.spine(Props.throwAnim));
     }
 
-    public static Hurtable hurtable(BrawlerMotion motion, Timers timers) {
-        return new Hurtable().despawnAfter(Props.despawnAfter)
-                .onHurt((entity, strike) -> {
-                    // shoved along the floor: flinch (present system doesn't change clips it doesn't own until they complete)
-                    if (motion.grounded) {
-                        Props.flinchClip.start(entity, false);
-                    }
-                })
-                .onDeath((entity, strike) -> {
-                    timers.cancel(Props.thinkTimer);
-                    Input.get(entity).reset();
-                });
+    /** After spawn: the rig's "footstep" to a dust emitter, every event logged, stand-in sounds until there are real ones. */
+    static void dress(Factory factory, Entity e) {
+        factory.emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(e));
+        SpineAnimator.get(e).onEvent(event -> {
+            var name = event.getData().getName();
+            Log.info("awol", "event '%s' at %.2fs of '%s'", name, event.getTime(), AnimClip.current(e));
+            switch (name) {
+                case "footstep" -> AudioEvent.playSound(SoundType.BELL_LOW);  // TODO: change me
+                case "hurt"     -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (or remove, see default)
+                case "jump"     -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (or remove, see default)
+                case "swing"    -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (swing a weapon)
+                case "throw"    -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (throw a weapon)
+                case "thud"     -> AudioEvent.playSound(SoundType.BELL_LOW);  // TODO: change me (hit ground on death)
+                default -> {} // a landed hit is better heard from CombatEvent, which knows whether a glove connected
+            }
+        });
     }
 
-    public static Hitboxes hitboxes() {
-        return new Hitboxes(Props.unarmedWeapon.set(), GameMask.ENEMY, GameMask.PLAYER);
-    }
+    public static final Kind KIND = new Kind("awol",
+            tuning,
+            Props.maxHealth,
+            Props.feet,
+            Awol::animator,
+            Awol::animClips,
+            GameWeapons.FISTS,
+            Map.of(
+                    GameWeapons.FISTS.name(), new Wield(Props.fistsSet, Move.of(AnimClip.spine(Props.punchAnim)), /*low*/ Move.of(AnimClip.spine(Props.kickAnim))),
+                    GameWeapons.PIPE.name(),  Wield.of(Props.pipeSet, Move.of(AnimClip.spine(Props.swingAnim)))),
+            Awol::dress);
 }

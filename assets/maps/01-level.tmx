@@ -55,14 +55,26 @@
     <property name="kind" value="awol"/>
    </properties>
   </object>
-  <object id="4" name="thug" type="enemy" gid="52" x="752" y="384" width="16" height="16"/>
+  <object id="4" name="awol" type="enemy" gid="52" x="752" y="384" width="16" height="16">
+   <properties>
+    <property name="kind" value="awol"/>
+   </properties>
+  </object>
   <object id="5" name="wall" type="wall" gid="161" x="0" y="448" width="4" height="112"/>
   <object id="6" name="wall" type="wall" gid="161" x="4860" y="448" width="4" height="128"/>
   <object id="7" name="wall" type="wall" gid="161" x="4" y="448" width="4856" height="4"/>
   <object id="8" name="television" type="television" gid="165" x="368" y="260" width="280" height="240"/>
   <object id="9" name="television" type="television" gid="165" x="3428" y="116" width="340" height="252"/>
-  <object id="18" name="thug" type="enemy" gid="52" x="1516" y="378.667" width="16" height="16"/>
-  <object id="19" name="thug" type="enemy" gid="52" x="2072" y="364" width="16" height="16"/>
+  <object id="18" name="spineboy" type="enemy" gid="52" x="1516" y="378.667" width="16" height="16">
+   <properties>
+    <property name="kind" value="spineboy"/>
+   </properties>
+  </object>
+  <object id="19" name="awol" type="enemy" gid="52" x="2072" y="364" width="16" height="16">
+   <properties>
+    <property name="kind" value="awol"/>
+   </properties>
+  </object>
   <object id="20" name="awol" type="enemy" gid="52" x="2870.67" y="366.667" width="16" height="16">
    <properties>
     <property name="kind" value="awol"/>
@@ -73,15 +85,31 @@
     <property name="kind" value="awol"/>
    </properties>
   </object>
-  <object id="22" name="thug" type="enemy" gid="52" x="4378.67" y="310.667" width="16" height="16"/>
+  <object id="22" name="spineboy" type="enemy" gid="52" x="4378.67" y="310.667" width="16" height="16">
+   <properties>
+    <property name="kind" value="spineboy"/>
+   </properties>
+  </object>
   <object id="26" name="n64Boss" type="enemy" gid="52" x="4708" y="289.667" width="32" height="32">
    <properties>
     <property name="kind" value="n64Boss"/>
    </properties>
   </object>
-  <object id="27" name="thug" type="enemy" gid="52" x="4594.67" y="270.667" width="16" height="16"/>
-  <object id="28" name="thug" type="enemy" gid="52" x="4597.33" y="360" width="16" height="16"/>
-  <object id="29" name="thug" type="enemy" gid="52" x="2541.33" y="374.667" width="16" height="16"/>
+  <object id="27" name="spineboy" type="enemy" gid="52" x="4594.67" y="270.667" width="16" height="16">
+   <properties>
+    <property name="kind" value="spineboy"/>
+   </properties>
+  </object>
+  <object id="28" name="spineboy" type="enemy" gid="52" x="4597.33" y="360" width="16" height="16">
+   <properties>
+    <property name="kind" value="spineboy"/>
+   </properties>
+  </object>
+  <object id="29" name="spineboy" type="enemy" gid="52" x="2541.33" y="374.667" width="16" height="16">
+   <properties>
+    <property name="kind" value="spineboy"/>
+   </properties>
+  </object>
   <object id="30" name="awol" type="enemy" gid="52" x="2662.67" y="366.667" width="16" height="16">
    <properties>
     <property name="kind" value="awol"/>

@@ -27,7 +27,7 @@ public class BrawlerAnimClips implements Component {
 
     public final AnimClip idle, walk, run, jump;
 
-    public AnimClip hurt, dead, stop, throwing;
+    public AnimClip hurt, dead, stop, throwing, flinch;
     public Move attack;
 
     /** Speed in px/s at and above which the run clip plays instead of walk. */
@@ -45,6 +45,7 @@ public class BrawlerAnimClips implements Component {
     public BrawlerAnimClips dead(AnimClip clip)     { this.dead     = clip; return this; }
     public BrawlerAnimClips stop(AnimClip clip)     { this.stop     = clip; return this; }
     public BrawlerAnimClips throwing(AnimClip clip) { this.throwing = clip; return this; }
+    public BrawlerAnimClips flinch(AnimClip clip)   { this.flinch   = clip; return this; }
     public BrawlerAnimClips attack(Move move)       { this.attack   = move; return this; }
 
     public AnimClip hurtOrJump() { return (hurt != null) ? hurt : jump; }

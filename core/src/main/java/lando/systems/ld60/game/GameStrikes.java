@@ -6,6 +6,7 @@ import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.*;
 import lando.systems.ld60.events.CombatEvent;
 import lando.systems.ld60.game.combat.Strike;
+import lando.systems.ld60.game.components.BrawlerAnimClips;
 import lando.systems.ld60.game.components.Health;
 import lando.systems.ld60.game.components.Hitboxes;
 import lando.systems.ld60.game.components.Hurtable;
@@ -68,6 +69,13 @@ public class GameStrikes implements Strike.Responder {
         if (health != null && health.isDead()) {
             if (!hurtable.dead) die(target, strike, hurtable, boxes, timers);
             return;
+        }
+
+        // a hit that left it on the floor: the flinch clip, if its clips have one (it plays through, the present system does not own it)
+        var clips = BrawlerAnimClips.get(target);
+        if (clips != null && clips.flinch != null && Mover.has(target)
+         && Mover.get(target).motion instanceof BrawlerMotion motion && motion.grounded) {
+            clips.flinch.start(target, false);
         }
 
         if (hurtable.recoverTime > 0) {
