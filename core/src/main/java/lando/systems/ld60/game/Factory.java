@@ -68,6 +68,7 @@ public class Factory {
     public static final String ENEMY      = "enemy";  // scroller: a thug (member 'kind' picks which, 'weapon' arms it)
     public static final String PICKUP     = "pickup"; // scroller: a weapon on the floor (member 'weapon')
     public static final String TELEVISION = "television"; // scroller: a region where the game world framebuffer is rendered back into for a "watch yourself play" effect
+    public static final String STAGE_MARKER = "stage";
 
     public static final List<String> ENEMY_KINDS = List.of("thug", /*TEMP: testing*/ "awol");
 

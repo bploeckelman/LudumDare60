@@ -323,9 +323,31 @@
                     "propertyType": "direction",
                     "type": "string",
                     "value": "up"
+                },
+                {
+                    "name": "stage_num",
+                    "type": "int",
+                    "value": 0
                 }
             ],
             "name": "spike",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
+            "color": "#ffff0571",
+            "drawFill": true,
+            "id": 21,
+            "members": [
+                {
+                    "name": "stage_num",
+                    "type": "int",
+                    "value": -1
+                }
+            ],
+            "name": "stage",
             "type": "class",
             "useAs": [
                 "object"

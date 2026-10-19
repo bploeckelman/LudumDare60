@@ -3,7 +3,9 @@ package lando.systems.ld60.screens;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Rectangle;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
+import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.Time;
 import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.collision.ContactResponder;
@@ -12,6 +14,7 @@ import com.zendogames.zenlib.ecs.Family;
 import com.zendogames.zenlib.ecs.components.Mover;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
+import com.zendogames.zenlib.ecs.components.Tilemap;
 import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.render.WorldView;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
@@ -27,6 +30,7 @@ import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HealthBarSystem;
 import lando.systems.ld60.game.systems.HitSystem;
+import lando.systems.ld60.game.systems.LevelControlSystem;
 import lando.systems.ld60.particles.effects.BloodSprayEffect;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
@@ -47,6 +51,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
     final SkeletonRendererDebug skeletonDebug;
     final HitSystem hitSystem;
     final TelevisionFeed televisions;
+    final LevelControlSystem levelControl; // Add this reference
 
     public boolean debugRender  = false;
     public boolean showHitboxes = false;
@@ -64,15 +69,20 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         this.hitSystem = new HitSystem(new GameStrikes());
         this.televisions = new TelevisionFeed(VIEW_WIDTH / 2, VIEW_HEIGHT / 2);
         this.televisions.clearColor.set(worldView.clearColor);
+
+        this.levelControl = new LevelControlSystem(this, obj -> factory.enemy(obj));
+
         world.addSystem(new BrawlerPresentSystem());
         world.addSystem(hitSystem);
         world.addSystem(new HealthBarSystem());
+        world.addSystem(levelControl);
 
         spawner .on(Factory.PLAYER,     (map, obj) -> spawnPlayer(factory.hero(obj)))
                 .on(Factory.WALL,       (map, obj) -> factory.wall(obj))
-                .on(Factory.ENEMY,      (map, obj) -> factory.enemy(obj))
+                .on(Factory.ENEMY,      (map, obj) -> levelControl.queueEnemy(obj)) // Defer spawning
                 .on(Factory.PICKUP,     (map, obj) -> factory.pickup(obj))
                 .on(Factory.TELEVISION, (map, obj) -> factory.television(obj, televisions))
+                .on(Factory.STAGE_MARKER,            (map, obj) -> {}) // Safely ignore stage markers
         ;
 
         buildLevel();
@@ -111,6 +121,27 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
     /** -1/+1 pointing from the player to {@code e}; +1 when there is no player. */
     private int awayFromPlayer(Entity e) {
         return (player != null && Position.get(player).x > Position.get(e).x) ? -1 : 1;
+    }
+
+    @Override
+    protected void buildLevel() {
+        world.clear();
+
+        player = null;
+        tilemap = new Tilemap(map.get());
+        tilemap.spawn(world, GameMask.SOLID, batch, worldCamera);
+        cameraFollow.bounds = new Rectangle(0, 0, tilemap.width(), tilemap.height());
+
+        // Notify the control system to prepare tracking, then execute the spawns
+        levelControl.startLevel(tilemap);
+        spawner.spawnAll(tilemap);
+        levelControl.finishSpawning();
+
+        mapCenter.set(tilemap.width() / 2f, tilemap.height() / 2f);
+        if (player != null) cameraFollow.follow(player, /*snap*/ true);
+
+        Log.info("GameScreen", "built level: %dx%d tiles, %d layers, %d objects, player %s",
+            tilemap.cols, tilemap.rows, tilemap.layers.size, tilemap.objects.size, player == null ? "none" : player.toString());
     }
 
     /** In a brawler only hits hurt; contacts are for pickups and triggers. */

@@ -46,10 +46,10 @@ public abstract class MapScreen extends BaseScreen {
     final Vector2 mapCenter;
     final HeldKeys keys;
     final ContactSystem contactSystem;
-    final CameraFollow cameraFollow;
+    public final CameraFollow cameraFollow;
     final MapObjectSpawner spawner;
 
-    Entity player;
+    public Entity player;
     Tilemap tilemap;
 
     protected MapScreen(ZenGame game, GameMap map) {
