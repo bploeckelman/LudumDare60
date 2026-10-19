@@ -40,8 +40,9 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
 
     @Override
     protected void init() {
-
         prefs = Gdx.app.getPreferences(Config.preferencesName);
+
+        GameFlags.INVULNERABILITY.set(prefs.getBoolean("invulnerability", false));
         //ZenFlag.LOG_DEBUG.enable();
         //ZenFlag.LOG_INPUT.enable();
         //ZenFlag.DEBUG_FRAME_POOL.enable();

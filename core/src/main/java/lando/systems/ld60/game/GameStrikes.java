@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.*;
+import lando.systems.ld60.GameFlags;
 import lando.systems.ld60.events.CombatEvent;
 import lando.systems.ld60.game.combat.Strike;
 import lando.systems.ld60.game.components.BrawlerAnimClips;
@@ -61,7 +62,11 @@ public class GameStrikes implements Strike.Responder {
             motion.launch(Mover.get(target), away, attack.knockback() * hurtable.knockback, attack.height() * hurtable.knockback);
         }
         if (health != null) {
-            health.current -= attack.damage();
+            var isTargetPlayer = target.hasTag(GameTags.PLAYER);
+            var isInvulnerable = isTargetPlayer && GameFlags.INVULNERABILITY.on();
+            if (!isInvulnerable) {
+                health.current -= attack.damage();
+            }
         }
         hurtable.lastStrike = strike;
         hurtable.hits++;

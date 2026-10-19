@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.kotcrab.vis.ui.widget.VisLabel;
@@ -28,6 +29,7 @@ public class SettingsUI extends VisWindow {
 
     public boolean isVisible = false;
     public VisCheckBox crtShaderCheckBox;
+    public VisCheckBox invulnerabilityCheckBox;
     public ControllerSlider musicSlider;
     public ControllerSlider soundSlider;
     public VisTextButton closeButton;
@@ -63,7 +65,19 @@ public class SettingsUI extends VisWindow {
                 crtShaderCheckBox.setChecked(prefs.getBoolean("crtShader", true));
             }
         });
+        this.invulnerabilityCheckBox = new VisCheckBox("Invulnerability");
+        invulnerabilityCheckBox.setChecked(prefs.getBoolean("invulnerability", false));
+        invulnerabilityCheckBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                prefs.putBoolean("invulnerability", invulnerabilityCheckBox.isChecked());
+                prefs.flush();
+                GameFlags.INVULNERABILITY.set(prefs.getBoolean("invulnerability", false));
+                invulnerabilityCheckBox.setChecked(prefs.getBoolean("invulnerability", false));
+            }
+        });
         add(crtShaderCheckBox).row();
+        add(invulnerabilityCheckBox).row();
 
         var musicLabel = new VisLabel("Music");
         add().height(10f).row();

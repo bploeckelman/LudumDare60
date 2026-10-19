@@ -6,7 +6,8 @@ import static com.zendogames.zenlib.Flag.Kind.DEBUG;
 import static com.zendogames.zenlib.Flag.Kind.FEATURE;
 
 public enum GameFlags implements Flag {
-    CRT_SHADER           (true,  FEATURE) // master switch
+      CRT_SHADER      (true,  FEATURE)
+    , INVULNERABILITY (false, FEATURE)
     ;
 
     private final Kind kind;
