@@ -1,5 +1,7 @@
 package lando.systems.ld60.ui;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -17,15 +19,22 @@ public class KeepMovingWidget  extends Widget {
     private static float SHAKEAMOUNT = 30;
     private static float MARGIN = 30;
 
+    public int lastPlayedSoundIndex = 0;
 
     public enum GoPrompt {
-        GO_RIGHT("GO RIGHT!", SoundType.BELL_HIGH), // Replace with actual voice lines or sfx
-        MOVE_IT("MOVE IT!", SoundType.BELL_LOW),
-        AREA_CLEAR("AREA CLEAR!", SoundType.BELL_HIGH),
-        KEEP_GOING("KEEP GOING!", SoundType.BELL_LOW);
+//        GO_RIGHT("GO RIGHT!", SoundType.BELL_HIGH), // Replace with actual voice lines or sfx
+//        MOVE_IT("MOVE IT!", SoundType.BELL_LOW),
+//        AREA_CLEAR("AREA CLEAR!", SoundType.BELL_HIGH),
+//        KEEP_GOING("KEEP GOING!", SoundType.BELL_LOW),
+        ONWARD("Onward!", SoundType.ONWARD),
+        LETSGO("Let's Go!", SoundType.LETSGO),
+        DAMN_SON("Well Done!", SoundType.DAMN_SON),
+        FIGHT_MORE("Fight (more)!", SoundType.FIGHT_MORE),
+        ;
 
         public final String text;
         public final SoundType sound;
+
 
         GoPrompt(String text, SoundType sound) {
             this.text = text;
@@ -55,14 +64,14 @@ public class KeepMovingWidget  extends Widget {
 
         // Only roll a new prompt and play the sound when turning ON
         if (visible && !wasVisible) {
-            currentPrompt = GoPrompt.random();
+
             waitTimer = 0f;
 
             // Start the typing animation with the new text
             typingLabel.restart("{SPEED=1.5}" + currentPrompt.text);
 
             if (currentPrompt.sound != null) {
-                AudioEvent.playSound(currentPrompt.sound);
+                AudioEvent.playSound(currentPrompt.sound, .5f);
             }
         }
     }
@@ -71,6 +80,7 @@ public class KeepMovingWidget  extends Widget {
     public void act(float delta) {
         super.act(delta);
         accum += delta;
+
 
         if (isVisible() && currentPrompt != null) {
             typingLabel.act(delta);
@@ -90,6 +100,7 @@ public class KeepMovingWidget  extends Widget {
     public void draw(Batch batch, float parentAlpha) {
         float x = Config.windowWidth - (SIZE + SHAKEAMOUNT + MARGIN);
         float y = Config.windowHeight / 2 - SIZE / 2f;
+
 
         // Calculate the shaken X coordinate once so the text and arrow move perfectly together
         float drawX = x + MathUtils.cos(accum * 6f) * SHAKEAMOUNT;
