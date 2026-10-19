@@ -64,7 +64,7 @@ public class KeepMovingWidget  extends Widget {
 
         // Only roll a new prompt and play the sound when turning ON
         if (visible && !wasVisible) {
-
+            currentPrompt = GoPrompt.random();
             waitTimer = 0f;
 
             // Start the typing animation with the new text
