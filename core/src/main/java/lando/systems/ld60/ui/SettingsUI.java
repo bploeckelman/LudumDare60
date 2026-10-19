@@ -6,11 +6,16 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.kotcrab.vis.ui.widget.*;
+import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.widget.VisCheckBox;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.kotcrab.vis.ui.widget.VisWindow;
+import com.zendogames.zenlib.Log;
+import de.golfgl.gdx.controllers.ControllerSlider;
 import lando.systems.ld60.Config;
 import lando.systems.ld60.GameFlags;
 import lando.systems.ld60.Main;
-import lando.systems.ld60.assets.GameFont;
 import lando.systems.ld60.assets.GameUIAnim;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
@@ -18,9 +23,16 @@ import lando.systems.ld60.game.systems.AudioSystem;
 
 public class SettingsUI extends VisWindow {
 
+    private static final String TAG = SettingsUI.class.getSimpleName();
+
     public boolean isVisible = false;
-    float panelWidth = Config.windowWidth * .90f;
-    float panelHeight = Config.windowHeight * .90f;
+    public VisCheckBox crtShaderCheckBox;
+    public ControllerSlider musicSlider;
+    public ControllerSlider soundSlider;
+    public VisTextButton closeButton;
+
+    float panelWidth  = Config.windowWidth  * 0.9f;
+    float panelHeight = Config.windowHeight * 0.9f;
     Preferences prefs = Main.game.prefs;
 
     public SettingsUI() {
@@ -36,7 +48,7 @@ public class SettingsUI extends VisWindow {
 
         add().height(40f).row();
 
-        VisCheckBox crtShaderCheckBox = new VisCheckBox("CRT Shader");
+        this.crtShaderCheckBox = new VisCheckBox("CRT Shader");
         crtShaderCheckBox.setChecked(prefs.getBoolean("crtShader", true));
         crtShaderCheckBox.addListener(new ChangeListener() {
             @Override
@@ -49,16 +61,16 @@ public class SettingsUI extends VisWindow {
         });
         add(crtShaderCheckBox).row();
 
-        VisLabel musicLabel = new VisLabel("Music");
+        var musicLabel = new VisLabel("Music");
         add().height(10f).row();
         add(musicLabel).row();
 
-        VisSlider musicSlider = new VisSlider(0, 1f, 0.1f, false);
+        this.musicSlider = new ControllerSlider(0, 1f, 0.1f, false, VisUI.getSkin());
         musicSlider.setValue(prefs.getFloat("musicVolume", 0.5f));
         musicSlider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-//                Util.log("musicSlider changed: " + musicSlider.getValue());
+                Log.debug(TAG, "musicSlider changed: %0.2f", musicSlider.getValue());
                 AudioSystem.setMusicVolume(musicSlider.getValue());
             }
         });
@@ -66,15 +78,15 @@ public class SettingsUI extends VisWindow {
 
         add().height(10f).row();
 
-        VisLabel soundLabel = new VisLabel("Sound");
+        var soundLabel = new VisLabel("Sound");
         add(soundLabel).row();
 
-        VisSlider soundSlider = new VisSlider(0, 1f, 0.1f, false);
+        this.soundSlider = new ControllerSlider(0, 1f, 0.1f, false, VisUI.getSkin());
         soundSlider.setValue(prefs.getFloat("soundVolume", 0.5f));
         soundSlider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-//                Util.log("soundSlider changed: " + soundSlider.getValue());
+                Log.debug(TAG, "soundSlider changed: %0.2f", soundSlider.getValue());
                 AudioSystem.setSoundVolume(soundSlider.getValue());
                 AudioEvent.playSound(SoundType.BELL_HIGH);
             }
@@ -83,7 +95,7 @@ public class SettingsUI extends VisWindow {
 
         add().height(20f).row();
 
-        VisTextButton closeButton = new VisTextButton("Close");
+        this.closeButton = new VisTextButton("Close");
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

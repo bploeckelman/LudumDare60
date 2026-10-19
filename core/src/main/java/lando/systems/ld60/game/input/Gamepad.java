@@ -54,12 +54,19 @@ public class Gamepad implements HeldKeys {
     /**
      * Follows whatever controller is first in the list each query, so plugging one in mid-game just works;
      * Desktop (Jamepad) and web (gdx-controllers-web in the teavm module); anywhere else the Controllers
-     * lookup would throw, so those get {@link #NONE}.
+     * lookup would throw, so those get {@code new Gamepad(() -> null)}.
      */
     public static Gamepad first() {
-        if (Gdx.app == null) return NONE;
+        if (Gdx.app == null) {
+            return new Gamepad(() -> null);
+        }
+
         var type = Gdx.app.getType();
-        if (type != ApplicationType.Desktop && type != ApplicationType.WebGL) return NONE;
+        if (type != ApplicationType.Desktop
+         && type != ApplicationType.WebGL) {
+            return new Gamepad(() -> null);
+        }
+
         return new Gamepad(() -> {
             var pads = Controllers.getControllers();
             return pads.isEmpty() ? null : pads.first();
@@ -83,6 +90,11 @@ public class Gamepad implements HeldKeys {
         return bind(controls.left(), Pad.LEFT).bind(controls.right(), Pad.RIGHT)
                 .bind(controls.up(),   Pad.UP)  .bind(controls.down(),  Pad.DOWN)
                 .bind(controls.action(), Pad.A);
+    }
+
+    /** Every key code with a binding, for whoever watches the pad as keys; see {@link KeyEvents}. */
+    public int[] boundKeys() {
+        return bindings.keys().toArray().toArray();
     }
 
     @Override

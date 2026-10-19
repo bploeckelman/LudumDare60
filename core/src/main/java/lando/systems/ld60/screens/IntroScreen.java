@@ -11,6 +11,7 @@ import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
+import de.golfgl.gdx.controllers.ControllerMenuStage;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.MusicType;
 import lando.systems.ld60.assets.ParticleAnim;
@@ -33,21 +34,41 @@ public class IntroScreen extends BaseScreen {
         super(game, false);
         addCommonSystems();
 
-        var title = new VisLabel("Ludum Dare 60");
+        var title    = new VisLabel("Ludum Dare 60");
+        var play     = buttonWithOnClick("Play",     () -> start(() -> new GameScreen(game, GameLevel.LEVEL_1)));
+        var dialog   = buttonWithOnClick("Dialog",   () -> start(() -> new DialogScreen(game)));
+        var settings = buttonWithOnClick("Settings", () -> {});
+        settings.addListener(new ChangeListener() {
+            @Override public void changed(ChangeEvent event, Actor actor) {
+                settingsUI.toggle();
+                if (uiStage instanceof ControllerMenuStage menuStage) {
+                    if (settingsUI.isVisible()) {
+                        menuStage.setFocusedActor(settingsUI.musicSlider);
+                    } else {
+                        menuStage.setFocusedActor(settings);
+                    }
+                }
+            }
+        });
+        var credits  = new VisTextButton("Credits");
 
         var table = new VisTable();
         table.setFillParent(true);
         table.add(title).padBottom(BUTTON_MARGIN * 3).row();
-        table.add(buttonWithOnClick("Play",                () -> start(() -> new GameScreen(game, GameLevel.LEVEL_1)))).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(play)     .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(dialog)   .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(settings) .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
+        table.add(credits)  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         //table.add(buttonWithOnClick("Example: Platformer", () -> start(() -> new ExamplePlatformer(game)))).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         //table.add(buttonWithOnClick("Example: Overhead",   () -> start(() -> new ExampleOverhead(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         //table.add(buttonWithOnClick("Example: Scroller",   () -> start(() -> new ExampleScroller(game))))  .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         //table.add(buttonWithOnClick("Example: Spine",      () -> start(() -> new ExampleSpine(game))))     .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
-        table.add(buttonWithOnClick("Dialog",              () -> start(() -> new DialogScreen(game))))     .size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
-        table.add(buttonWithOnClick("Settings", settingsUI::toggle)).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
-        table.add(new VisTextButton("Credits")).size(BUTTON_WIDTH, BUTTON_HEIGHT).padBottom(BUTTON_MARGIN).row();
         uiStage.addActor(table);
+
+        menu.focus(play, dialog, settings, credits); // 'Play' is highlighted; keys or gamepad move from there
+
         AudioEvent.playMusic(MusicType.MAIN_THEME);
+
         addSettingButton();
     }
 

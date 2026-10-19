@@ -109,7 +109,6 @@ public class Factory {
     /** The player: spineboy on the keyboard (or pad). */
     public Entity player(int x, int y) {
         return fighter(Awol.KIND, Roles.PLAYER, x, y, 1);
-//        return fighter(Spineboy.KIND, Roles.PLAYER, x, y, 1);
     }
 
     /** A spineboy thug: the rank and file, a {@code ThugMind} for a brain. */

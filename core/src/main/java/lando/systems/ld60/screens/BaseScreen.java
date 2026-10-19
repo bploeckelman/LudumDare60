@@ -7,8 +7,10 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisImageButton;
 import com.zendogames.zenlib.FramePool;
 import com.zendogames.zenlib.Time;
@@ -26,13 +28,17 @@ import com.zendogames.zenlib.input.ScreenInputProcessor;
 import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.ui.DebugActions;
 import com.zendogames.zenlib.ui.DebugViews;
+import de.golfgl.gdx.controllers.ControllerMenuStage;
 import lando.systems.ld60.GameFlags;
 import lando.systems.ld60.assets.GameUIAnim;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.components.FloatingHealthBar;
 import lando.systems.ld60.game.components.Television;
+import lando.systems.ld60.game.input.Gamepad;
+import lando.systems.ld60.game.input.KeyEvents;
 import lando.systems.ld60.game.systems.ParticleSystem;
+import lando.systems.ld60.ui.MenuStage;
 import lando.systems.ld60.ui.SettingsUI;
 
 public class BaseScreen extends ZenScreen {
@@ -51,6 +57,15 @@ public class BaseScreen extends ZenScreen {
     final DebugActions actions;
 
     public final SettingsUI settingsUI = new SettingsUI();
+
+    /** {@link #uiStage} as the focus-navigable stage every screen gets from {@link #createUiStage()}. */
+    public final MenuStage menu = (MenuStage) uiStage;
+
+    /** The first connected controller read as the player's keys: the ECS reads it through {@code GameKeys}, the UI through {@link #padKeys}. */
+    public final Gamepad pad = Gamepad.player();
+
+    /** Sends the pad's key edges to {@link #uiStage}, so focus and buttons answer a controller like the keyboard. */
+    final KeyEvents padKeys = new KeyEvents(pad, uiStage, pad.boundKeys());
 
     int zoomIndex = 0;
 
@@ -72,8 +87,21 @@ public class BaseScreen extends ZenScreen {
         actions.add("crt shader", Input.Keys.C, GameFlags.CRT_SHADER::toggle);
 
         uiStage.addActor(settingsUI);
+        if (uiStage instanceof ControllerMenuStage menuStage) {
+            menuStage.addFocusableActor(settingsUI.crtShaderCheckBox);
+            menuStage.addFocusableActor(settingsUI.musicSlider);
+            menuStage.addFocusableActor(settingsUI.soundSlider);
+            menuStage.addFocusableActor(settingsUI.closeButton);
+            menuStage.setEscapeActor(settingsUI.closeButton);
+        }
 
         initializeUI();
+    }
+
+    /** Every screen's UI stage is a {@link MenuStage}; one with no focusable actors passes every key through untouched. */
+    @Override
+    protected Stage createUiStage() {
+        return new MenuStage(new ScreenViewport(windowCamera), batch);
     }
 
     /** The world's systems after the game-specific ones every subclass adds; call at the end of the constructor. */
@@ -115,6 +143,7 @@ public class BaseScreen extends ZenScreen {
     }
 
     @Override public void update(float dt) {
+        padKeys.update();
         world.update(dt);
         afterWorldUpdate(dt);
         super.update(dt);
@@ -140,11 +169,7 @@ public class BaseScreen extends ZenScreen {
     }
 
     @Override
-    public void initializeUI() {
-
-
-    }
-
+    public void initializeUI() {}
 
     /**
      * Adds a "Settings" button to the user interface of the screen.
@@ -170,6 +195,13 @@ public class BaseScreen extends ZenScreen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 settingsUI.toggle();
+                if (uiStage instanceof ControllerMenuStage menuStage) {
+                    if (settingsUI.isVisible()) {
+                        menuStage.setFocusedActor(settingsUI.musicSlider);
+                    } else {
+                        menuStage.setFocusedActor(settingsButton);
+                    }
+                }
             }
         });
 

@@ -23,7 +23,6 @@ import lando.systems.ld60.game.FactoryExample;
 import lando.systems.ld60.game.GameContacts;
 import lando.systems.ld60.game.GameMask;
 import lando.systems.ld60.game.input.GameKeys;
-import lando.systems.ld60.game.input.Gamepad;
 import lando.systems.ld60.game.systems.GameInputSystem;
 import lando.systems.ld60.ui.GameDebugViews;
 
@@ -56,7 +55,7 @@ public abstract class MapScreen extends BaseScreen {
         super(game, /*withCollision*/ true);
         this.map = map;
         this.mapCenter = new Vector2();
-        this.keys = new GameKeys(inputProcessor, Gamepad.player());
+        this.keys = new GameKeys(inputProcessor, new GameKeys(inputProcessor, pad));
         this.contactSystem = new ContactSystem(collision, createContactResponder());
         this.spawner = new MapObjectSpawner().on(FactoryExample.MARKER, (_, _) -> {}); // point objects other objects reference; nothing to spawn
 
