@@ -24,8 +24,8 @@ public class LevelControlSystem extends EntitySystem {
     private Family enemyFamily;
     private Family bossFamily;
     private int currentStage = 1;
-    private Array<MapObject> unspawnedEnemies = new Array<>();
-    private Array<PolylineMapObject> stageBounds = new Array<>();
+    private final Array<MapObject> unspawnedEnemies = new Array<>();
+    private final Array<PolylineMapObject> stageBounds = new Array<>();
     private Tilemap tilemap;
 
     private float currentStageStartX;
@@ -80,9 +80,8 @@ public class LevelControlSystem extends EntitySystem {
         loadStageBounds(currentStage);
     }
 
-    public Entity queueEnemy(MapObject obj) {
+    public void queueEnemy(MapObject obj) {
         unspawnedEnemies.add(obj);
-        return null;
     }
 
     public void finishSpawning() {

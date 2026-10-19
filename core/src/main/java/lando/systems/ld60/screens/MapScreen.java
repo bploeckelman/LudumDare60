@@ -58,7 +58,7 @@ public abstract class MapScreen extends BaseScreen {
         this.mapCenter = new Vector2();
         this.keys = new GameKeys(inputProcessor, Gamepad.player());
         this.contactSystem = new ContactSystem(collision, createContactResponder());
-        this.spawner = new MapObjectSpawner().on(Factory.MARKER, (m, obj) -> {}); // point objects other objects reference; nothing to spawn
+        this.spawner = new MapObjectSpawner().on(Factory.MARKER, (_, _) -> {}); // point objects other objects reference; nothing to spawn
 
         world.addSystem(new InputSystem(keys));
         world.addSystem(new GameInputSystem(keys));
@@ -95,12 +95,9 @@ public abstract class MapScreen extends BaseScreen {
     }
 
     @Override public void update(float dt) {
-        if (!settingsUI.isVisible) {
+        if (!settingsUI.isVisible) { // Pause if settings are visible
             world.update(dt);
             afterWorldUpdate(dt);
-        }
-        else { // pause during settings
-
         }
         uiStage.act(dt);
 

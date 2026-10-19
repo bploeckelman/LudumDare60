@@ -78,12 +78,12 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         world.addSystem(new HealthBarSystem());
         world.addSystem(levelControl);
 
-        spawner .on(Factory.PLAYER,     (map, obj) -> spawnPlayer(factory.hero(obj)))
-                .on(Factory.WALL,       (map, obj) -> factory.wall(obj))
-                .on(Factory.ENEMY,      (map, obj) -> levelControl.queueEnemy(obj)) // Defer spawning
-                .on(Factory.PICKUP,     (map, obj) -> factory.pickup(obj))
-                .on(Factory.TELEVISION, (map, obj) -> factory.television(obj, televisions))
-                .on(Factory.STAGE_MARKER,            (map, obj) -> {}) // Safely ignore stage markers
+        spawner .on(Factory.PLAYER,     (_, obj) -> spawnPlayer(factory.hero(obj)))
+                .on(Factory.WALL,       (_, obj) -> factory.wall(obj))
+                .on(Factory.ENEMY,      (_, obj) -> levelControl.queueEnemy(obj)) // Defer spawning
+                .on(Factory.PICKUP,     (_, obj) -> factory.pickup(obj))
+                .on(Factory.TELEVISION, (_, obj) -> factory.television(obj, televisions))
+                .on(Factory.STAGE_MARKER,            (_, _) -> {}) // Safely ignore stage markers
         ;
 
         buildLevel();
@@ -101,7 +101,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
                 .add("toggle debug render", Input.Keys.B, () -> debugRender  = !debugRender)
                 .add("toggle hitboxes",     Input.Keys.H, () -> showHitboxes = !showHitboxes)
                 // TEMP: the clips a thug's brain never triggers on its own (jump; knockback without a weapon that lifts)
-                .add("enemies hop",         Input.Keys.J, () -> eachEnemy((e, mover, motion) -> motion.jump(mover)))
+                .add("enemies hop",         Input.Keys.J, () -> eachEnemy((_, mover, motion) -> motion.jump(mover)))
                 .add("enemies knocked back",Input.Keys.L, () -> eachEnemy((e, mover, motion) -> motion.launch(mover, awayFromPlayer(e), /*dist*/ 3f, /*height*/ 2f)));
     }
 
