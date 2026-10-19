@@ -119,9 +119,9 @@ public class CreditsScreen extends BaseScreen {
     private VisTable rightPanel() {
         var panel = panel();
         panel.add(label("{GRADIENT=GOLD;ORANGE}Art{ENDGRADIENT}")).row();
-        panel.add(label("Matt Neumann\nPete Valeo")).padBottom(PANEL_PAD * 2).row();
+        panel.add(label("Matt Neumann\nPete V")).padBottom(PANEL_PAD * 2).row();
         panel.add(label("{GRADIENT=WHITE;GREEN}Audio{ENDGRADIENT}")).row();
-        panel.add(label("Pete Valeo")).padBottom(PANEL_PAD * 2).row();
+        panel.add(label("Pete V")).padBottom(PANEL_PAD * 2).row();
         panel.add(label("{GRADIENT=BLUE;PINK}Made With{ENDGRADIENT}")).row();
         panel.add(label("libGDX, Spine, and {COLOR=RED}Love{ENDCOLOR}"));
         return panel;
