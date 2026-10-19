@@ -7,9 +7,7 @@ import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.utils.Array;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ecs.*;
-import com.zendogames.zenlib.ecs.components.Input;
-import com.zendogames.zenlib.ecs.components.Position;
-import com.zendogames.zenlib.ecs.components.Tilemap;
+import com.zendogames.zenlib.ecs.components.*;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import lando.systems.ld60.game.GameTags;
 import lando.systems.ld60.game.components.GameInput;
@@ -280,8 +278,14 @@ public class LevelControlSystem extends EntitySystem {
                 Position pos = Position.get(gameScreen.player);
                 if (pos != null) {
 
-                    float margin = 24f; // Player sprite half-width + a little padding
-
+                    float margin = 24f; // Fallback default
+                    if (gameScreen.player.has(SpineAnimator.TYPE)) {
+                        SpineAnimator anim = SpineAnimator.get(gameScreen.player);
+                        // origin.x is usually the center of the entity.
+                        // The half-width of the drawn size is size.x / 2.
+                        margin = (anim.size.x / 2f) * Math.abs(anim.scale.x);
+                        margin += 5f; // a little extra
+                    }
                     if (pos.x >= currentStageStartX && activeLeftBound < currentStageStartX) {
                         // Make sure we don't snap the left bound further than the player's permitted margin
                         activeLeftBound = Math.min(pos.x - margin, currentStageStartX);
