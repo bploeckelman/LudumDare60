@@ -8,7 +8,7 @@ import static com.zendogames.zenlib.Flag.Kind.FEATURE;
 public enum GameFlags implements Flag {
       CRT_SHADER      (true,  FEATURE)
     , INVULNERABILITY (false, FEATURE)
-    , RELEASE         (false, DEBUG)
+    , RELEASE         (true, DEBUG)
     ;
 
     private final Kind kind;
