@@ -85,7 +85,7 @@ public enum SoundType implements AssetType<Sound> {
             ,new WeightedSound(FOOTSTEP3, 16f)
             ,new WeightedSound(FOOTSTEP4, 16f)
             ,new WeightedSound(FOOTSTEP5, 16f)
-            ,new WeightedSound(FOOTSTEP6, 17f)
+//            ,new WeightedSound(FOOTSTEP6, 17f) // this has like all steps in it, makes an echo
 //            new WeightedSound(BELL_LOW, 10f)
         )
         ,GRUNTS(

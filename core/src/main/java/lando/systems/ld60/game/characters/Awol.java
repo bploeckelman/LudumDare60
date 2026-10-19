@@ -9,6 +9,7 @@ import lando.systems.ld60.assets.GameSpine;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
 import lando.systems.ld60.game.Factory;
+import lando.systems.ld60.game.GameTags;
 import lando.systems.ld60.game.GameWeapons;
 import lando.systems.ld60.game.anim.AnimClip;
 import lando.systems.ld60.game.anim.Move;
@@ -106,13 +107,19 @@ public final class Awol {
     }
 
     /** After spawn: the rig's "footstep" to a dust emitter, every event logged, stand-in sounds until there are real ones. */
+
     static void dress(Factory factory, Entity e) {
         factory.emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(e));
         SpineAnimator.get(e).onEvent(event -> {
             var name = event.getData().getName();
             Log.info("awol", "event '%s' at %.2fs of '%s'", name, event.getTime(), AnimClip.current(e));
             switch (name) {
-                case "footstep" -> AudioEvent.playSound(SoundType.SoundGroup.FOOTSTEPS, .0525f);  // TODO: change me
+                case "footstep" -> {
+                    // Only play footstep sounds for the player
+                    if (e.hasTag(GameTags.PLAYER)) {
+                        AudioEvent.playSound(SoundType.SoundGroup.FOOTSTEPS, .925f);
+                    }
+                }
                 case "hurt"     -> AudioEvent.playSound(SoundType.SoundGroup.GRUNTS); // TODO: change me (or remove, see default)
                 case "jump"     -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (or remove, see default)
                 case "swing"    -> AudioEvent.playSound(SoundType.SWING1, .75f); // TODO: change me (swing a weapon)
@@ -122,7 +129,6 @@ public final class Awol {
             }
         });
     }
-
     public static final Kind KIND = new Kind("awol",
             tuning,
             Props.maxHealth,

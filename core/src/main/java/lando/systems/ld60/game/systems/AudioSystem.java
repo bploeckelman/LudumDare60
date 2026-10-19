@@ -4,6 +4,7 @@ import aurelienribon.tweenengine.primitives.MutableFloat;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.math.MathUtils;
+import com.zendogames.zenlib.Log;
 import lando.systems.ld60.Main;
 import lando.systems.ld60.assets.MusicType;
 import lando.systems.ld60.assets.SoundType;
@@ -80,6 +81,7 @@ public class AudioSystem implements SignalListener<AudioEvent> {
     }
 
     private void playSoundLogic(SoundType soundType, float volume, float pan) {
+        Log.debug("AudioSystem", "playing sound '%s' at %.2f volume", soundType.name(), volume);
         // Automatically calls default get() from AssetType interface
         soundType.get().play(volume * soundVolume.floatValue(), soundType.pitch, pan);
     }
