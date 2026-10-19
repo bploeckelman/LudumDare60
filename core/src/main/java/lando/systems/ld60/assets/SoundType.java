@@ -9,6 +9,20 @@ public enum SoundType implements AssetType<Sound> {
     BELL("blip1.ogg", 1.0f)
     , BELL_LOW("blip1.ogg", 0.8f)
     , BELL_HIGH("blip1.ogg", 1.2f)
+    , FOOTSTEP1("footstep1.ogg", 1f)
+    , FOOTSTEP2("footstep2.ogg", 1f)
+    , FOOTSTEP3("footstep3.ogg", 1f)
+    , FOOTSTEP4("footstep4.ogg", 1f)
+    , FOOTSTEP5("footstep5.ogg", 1f)
+    , FOOTSTEP6("footstep6.ogg", 1f)
+    , GRUNT1("grunt1.ogg", 1f)
+    , GRUNT2("grunt2.ogg", 1f)
+    , GRUNT3("grunt3.ogg", 1f)
+    , GRUNT4("grunt4.ogg", 1f)
+    , GRUNT5("grunt5.ogg", 1f)
+    , GRUNT6("grunt6.ogg", 1f)
+    , GRUNT7("grunt7.ogg", 1f)
+    , SWING1("swing1.ogg", 1f)
     , DEGAUSS("degauss.ogg", 1f);
 
     private final Asset<Sound> asset;
@@ -63,6 +77,25 @@ public enum SoundType implements AssetType<Sound> {
         ,DEGAUSS(
             new WeightedSound(SoundType.DEGAUSS, 100f)
 //            new WeightedSound(BELL_HIGH, 20f),
+//            new WeightedSound(BELL_LOW, 10f)
+        )
+        ,FOOTSTEPS(
+            new WeightedSound(SoundType.FOOTSTEP1, 16f)
+            ,new WeightedSound(FOOTSTEP2, 16f)
+            ,new WeightedSound(FOOTSTEP3, 16f)
+            ,new WeightedSound(FOOTSTEP4, 16f)
+            ,new WeightedSound(FOOTSTEP5, 16f)
+            ,new WeightedSound(FOOTSTEP6, 17f)
+//            new WeightedSound(BELL_LOW, 10f)
+        )
+        ,GRUNTS(
+            new WeightedSound(SoundType.GRUNT1, 14f)
+            ,new WeightedSound(GRUNT2, 14f)
+            ,new WeightedSound(GRUNT3, 14f)
+            ,new WeightedSound(GRUNT4, 16f)
+            ,new WeightedSound(GRUNT5, 14f)
+            ,new WeightedSound(GRUNT6, 14f)
+            ,new WeightedSound(GRUNT7, 14f)
 //            new WeightedSound(BELL_LOW, 10f)
         )
         ;

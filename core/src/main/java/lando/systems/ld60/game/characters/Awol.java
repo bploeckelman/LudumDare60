@@ -112,10 +112,10 @@ public final class Awol {
             var name = event.getData().getName();
             Log.info("awol", "event '%s' at %.2fs of '%s'", name, event.getTime(), AnimClip.current(e));
             switch (name) {
-                case "footstep" -> AudioEvent.playSound(SoundType.BELL_LOW);  // TODO: change me
-                case "hurt"     -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (or remove, see default)
+                case "footstep" -> AudioEvent.playSound(SoundType.SoundGroup.FOOTSTEPS);  // TODO: change me
+                case "hurt"     -> AudioEvent.playSound(SoundType.SoundGroup.GRUNTS); // TODO: change me (or remove, see default)
                 case "jump"     -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (or remove, see default)
-                case "swing"    -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (swing a weapon)
+                case "swing"    -> AudioEvent.playSound(SoundType.SWING1, .75f); // TODO: change me (swing a weapon)
                 case "throw"    -> AudioEvent.playSound(SoundType.BELL_HIGH); // TODO: change me (throw a weapon)
                 case "thud"     -> AudioEvent.playSound(SoundType.BELL_LOW);  // TODO: change me (hit ground on death)
                 default -> {} // a landed hit is better heard from CombatEvent, which knows whether a glove connected

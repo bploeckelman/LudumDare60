@@ -10,8 +10,8 @@ import lando.systems.ld60.assets.MusicType;
  */
 public enum GameLevel {
     LEVEL_1 ("Dial-Up Alley",     GameMap.LEVEL_1, MusicType.MAIN_THEME),
-    LEVEL_2 ("The Server Room",   GameMap.LEVEL_1, MusicType.MAIN_THEME),
-    LEVEL_3 ("Tape Vault",        GameMap.LEVEL_1, MusicType.MAIN_THEME),
+    LEVEL_2 ("The Server Room",   GameMap.LEVEL_1, MusicType.JAZZY_THEME),
+    LEVEL_3 ("Tape Vault",        GameMap.LEVEL_1, MusicType.CHIPTUNE_THEME),
     FINALE  ("The Mainframe",     GameMap.LEVEL_1, MusicType.MAIN_THEME);
 
     public final String title;

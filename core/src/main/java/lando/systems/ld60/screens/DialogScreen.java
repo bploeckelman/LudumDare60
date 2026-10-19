@@ -40,14 +40,14 @@ public class DialogScreen extends BaseScreen {
     private record Line(Side speaking, Actor left, Actor right, String text) {}
 
     private static Actor awol(String animation) { return new Actor(GameSpine.AWOL, animation); }
-    private static Actor spineboy(String animation) { return new Actor(GameSpine.SPINEBOY, animation); }
+    private static Actor floppyd(String animation) { return new Actor(GameSpine.FLOPPYD, animation); }
 
     private static final Line[] LINES = {
         new Line(Side.LEFT, null, null, "This is how the story starts."),
-        new Line(Side.LEFT, awol("idle"), spineboy("idle"), "Hey there."),
-        new Line(Side.RIGHT, awol("idle"), spineboy("shoot"), "Oh, hello! BANG!"),
-        new Line(Side.LEFT, awol("punch"), spineboy("jump"), "Rude, Take that!"),
-        new Line(Side.RIGHT, awol("idle"), spineboy("death"), "(dying sound)"),
+        new Line(Side.LEFT, awol("idle"), floppyd("idle"), "Hey there."),
+        new Line(Side.RIGHT, awol("idle"), floppyd("punch"), "Oh, hello! BANG!"),
+        new Line(Side.LEFT, awol("punch"), floppyd("jump"), "Rude, Take that!"),
+        new Line(Side.RIGHT, awol("idle"), floppyd("death"), "(dying sound)"),
         new Line(Side.LEFT, awol("run"), null, "Good"),
         new Line(Side.LEFT, null, null, "And that is how the story starts"),
     };
