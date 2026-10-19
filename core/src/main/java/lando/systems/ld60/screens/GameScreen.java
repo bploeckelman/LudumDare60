@@ -33,8 +33,7 @@ import lando.systems.ld60.game.systems.LevelControlSystem;
 import lando.systems.ld60.particles.effects.BloodSprayEffect;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
-import lando.systems.ld60.ui.BossHealthWidget;
-import lando.systems.ld60.ui.PlayerHealthWidget;
+import lando.systems.ld60.ui.HUDHealthWidget;
 
 /**
  * The game: one {@link GameLevel} at a time on the brawler's systems (presentation, hits,
@@ -54,7 +53,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
     final TelevisionFeed televisions;
     final LevelControlSystem levelControl; // Add this reference
 
-    private BossHealthWidget bossWidget;
+    private HUDHealthWidget bossWidget;
     private TypingLabel bossLabel;
 
     public boolean debugRender  = false;
@@ -110,23 +109,21 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
                 .add("enemies hop",         Input.Keys.J, () -> eachEnemy((_, mover, motion) -> motion.jump(mover)))
                 .add("enemies knocked back",Input.Keys.L, () -> eachEnemy((e, mover, motion) -> motion.launch(mover, awayFromPlayer(e), /*dist*/ 3f, /*height*/ 2f)));
 
-        PlayerHealthWidget healthWidget = new PlayerHealthWidget(this);
+        HUDHealthWidget healthWidget = new HUDHealthWidget(() -> this.player);
         healthWidget.setSize(300f, 25f);
-        // Position it 20 pixels from the left and 20 pixels down from the top of the UI camera
         healthWidget.setPosition(20f, uiStage.getHeight() - healthWidget.getHeight() - 30f);
         uiStage.addActor(healthWidget);
 
-        TypingLabel playerLabel = new TypingLabel("{OUTLINECOLOR=BLACK}{OUTLINE=2}{SPEED=2.5}PLAYER 1", GameFont.DOS_FONT.get());        playerLabel.setPosition(healthWidget.getX(), healthWidget.getY() - 30);
+        TypingLabel playerLabel = new TypingLabel("{OUTLINECOLOR=BLACK}{OUTLINE=2}{SPEED=2.5}PLAYER 1", GameFont.DOS_FONT.get());
+        playerLabel.setPosition(healthWidget.getX(), healthWidget.getY() - 30);
         uiStage.addActor(playerLabel);
 
-        // Initialize Boss Widget but make it invisible
-        bossWidget = new BossHealthWidget(levelControl);
+        bossWidget = new HUDHealthWidget(levelControl::getBossEntity);
         bossWidget.setSize(300f, 25f);
         bossWidget.setPosition(uiStage.getWidth() - bossWidget.getWidth() - 20f, uiStage.getHeight() - bossWidget.getHeight() - 30f);
         bossWidget.setVisible(false);
         uiStage.addActor(bossWidget);
 
-        // Initialize Boss Label but make it invisible
         bossLabel = new TypingLabel("", GameFont.DOS_FONT.get());
         bossLabel.setVisible(false);
         uiStage.addActor(bossLabel);
