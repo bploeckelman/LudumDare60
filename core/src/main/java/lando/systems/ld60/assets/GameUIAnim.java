@@ -5,11 +5,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.zendogames.zenlib.assets.AnimType;
 import com.zendogames.zenlib.assets.Asset;
 import com.zendogames.zenlib.assets.AtlasType;
-import com.zendogames.zenlib.assets.ZenAtlas;
 
 public enum GameUIAnim implements AnimType {
     GEAR ("gear")
     , SETTINGS ("ui/settings-modal")
+    , DIALOG ("ui/dialog-box")
     ;
 
     private final Asset<Animation<TextureRegion>> asset;
