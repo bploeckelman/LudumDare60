@@ -9,11 +9,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.Align;
 import com.zendogames.zenlib.ZenGame;
-import com.zendogames.zenlib.screens.ZenScreen;
 import lando.systems.ld60.Main;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
-import lando.systems.ld60.events.DistortionEvent;
 
 public class LauncherScreen extends BaseScreen {
 
@@ -23,7 +21,6 @@ public class LauncherScreen extends BaseScreen {
     Color headerTextColor = new Color(0f, 0f, .8f, 1f);
     BitmapFont dosFont;
     GlyphLayout glyphLayout = new GlyphLayout();
-
 
     public LauncherScreen(ZenGame game) {
         super(game, false);
@@ -36,11 +33,14 @@ public class LauncherScreen extends BaseScreen {
         dosFont.getData().setScale(.5f);
     }
 
-
-    @Override public void update(float dt) {
+    @Override
+    public void update(float dt) {
         super.update(dt);
         deBounceTimer -= dt;
-        if (deBounceTimer <= 0 && (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.justTouched())) {
+        var isEnterPressed = Gdx.input.isKeyJustPressed(Input.Keys.ENTER);
+        var isJustTouched  = Gdx.input.justTouched();
+        var isPadPressed   = pad.anyButton();
+        if (deBounceTimer <= 0 && (isEnterPressed || isJustTouched || isPadPressed)) {
             if (!transitioning){
                 transitioning = true;
                 AudioEvent.playSound(SoundType.DEGAUSS);

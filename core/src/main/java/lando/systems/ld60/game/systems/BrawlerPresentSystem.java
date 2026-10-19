@@ -9,6 +9,7 @@ import lando.systems.ld60.game.anim.AnimClip;
 import lando.systems.ld60.game.components.BrawlerAnimClips;
 import lando.systems.ld60.game.components.Hitboxes;
 import lando.systems.ld60.game.components.Hurtable;
+import lando.systems.ld60.game.components.Shadow;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 
 /**
@@ -35,9 +36,8 @@ public class BrawlerPresentSystem extends IteratingSystem {
         var mover = Mover.get(e);
         if (!(mover.motion instanceof BrawlerMotion motion)) return;
 
-        if (Hitboxes.has(e)) {
-            Hitboxes.get(e).lift = motion.z;
-        }
+        if (Hitboxes.has(e)) Hitboxes.get(e).lift   = motion.z;
+        if (Shadow  .has(e)) Shadow  .get(e).height = motion.z;
 
         var order = -Position.get(e).y; // lower on the street draws in front of higher
         if (SpineAnimator.has(e)) {

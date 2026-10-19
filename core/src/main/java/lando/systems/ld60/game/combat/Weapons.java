@@ -13,10 +13,7 @@ import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.GameMask;
 import lando.systems.ld60.game.GameTags;
 import lando.systems.ld60.game.anim.Move;
-import lando.systems.ld60.game.components.Fighter;
-import lando.systems.ld60.game.components.Held;
-import lando.systems.ld60.game.components.Hitboxes;
-import lando.systems.ld60.game.components.Pickup;
+import lando.systems.ld60.game.components.*;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.movement.BrawlerTuning;
 
@@ -174,6 +171,7 @@ public final class Weapons {
                 .add(new Name("thrown:" + weapon.name()))
                 .add(new Position(pos.x + facing * 12, pos.y))
                 .add(Collider.circ(GameMask.PICKUP, 0, 0, 4).blockedBy(GameMask.SOLID))
+                .add(new Shadow(ITEM))
                 .add(mover)
                 .add(hits)
                 .add(timers);

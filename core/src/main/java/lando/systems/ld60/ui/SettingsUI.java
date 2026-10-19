@@ -12,6 +12,7 @@ import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import com.zendogames.zenlib.Log;
+import de.golfgl.gdx.controllers.ControllerMenuStage;
 import de.golfgl.gdx.controllers.ControllerSlider;
 import lando.systems.ld60.Config;
 import lando.systems.ld60.GameFlags;
@@ -30,6 +31,9 @@ public class SettingsUI extends VisWindow {
     public ControllerSlider musicSlider;
     public ControllerSlider soundSlider;
     public VisTextButton closeButton;
+
+    /** Whoever had focus when the window opened, focused again when it closes. */
+    private Actor returnFocusTo;
 
     float panelWidth  = Config.windowWidth  * 0.9f;
     float panelHeight = Config.windowHeight * 0.9f;
@@ -99,7 +103,7 @@ public class SettingsUI extends VisWindow {
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                toggle();
+                close();
             }
         });
         add(closeButton).height(35f).row();
@@ -110,11 +114,27 @@ public class SettingsUI extends VisWindow {
     }
 
     public void toggle() {
-        isVisible = !isVisible;
-        setVisible(isVisible);
-        if (isVisible) {
-            toFront();
-            // TODO: play a sound?
+        if (isVisible) close();
+        else           open();
+    }
+
+    public void open() {
+        isVisible = true;
+        setVisible(true);
+        toFront();
+        // TODO: play a sound?
+        if (getStage() instanceof ControllerMenuStage menu) {
+            returnFocusTo = menu.getFocusedActor();
+            menu.setFocusedActor(soundSlider);
+        }
+    }
+
+    public void close() {
+        isVisible = false;
+        setVisible(false);
+        if (getStage() instanceof ControllerMenuStage menu) {
+            menu.setFocusedActor(returnFocusTo);
+            returnFocusTo = null;
         }
     }
 }

@@ -95,6 +95,7 @@ public class Factory {
                 .add(Collider.capsule(role.body(), kind.feet(), CollisionCaps.Axis.HORIZONTAL)
                         .blockedBy(GameMask.SOLID)
                         .detects(role.detects()))
+                .add(new Shadow(kind.feet().width))
                 .add(boxes);
         if (role.healthBar()) {
             e.add(new FloatingHealthBar(/*yOffset*/ 90f));

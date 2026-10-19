@@ -87,8 +87,10 @@ public class Gamepad implements HeldKeys {
 
     /** The five steering keys: directions on the d-pad or left stick, the action on A. */
     public Gamepad bind(InputControls controls) {
-        return bind(controls.left(), Pad.LEFT).bind(controls.right(), Pad.RIGHT)
-                .bind(controls.up(),   Pad.UP)  .bind(controls.down(),  Pad.DOWN)
+        return   bind(controls.left(),   Pad.LEFT)
+                .bind(controls.right(),  Pad.RIGHT)
+                .bind(controls.up(),     Pad.UP)
+                .bind(controls.down(),   Pad.DOWN)
                 .bind(controls.action(), Pad.A);
     }
 
@@ -97,12 +99,24 @@ public class Gamepad implements HeldKeys {
         return bindings.keys().toArray().toArray();
     }
 
+    /** True while any button on the pad is down, bound or not: the "press any button" of a title screen. */
+    public boolean anyButton() {
+        var controller = source.get();
+        if (controller == null) return false;
+        for (int code = controller.getMinButtonIndex(); code <= controller.getMaxButtonIndex(); code++) {
+            if (controller.getButton(code)) return true;
+        }
+        return false;
+    }
+
     @Override
     public boolean isHeld(int keycode) {
         var pad = bindings.get(keycode);
         if (pad == null) return false;
+
         var controller = source.get();
         if (controller == null) return false;
+
         return held(controller, pad);
     }
 

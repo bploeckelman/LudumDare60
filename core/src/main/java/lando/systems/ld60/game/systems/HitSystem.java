@@ -16,6 +16,7 @@ import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import lando.systems.ld60.game.combat.Hitbox;
 import lando.systems.ld60.game.combat.Strike;
 import lando.systems.ld60.game.components.Hitboxes;
+import lando.systems.ld60.game.components.Shadow;
 
 /**
  * Resolves every fighter's {@link Hitboxes} for the tick, finds HIT boxes overlapping opposing HURT
@@ -74,6 +75,30 @@ public class HitSystem extends IteratingSystem {
         for (int i = 0; i < strikes.size; i++) {
             responder.strike(strikes.get(i));
         }
+        for (int i = 0; i < fighters.size; i++) {
+            cue(fighters.get(i), fighters);
+        }
+    }
+
+    /** The shadow's range cue: an opponent {@code e} can hit, or be hit by, within its shadow's reach and within depth. */
+    private static void cue(Entity e, Array<Entity> fighters) {
+        var shadow = Shadow.get(e);
+        if (shadow == null) return;
+
+        var a    = Hitboxes.get(e);
+        var aPos = Position.get(e);
+        var inRange = false;
+        for (int j = 0; j < fighters.size && !inRange; j++) {
+            var other = fighters.get(j);
+            if (other == e || !other.isAlive() || other.isRemoving()) continue;
+
+            var t = Hitboxes.get(other);
+            if (!t.vulnerable || !(t.team.in(a.targets) || a.team.in(t.targets))) continue;
+
+            var tPos = Position.get(other);
+            inRange = Math.abs(tPos.x - aPos.x) <= shadow.reach && Math.abs(tPos.y - aPos.y) < 2 * Hitbox.DEPTH;
+        }
+        shadow.inRange = inRange;
     }
 
     // ------------------------------------------------------------------------

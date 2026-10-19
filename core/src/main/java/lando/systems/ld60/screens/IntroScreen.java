@@ -11,7 +11,6 @@ import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
-import de.golfgl.gdx.controllers.ControllerMenuStage;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.MusicType;
 import lando.systems.ld60.assets.ParticleAnim;
@@ -37,19 +36,7 @@ public class IntroScreen extends BaseScreen {
         var title    = new VisLabel("Ludum Dare 60");
         var play     = buttonWithOnClick("Play",     () -> start(() -> new GameScreen(game, GameLevel.LEVEL_1)));
         var dialog   = buttonWithOnClick("Dialog",   () -> start(() -> new DialogScreen(game)));
-        var settings = buttonWithOnClick("Settings", () -> {});
-        settings.addListener(new ChangeListener() {
-            @Override public void changed(ChangeEvent event, Actor actor) {
-                settingsUI.toggle();
-                if (uiStage instanceof ControllerMenuStage menuStage) {
-                    if (settingsUI.isVisible()) {
-                        menuStage.setFocusedActor(settingsUI.musicSlider);
-                    } else {
-                        menuStage.setFocusedActor(settings);
-                    }
-                }
-            }
-        });
+        var settings = buttonWithOnClick("Settings", settingsUI::toggle);
         var credits  = new VisTextButton("Credits");
 
         var table = new VisTable();

@@ -28,12 +28,12 @@ import com.zendogames.zenlib.input.ScreenInputProcessor;
 import com.zendogames.zenlib.screens.ZenScreen;
 import com.zendogames.zenlib.ui.DebugActions;
 import com.zendogames.zenlib.ui.DebugViews;
-import de.golfgl.gdx.controllers.ControllerMenuStage;
 import lando.systems.ld60.GameFlags;
 import lando.systems.ld60.assets.GameUIAnim;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.components.FloatingHealthBar;
+import lando.systems.ld60.game.components.Shadow;
 import lando.systems.ld60.game.components.Television;
 import lando.systems.ld60.game.input.Gamepad;
 import lando.systems.ld60.game.input.KeyEvents;
@@ -87,13 +87,11 @@ public class BaseScreen extends ZenScreen {
         actions.add("crt shader", Input.Keys.C, GameFlags.CRT_SHADER::toggle);
 
         uiStage.addActor(settingsUI);
-        if (uiStage instanceof ControllerMenuStage menuStage) {
-            menuStage.addFocusableActor(settingsUI.crtShaderCheckBox);
-            menuStage.addFocusableActor(settingsUI.musicSlider);
-            menuStage.addFocusableActor(settingsUI.soundSlider);
-            menuStage.addFocusableActor(settingsUI.closeButton);
-            menuStage.setEscapeActor(settingsUI.closeButton);
-        }
+        menu.addFocusableActor(settingsUI.crtShaderCheckBox);
+        menu.addFocusableActor(settingsUI.musicSlider);
+        menu.addFocusableActor(settingsUI.soundSlider);
+        menu.addFocusableActor(settingsUI.closeButton);
+        menu.setEscapeActor(settingsUI.closeButton); // Esc / Backspace / pad B close the window while it is up
 
         initializeUI();
     }
@@ -108,8 +106,9 @@ public class BaseScreen extends ZenScreen {
     protected void addCommonSystems() {
         world.addSystem(new AnimationSystem());
         world.addSystem(new SpineSystem());
-        world.addSystem(new RenderSystem(batch, Emitter.TYPE, FloatingHealthBar.TYPE, Television.TYPE));
         world.addSystem(new ParticleSystem(factory));
+        world.addSystem(new RenderSystem(batch,
+                Emitter.TYPE, FloatingHealthBar.TYPE, Television.TYPE, Shadow.TYPE));
     }
 
     /** Steps {@link #zoomIndex} through {@link #ZOOMS} and applies it to the world camera. */
@@ -195,13 +194,6 @@ public class BaseScreen extends ZenScreen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 settingsUI.toggle();
-                if (uiStage instanceof ControllerMenuStage menuStage) {
-                    if (settingsUI.isVisible()) {
-                        menuStage.setFocusedActor(settingsUI.musicSlider);
-                    } else {
-                        menuStage.setFocusedActor(settingsButton);
-                    }
-                }
             }
         });
 

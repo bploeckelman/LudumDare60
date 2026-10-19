@@ -1,5 +1,6 @@
 package lando.systems.ld60.ui;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.Layout;
@@ -48,6 +49,18 @@ public class MenuStage extends ControllerMenuStage {
         return super.isDefaultActionKeyCode(keyCode)
                 || keyCode == GameControls.PLAYER.action()
                 || keyCode == GameControls.PLAYER_ATTACK;
+    }
+
+    /**
+     * Esc, Backspace, Android back, and the special key (pad B). Not {@code super}: the library was compiled
+     * against a libGDX whose {@code Keys.ESCAPE} was 131, inlined, and it is 111 since 1.10, so its own
+     * Esc check never matches.
+     */
+    @Override public boolean isEscapeActionKeyCode(int keyCode) {
+        return keyCode == Input.Keys.ESCAPE
+            || keyCode == Input.Keys.BACKSPACE
+            || keyCode == Input.Keys.BACK
+            || keyCode == GameControls.PLAYER_SPECIAL;
     }
 
     /** Validates the outermost {@link Layout} above the actor; a table lays out its children itself. */
