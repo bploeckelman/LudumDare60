@@ -1,6 +1,6 @@
 package lando.systems.ld60.events;
 
-public class DistortionEvent {
+public class DistortionEvent implements SignalEvent {
 
     public static final Signal<DistortionEvent> signal = new Signal<>();
 

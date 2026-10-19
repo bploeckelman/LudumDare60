@@ -9,7 +9,7 @@ public final class Kinds {
 
     private Kinds() {}
 
-    public static final List<Kind> ALL = List.of(Spineboy.KIND, Awol.KIND);
+    public static final List<Kind> ALL = List.of(Spineboy.KIND, Awol.KIND, N64.KIND);
 
     /** The kind named in Tiled, case-insensitive; throws listing the names so a typo fails at load. */
     public static Kind byName(String name) {
@@ -19,5 +19,10 @@ public final class Kinds {
         var names = new StringBuilder();
         for (var kind : ALL) names.append(names.isEmpty() ? "" : ", ").append(kind.name());
         throw new GdxRuntimeException("Kinds: no kind '%s', have: %s".formatted(name, names));
+    }
+
+    /** The role a Tiled {@code boss: true} of {@code kind} spawns in: its own state machine when it has one, else a thug's brain with a boss's armor. */
+    public static Role bossRole(Kind kind) {
+        return (kind == N64.KIND) ? N64.ROLE : Roles.boss(Roles.THUG.mind());
     }
 }

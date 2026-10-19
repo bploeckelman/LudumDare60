@@ -4,7 +4,7 @@ import com.zendogames.zenlib.render.RenderLayer;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.particles.ParticleEffectParams;
 
-public class ParticleEvent {
+public class ParticleEvent implements SignalEvent {
     public static final Signal<ParticleEvent> signal = new Signal<>();
 
     // Static helper to keep calling code incredibly clean

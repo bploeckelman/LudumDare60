@@ -59,7 +59,7 @@ public class Factory {
         var kind   = Kinds.byName(TiledProps.get(object, "kind", "spineboy", String.class));
         var boss   = TiledProps.get(object, "boss", false, Boolean.class);
         var weapon = TiledProps.get(object, "weapon", "", String.class);
-        var role   = boss ? Roles.boss(Roles.THUG.mind()) : Roles.THUG; // TODO: the boss's own state machine via Minds.states(...)
+        var role   = boss ? Kinds.bossRole(kind) : Roles.THUG; // TODO: the boss's own state machine via Minds.states(...)
         var enemy  = fighter(kind, role, x + w / 2, y, -1);
         if (!weapon.isEmpty()) {
             Weapons.arm(enemy, GameWeapons.byName(weapon));
@@ -117,8 +117,9 @@ public class Factory {
         return fighter(Spineboy.KIND, Roles.THUG, x, y, facing);
     }
 
+    /** The N64 controller boss: its own states ({@code N64BossState}), floats, jabs, fires its rumble pak. */
     public Entity n64Boss(int x, int y, int facing) {
-        return fighter(Awol.KIND, Roles.boss(Roles.THUG.mind()), x, y, facing); // TODO: its own states: Roles.boss(Minds.states(N64BossState.ENTER))
+        return fighter(N64.KIND, N64.ROLE, x, y, facing);
     }
 
     public Entity awol(int x, int y, int facing) {

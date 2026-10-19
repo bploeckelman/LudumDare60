@@ -47,8 +47,13 @@ public record Hitbox(
      * @param damage    health taken
      * @param knockback how far the target is thrown along the street, tiles
      * @param height    how high it is thrown, tiles; 0 is a shove along the floor
+     * @param heavy     whether this is a heavy / special attack for triggering alternate sounds, particles, etc... through {@code Strike}, {@code GameStrikes.strike} and {@code CombatEvent.struck}
      */
-    public record Attack(int damage, float knockback, float height) {}
+    public record Attack(int damage, float knockback, float height, boolean heavy) {
+        public Attack(int damage, float knockback, float height) {
+            this(damage, knockback, height, /*heavy*/ false);
+        }
+    }
 
     /** Default half thickness: a hit lands within 12 px of the target's floor line. */
     public static final float DEPTH = 6;
@@ -72,6 +77,7 @@ public record Hitbox(
     public static Hitbox hurt(String name, CollisionShape shape)                  { return new Hitbox(name, Kind.HURT, shape, mirror(shape), DEPTH, null, null); }
     public static Hitbox hit (String name, CollisionShape shape, Attack attack)   { return new Hitbox(name, Kind.HIT,  shape, mirror(shape), DEPTH, null, attack); }
     public static Hitbox.Attack attack(int damage, float knockback, float height) { return new Hitbox.Attack(damage, knockback, height); }
+    public static Hitbox.Attack attackHeavy(int damage, float knockback, float height) { return new Hitbox.Attack(damage, knockback, height, /*heavy*/ true); }
 
     /** A copy {@code depth} pixels thick either side of the floor line: wider for a sweep, narrower for a jab. */
     public Hitbox depth(float depth) { return new Hitbox(name, kind, right, left, depth, bone, attack); }

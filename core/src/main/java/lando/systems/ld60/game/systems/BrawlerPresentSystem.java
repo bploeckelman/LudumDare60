@@ -6,10 +6,7 @@ import com.zendogames.zenlib.ecs.IteratingSystem;
 import com.zendogames.zenlib.ecs.SystemOrder;
 import com.zendogames.zenlib.ecs.components.*;
 import lando.systems.ld60.game.anim.AnimClip;
-import lando.systems.ld60.game.components.BrawlerAnimClips;
-import lando.systems.ld60.game.components.Hitboxes;
-import lando.systems.ld60.game.components.Hurtable;
-import lando.systems.ld60.game.components.Shadow;
+import lando.systems.ld60.game.components.*;
 import lando.systems.ld60.game.movement.BrawlerMotion;
 
 /**
@@ -20,8 +17,9 @@ import lando.systems.ld60.game.movement.BrawlerMotion;
  * Any {@code Renderable} is lifted and sorted; a thrown item drawn with an {@code Image} rides
  * the same arc as a fighter.
  * <p>
- * The clip pick leaves a clip it does not own alone until it completes (a state's attack), so
- * states never fight the system for track 0: they play their move, the system resumes after.
+ * The clip pick leaves a clip it does not own alone until it completes (a state's attack), and
+ * leaves a fighter's {@code Fighter.move} alone for as long as the state keeps it set (a looping
+ * hold), so states never fight the system for track 0: they play their move, the system resumes after.
  */
 public class BrawlerPresentSystem extends IteratingSystem {
 
@@ -66,7 +64,14 @@ public class BrawlerPresentSystem extends IteratingSystem {
     /** The clip for what the motion is doing, played only when the current clip is ours (or done). */
     private static void present(Entity e, BrawlerAnimClips clips, Mover mover, BrawlerMotion motion) {
         var current = AnimClip.current(e);
-        if (!clips.owns(current) && !AnimClip.complete(e)) return; // a state's move plays through
+        if (!clips.owns(current) && !AnimClip.complete(e)) {
+            return; // a state's move plays through
+        }
+
+        var fighter = Fighter.get(e);
+        if (fighter != null && fighter.move != null && fighter.move.clip().is(e)) {
+            return; // a move the state still holds, looping or done
+        }
 
         var dead = Hurtable.has(e) && Hurtable.get(e).dead;
         if (dead) {

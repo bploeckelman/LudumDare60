@@ -8,13 +8,13 @@ import com.zendogames.zenlib.assets.AtlasType;
 
 public enum AnimN64 implements AnimType {
       ARMED      ("characters/n64/n64-armed/n64-armed")
-    , HURT       ("characters/n64/n64-hurt/n64-hurt")
+    , HURT       ("characters/n64/n64-hurt/n64-hurt",             DEFAULT_FRAME_DURATION, Animation.PlayMode.NORMAL)
     , IDLE       ("characters/n64/n64-idle/n64-idle")
-    , PROJECTILE ("characters/n64/n64-projectile/n64-projectile")
-    , PUNCH      ("characters/n64/n64-punch/n64-punch")
-    , SHOOT      ("characters/n64/n64-shoot/n64-shoot")
-    , SPIN       ("characters/n64/n64-spin/n64-spin")
-    ;
+    , PROJECTILE ("characters/n64/n64-projectile/n64-projectile", DEFAULT_FRAME_DURATION, Animation.PlayMode.NORMAL)
+    , PUNCH      ("characters/n64/n64-punch/n64-punch",           DEFAULT_FRAME_DURATION, Animation.PlayMode.NORMAL)
+    , SHOOT      ("characters/n64/n64-shoot/n64-shoot",           DEFAULT_FRAME_DURATION, Animation.PlayMode.NORMAL)
+    , SPIN       ("characters/n64/n64-spin/n64-spin",             DEFAULT_FRAME_DURATION, Animation.PlayMode.NORMAL)
+    ; // one-shot clips hold their last frame (a Move ends on it; the dead
 
     private final Asset<Animation<TextureRegion>> asset;
     private final String regionName;

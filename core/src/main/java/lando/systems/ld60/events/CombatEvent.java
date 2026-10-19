@@ -8,7 +8,7 @@ import lando.systems.ld60.game.combat.Strike;
  * shake when the player is struck, a burst of particles, a score. Subscribers register like the
  * other signals ({@code CombatEvent.signal.register(this)}) and switch on the subclass.
  */
-public abstract class CombatEvent {
+public abstract class CombatEvent implements SignalEvent {
 
     public static final Signal<CombatEvent> signal = new Signal<>();
 

@@ -1,6 +1,6 @@
 package lando.systems.ld60.events;
 
-public class ShakeEvent {
+public class ShakeEvent implements SignalEvent {
 
     public static final Signal<ShakeEvent> signal = new Signal<>();
 

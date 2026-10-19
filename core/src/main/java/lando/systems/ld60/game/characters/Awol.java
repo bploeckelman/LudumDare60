@@ -62,12 +62,12 @@ public final class Awol {
         public static final Hitbox.Attack attackPunch = Hitbox.attack(/*damage*/ 1, /*knockback*/ 4, /*height*/ 3);
         public static final Hitbox.Attack attackKick  = Hitbox.attack(/*damage*/ 2, /*knockback*/ 5, /*height*/ 2);
         public static final Hitbox.Attack attackPipe  = Hitbox.attack(/*damage*/ 2, /*knockback*/ 2, /*height*/ 1);
-        public static final Hitbox.Attack attackPower = Hitbox.attack(/*damage*/ 3, /*knockback*/ 9, /*height*/ 3);
+        public static final Hitbox.Attack attackPower = Hitbox.attackHeavy(/*damage*/ 3, /*knockback*/ 9, /*height*/ 3);
         // Strike boxes reach back from the striking bone to the body, so nothing fits between the chest and the fist
         public static final Hitbox hitboxPunch = Hitbox.hit("punch", Hitbox.capsule(-30,  -8, 40, 16), attackPunch).on("front-fist");
         public static final Hitbox hitboxKick  = Hitbox.hit("kick",  Hitbox.capsule(-36, -10, 56, 20), attackKick) .on("front-toe");
         public static final Hitbox hitboxPower = Hitbox.hit("power", Hitbox.capsule(-34, -12, 50, 24), attackPower).on("front-fist").depth(1.5f * Hitbox.DEPTH);
-        public static final Hitbox hitboxSwing = Hitbox.hit("swing", Hitbox.rect(0, -4, 24, 8), attackPipe) .on("weapon");
+        public static final Hitbox hitboxSwing = Hitbox.hit("swing", Hitbox.rect(0, -4, 24, 8),        attackPipe) .on("weapon");
         public static final Hitbox hurtboxBody = Hitbox.hurt("body", Hitbox.circ(0,  0, 25)).on("body");
         /** The power move parks this far into the swing (frame 5, wound up, before the window at 0.20) while attack is held. */
         public static final float powerWindup = 0.17f;

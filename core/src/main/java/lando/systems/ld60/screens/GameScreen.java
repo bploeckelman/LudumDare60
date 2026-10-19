@@ -52,8 +52,11 @@ public class GameScreen extends MapScreen {
     final TelevisionFeed televisions;
     final LevelControlSystem levelControl; // Add this reference
 
+    private final SignalListener<CombatEvent> onCombatEvent = this::handleCombatEvent;
+
     private HUDHealthWidget bossWidget;
     private TypingLabel bossLabel;
+
     public KeepMovingWidget keepMovingWidget;
 
     public boolean debugRender  = false;
@@ -62,6 +65,8 @@ public class GameScreen extends MapScreen {
     public GameScreen(ZenGame game, GameLevel level) {
         super(game, level.map);
         this.level = level;
+
+        CombatEvent.signal.register(onCombatEvent);
 
         this.skeletons = world.family(Family.all(SpineAnimator.TYPE));
         this.enemies   = world.family(Family.all(GameTags.ENEMY, Mover.TYPE));
@@ -86,13 +91,12 @@ public class GameScreen extends MapScreen {
         world.addSystem(new HealthBarSystem());
         world.addSystem(levelControl);
 
-        spawner //.on(Factory.PLAYER,     (_, obj) -> spawnPlayer(factory.fighter(Awol.KIND, Roles.PLAYER, TiledProps.x(obj), TiledProps.y(obj), 1)))
-                .on(Factory.PLAYER,     (_, obj) -> spawnPlayer(factory.player(obj)))
+        spawner .on(Factory.PLAYER,     (_, obj) -> spawnPlayer(factory.player(obj)))
                 .on(Factory.WALL,       (_, obj) -> factory.wall(obj))
                 .on(Factory.ENEMY,      (_, obj) -> levelControl.queueEnemy(obj)) // Defer spawning
                 .on(Factory.PICKUP,     (_, obj) -> factory.pickup(obj))
                 .on(Factory.TELEVISION, (_, obj) -> factory.television(obj, televisions))
-                .on(Factory.STAGE_MARKER,            (_, _) -> {}) // Safely ignore stage markers
+                .on(Factory.STAGE_MARKER, (_, _) -> {}) // Safely ignore stage markers
         ;
 
         buildLevel();
@@ -100,12 +104,12 @@ public class GameScreen extends MapScreen {
         worldCamera.position.set(VIEW_WIDTH / 2f, VIEW_HEIGHT / 2f, 0f);
         worldCamera.update();
 
-        CombatEvent.signal.register(this::onCombatEvent);
         AudioEvent.playMusic(level.music);
 
         this.debugViews.add(DebugViews.spine(world));
         actions .arm("spawn thug",          Input.Keys.N, (x, y) -> factory.thug(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
                 .arm("spawn pipe",          Input.Keys.K, (x, y) -> factory.pickup(GameWeapons.PIPE, x, y))
+                .arm("spawn n64 boss",      Input.Keys.V, (x, y) -> factory.n64Boss(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
                 .add("next level",          Input.Keys.RIGHT_BRACKET, () -> game.setScreen(new GameScreen(game, level.next()), ScreenTransitionEffectType.random()))
                 .add("toggle debug render", Input.Keys.Y, () -> debugRender  = !debugRender)
                 .add("toggle hitboxes",     Input.Keys.H, () -> showHitboxes = !showHitboxes)
@@ -235,7 +239,7 @@ public class GameScreen extends MapScreen {
     @Override
     public void dispose() {
         televisions.dispose();
-        CombatEvent.signal.remove(this::onCombatEvent);
+        CombatEvent.signal.remove(onCombatEvent);
         super.dispose();
     }
 
@@ -266,41 +270,50 @@ public class GameScreen extends MapScreen {
         return view;
     }
 
-    public void onCombatEvent(Signal<CombatEvent> signal, CombatEvent event) {
+    public void handleCombatEvent(Signal<CombatEvent> signal, CombatEvent event) {
         Position pos;
         SpineAnimator anim;
-        boolean isHumanoid = false;
+        boolean isHumanoid;
         Color bloodTint;
         String entityName;
         switch (event) {
-            case CombatEvent.Struck s:
-                pos = Position.get(s.strike.target());
-                anim = SpineAnimator.get(s.strike.target());
-//                anim.skeleton.getData() == GameSpine.SPINEBOY.get().skeleton()
+            case CombatEvent.Struck s -> {
+                pos        = Position.get(s.strike.target());
+                anim       = SpineAnimator.get(s.strike.target());
                 entityName = Name.get(s.strike.target()).name;
                 isHumanoid = entityName.equals("hero") || entityName.equals("thug");
-                bloodTint = isHumanoid ? Color.RED : Color.BLUE;
-                factory.emitter(EmitterType.BLOOD_SPRAY, new BloodSprayEffect.Params(pos.x, pos.y + 40f, s.strike.away(), bloodTint), RenderLayer.BACKGROUND);
-                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + -anim.facing * 50f, pos.y, 1, bloodTint), RenderLayer.BACKGROUND);
+                bloodTint  = isHumanoid ? Color.RED : Color.BLUE;
 
-                // Light trauma for standard hits
-                float hitTrauma = 0.3f;
+                int facing = (anim != null) ? -anim.facing : 1;
+                factory.emitter(EmitterType.BLOOD_SPRAY, new BloodSprayEffect.Params(pos.x, pos.y + 40f, s.strike.away(), bloodTint), RenderLayer.BACKGROUND);
+                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + facing * 50f, pos.y, 1, bloodTint), RenderLayer.BACKGROUND);
+
+                // Different effects for standard vs heavy hits
+                var isHeavyAttack = s.strike.attack().heavy();
+
+                var hitTrauma = (isHeavyAttack) ? 0.4f : 0.3f;
                 ShakeEvent.trigger(hitTrauma);
-                break;
-            case CombatEvent.Died d:
-                pos = Position.get(d.entity);
-                anim = SpineAnimator.get(d.entity);
+
+                if (isHeavyAttack) {
+                    Time.pauseFor(0.1f);
+                    DistortionEvent.trigger(0.5f, 0.2f);
+                }
+            }
+            case CombatEvent.Died d -> {
+                pos        = Position.get(d.entity);
+                anim       = SpineAnimator.get(d.entity);
                 entityName = Name.get(d.strike.target()).name;
                 isHumanoid = entityName.equals("hero") || entityName.equals("thug");
-                bloodTint = isHumanoid ? Color.RED : Color.BLUE;
-                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + -anim.facing * 50f, pos.y, 12, bloodTint), RenderLayer.BACKGROUND);
+                bloodTint  = isHumanoid ? Color.RED : Color.BLUE;
+
+                int facing = (anim != null) ? -anim.facing : 1;
+                factory.emitter(EmitterType.BLOOD, new BloodSplatterEffect.Params(pos.x + facing * 50f, pos.y, 12, bloodTint), RenderLayer.BACKGROUND);
 
                 // Heavier trauma for a kill
                 ShakeEvent.trigger(0.5f);
-                DistortionEvent.trigger();
-                break;
-            default:
-                break;
+                DistortionEvent.trigger(0.8f, 0.4f);
+            }
+            default -> {}
         }
     }
 

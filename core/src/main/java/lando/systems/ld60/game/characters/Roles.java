@@ -12,6 +12,8 @@ import lando.systems.ld60.game.components.Hurtable;
 import lando.systems.ld60.game.movement.BrawlerTuning;
 import lando.systems.ld60.game.state.BrawlerState;
 
+import java.util.function.Supplier;
+
 /** The roles a fighter can be spawned in. */
 public final class Roles {
 
@@ -61,15 +63,17 @@ public final class Roles {
                 true);
     }
 
-    /** A boss: tagged for the level script, super armor against knockback, the body stays; the mind is the boss's own state machine. */
+    /** A boss: tagged for the level script, super armor against knockback, the body stays a while; the mind is the boss's own state machine. */
     public static Role boss(Mind mind) {
+        return boss(mind, () -> new Hurtable().knockback(0).recoverTime(0.5f).despawnAfter(2.5f));
+    }
+
+    /** A boss with its own hurt policy: the states its {@code Hurtable} requests, its hooks. */
+    public static Role boss(Mind mind, Supplier<Hurtable> hurtable) {
         return new Role("boss", GameTags.BOSS,
                 GameMask.ENEMY, masks(GameMask.PICKUP),
                 GameMask.ENEMY, masks(GameMask.PLAYER),
-                null,
-                () -> new Hurtable().knockback(0).recoverTime(0.5f).despawnAfter(2.5f),
-                mind,
-                true);
+                /*tuning*/ null, hurtable, mind, /*healthBar*/ true);
     }
 
     private static GameMask[] masks(GameMask... masks) { return masks; }

@@ -3,7 +3,7 @@ package lando.systems.ld60.events;
 import lando.systems.ld60.assets.MusicType;
 import lando.systems.ld60.assets.SoundType;
 
-public abstract class AudioEvent {
+public abstract class AudioEvent implements SignalEvent {
 
     public static final Signal<AudioEvent> signal = new Signal<>();
 
