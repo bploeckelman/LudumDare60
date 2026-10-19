@@ -22,9 +22,11 @@ public final class GameHitboxes {
                   Hitbox.hurt("body", Hitbox.rect(-8, -28, 16, 46)).on("hip"))
             .window("shoot", 0.03f, 0.2f, Hitbox.hit("shot", Hitbox.rect(4, -6, 40, 12), SHOT).on("muzzle"));
 
+    public static final Hitbox.Attack AWOL_PUNCH = new Hitbox.Attack(/*dmg*/ 1, /*knockback*/ 4, /*height*/ 3);
     public static final HitboxSet AWOL = new HitboxSet()
-            .base(Hitbox.hurt("body", Hitbox.circ(0, 0, 35)).on("body-awol"))
-            .window("punch", 0.03f, 0.2f, Hitbox.hit("punch", Hitbox.rect(4, -6, 40, 12), SHOT).on("left-hand"));
+            .base(Hitbox.hurt("body", Hitbox.circ(0, 0, 25)).on("body"))
+            .window("punch", /*start*/ 0.03f, /*end*/ 0.2f,
+                    Hitbox.hit("punch", Hitbox.rect(-10, -6, 25, 12), AWOL_PUNCH).on("front-hand"));
 
     private GameHitboxes() {}
 }

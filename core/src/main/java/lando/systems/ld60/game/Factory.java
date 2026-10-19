@@ -346,20 +346,19 @@ public class Factory {
 
     static BrawlerAnimClips awolClips() {
         return new BrawlerAnimClips(
-                AnimClip.spine("run"),
-                AnimClip.spine("run"),
+                AnimClip.spine("idle"),
+                AnimClip.spine("walk"),
                 AnimClip.spine("run"),
                 AnimClip.spine("jump"),
                 BRAWLER_THUG_TUNING.maxSpeedX())
-                .stop(AnimClip.spine("run"))
-                .dead(AnimClip.spine("jump"));
+                .stop(AnimClip.spine("idle"))
+                .dead(AnimClip.spine("death"));
     }
 
     static SpineAnimator awolAnimator(int facing) {
-        var anim = new SpineAnimator(GameSpine.AWOL, "run");
-        // TODO: probably don't need to change scale...
-        anim.defaultScale.set(0.5f, 0.5f);
-        anim.scale.set(0.5f, 0.5f);
+        var anim = new SpineAnimator(GameSpine.AWOL, "idle");
+        anim.defaultScale.set(0.35f, 0.35f);
+        anim.scale.set(0.35f, 0.35f);
         anim.facing = facing;
         return anim;
     }

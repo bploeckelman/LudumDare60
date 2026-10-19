@@ -25,8 +25,7 @@ public final class GameWeapons {
             new Move(AnimClip.spine("shoot"), e -> GameSpine.aim(SpineAnimator.get(e))));
 
     public static final Weapon AWOL_FIST = Weapon.fixed("fist", GameHitboxes.AWOL,
-            new Move(AnimClip.spine("jump"), e -> SpineAnimator.get(e).start("jump")));
-//            new Move(AnimClip.spine("punch-right"), e -> SpineAnimator.get(e).start("punch-right")));
+            new Move(AnimClip.spine("punch"), e -> SpineAnimator.get(e).start("punch")));
 
     /** A length of pipe: a bigger, harder shot window on the same clip (spineboy has no swing), two damage, a tile of lift; thrown it flies six tiles. Breaks after five hits. */
     public static final Weapon PIPE = new Weapon("pipe",
