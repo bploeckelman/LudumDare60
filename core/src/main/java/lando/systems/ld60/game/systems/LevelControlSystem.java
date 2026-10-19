@@ -1,25 +1,35 @@
 package lando.systems.ld60.game.systems;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.utils.Array;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ecs.*;
+import com.zendogames.zenlib.ecs.components.Input;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.Tilemap;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import lando.systems.ld60.game.GameTags;
+import lando.systems.ld60.game.components.GameInput;
 import lando.systems.ld60.screens.GameScreen;
 
 public class LevelControlSystem extends EntitySystem {
 
     private static final String TAG = LevelControlSystem.class.getSimpleName();
-
     private static final int PRIORITY = SystemOrder.SENSE - 1;
+
+    public enum SequenceState {
+        PLAYING,
+        BOSS_DIALOGUE, // Place to run your custom script/dialogue
+        PLAYER_EXIT,   // Auto-walk player to bottom right
+        DONE           // Finished, waiting for transition
+    }
 
     private final GameScreen gameScreen;
     private final EnemySpawner enemySpawner;
+    private final Runnable onLevelComplete;
 
     private Family enemyFamily;
     private Family bossFamily;
@@ -31,19 +41,21 @@ public class LevelControlSystem extends EntitySystem {
     private float currentStageStartX;
     private float currentStageEndX;
     private float activeLeftBound;
-    private float currentCameraRightBound; // NEW: tracks the smoothed camera boundary
+    private float currentCameraRightBound;
+
     private boolean stageClear = false;
     private boolean bossSpawned = false;
-    private boolean levelComplete = false;
+    private SequenceState sequenceState = SequenceState.PLAYING;
 
     public interface EnemySpawner {
         Entity spawn(MapObject obj);
     }
 
-    public LevelControlSystem(GameScreen gameScreen, EnemySpawner enemySpawner) {
+    public LevelControlSystem(GameScreen gameScreen, EnemySpawner enemySpawner, Runnable onLevelComplete) {
         super(PRIORITY);
         this.gameScreen = gameScreen;
         this.enemySpawner = enemySpawner;
+        this.onLevelComplete = onLevelComplete;
     }
 
     @Override
@@ -57,12 +69,11 @@ public class LevelControlSystem extends EntitySystem {
         this.currentStage = 1;
         this.stageClear = false;
         this.bossSpawned = false;
-        this.levelComplete = false;
+        this.sequenceState = SequenceState.PLAYING;
         this.activeLeftBound = 0f;
         this.currentCameraRightBound = 0f;
         this.unspawnedEnemies.clear();
 
-        // Find all "stage" polylines and sort them from left to right based on their X coordinate
         this.stageBounds.clear();
         if (tilemap != null) {
             for (MapObject obj : tilemap.objects) {
@@ -98,7 +109,6 @@ public class LevelControlSystem extends EntitySystem {
         int stageIndex = stageNum - 1;
         if (stageIndex >= 0 && stageIndex < stageBounds.size) {
             PolylineMapObject stageObj = stageBounds.get(stageIndex);
-
             Object valX = stageObj.getProperties().get("x");
             rawStartX = valX instanceof Number ? ((Number)valX).floatValue() : 0f;
 
@@ -124,7 +134,6 @@ public class LevelControlSystem extends EntitySystem {
             }
         }
 
-        // Force a camera bound snap when loading a new stage so the right side locks immediately
         currentCameraRightBound = currentStageEndX;
     }
 
@@ -137,10 +146,8 @@ public class LevelControlSystem extends EntitySystem {
 
             if (ex >= currentStageStartX && ex < currentStageEndX) {
                 Entity e = enemySpawner.spawn(obj);
-                if (e != null) {
-                    if (e.hasTag(GameTags.BOSS)) {
-                        bossSpawned = true;
-                    }
+                if (e != null && e.hasTag(GameTags.BOSS)) {
+                    bossSpawned = true;
                 }
                 spawnedThisStage.add(obj);
             }
@@ -154,17 +161,14 @@ public class LevelControlSystem extends EntitySystem {
         }
     }
 
-    // Pass delta time in to smoothly expand the camera constraint
     private void updateCameraBounds(float dt) {
         if (gameScreen.cameraFollow != null && tilemap != null) {
             float mapEndX = tilemap.width();
             float targetRightBound = stageClear ? mapEndX : currentStageEndX;
 
             if (currentCameraRightBound == 0f || currentCameraRightBound > targetRightBound) {
-                // Snap bound instantly if shrinking (e.g. entering a new stage)
                 currentCameraRightBound = targetRightBound;
             } else if (currentCameraRightBound < targetRightBound) {
-                // Smoothly pan the bound open at 400 pixels per second to prevent instant camera jump
                 currentCameraRightBound += 400f * dt;
                 if (currentCameraRightBound > targetRightBound) {
                     currentCameraRightBound = targetRightBound;
@@ -176,61 +180,128 @@ public class LevelControlSystem extends EntitySystem {
         }
     }
 
+    static void hold(Entity e) {
+        var input = Input.get(e);
+        if (input != null) {
+            input.moveX = 0;
+            input.moveY = 0;
+            input.actionPressed = false;
+        }
+        var buttons = GameInput.get(e);
+        if (buttons != null) {
+            buttons.clearFrameEvents();
+        }
+    }
+
+    // Add this getter inside LevelControlSystem
+    public Entity getBossEntity() {
+        if (bossFamily == null || bossFamily.entities().isEmpty()) {
+            return null;
+        }
+        // Return the first boss found
+        return bossFamily.entities().get(0);
+    }
+
     @Override
     public void update(float dt) {
-        if (levelComplete) {
-            updateCameraBounds(dt);
+        updateCameraBounds(dt);
+
+        if (sequenceState == SequenceState.DONE) return;
+
+        // 1. BOSS DIALOGUE STATE
+        if (sequenceState == SequenceState.BOSS_DIALOGUE) {
+            if (gameScreen.player != null) {
+                hold(gameScreen.player);
+            }
+
+            // TODO: Render your boss text bubble here
+            // Listen for dismissal (mouse click, enter key, button press, etc.)
+            if (Gdx.input.justTouched()) {
+                Log.info(TAG, "Dialogue dismissed. Auto-walking player out.");
+                sequenceState = SequenceState.PLAYER_EXIT;
+            }
             return;
         }
 
-        if (bossSpawned && bossFamily.entities().isEmpty()) {
-            levelComplete = true;
-            stageClear = true;
-            Log.info(TAG, "Boss defeated! Level Complete.");
-        }
+        // 2. PLAYER EXIT STATE (Auto-walk)
+        if (sequenceState == SequenceState.PLAYER_EXIT) {
+            if (gameScreen.player != null) {
+                var input = Input.get(gameScreen.player);
+                var pos = Position.get(gameScreen.player);
 
-        if (!stageClear && enemyFamily.entities().isEmpty()) {
-            stageClear = true;
+                // Target bottom right coordinate
+                float targetX = tilemap.width() - 32f;
+                float targetY = 16f; // Floor level
 
-            if (unspawnedEnemies.isEmpty() && !bossSpawned) {
-                levelComplete = true;
-                Log.info(TAG, "All enemies defeated! Level Complete.");
-            } else {
-                Log.info(TAG, "Stage %d clear! Move forward.", currentStage);
-            }
-        }
+                int dx = (int) (targetX - pos.x);
+                int dy = (int) (targetY - pos.y);
 
-        if (gameScreen.player != null) {
-            Position pos = Position.get(gameScreen.player);
-            if (pos != null) {
-
-                if (pos.x >= currentStageStartX && activeLeftBound < currentStageStartX) {
-                    activeLeftBound = Math.min(pos.x, currentStageStartX);
-                }
-
-                if (stageClear && pos.x >= currentStageEndX && !levelComplete) {
-                    currentStage++;
-                    stageClear = false;
-                    Log.info(TAG, "Entering stage %d", currentStage);
-                    loadStageBounds(currentStage);
-                    spawnEnemiesForStage(currentStage);
-                }
-
-                // Player constraints remain rigid so they can't walk out of bounds
-                if (pos.x < activeLeftBound) {
-                    pos.x = (int) activeLeftBound;
-                }
-
-                float mapEndX = tilemap != null ? tilemap.width() : Float.MAX_VALUE;
-                float playerRightConstraint = stageClear ? mapEndX : currentStageEndX;
-
-                if (pos.x > playerRightConstraint) {
-                    pos.x = (int) playerRightConstraint;
+                if (Math.abs(dx) <= 4 && Math.abs(dy) <= 4) {
+                    hold(gameScreen.player);
+                    sequenceState = SequenceState.DONE;
+                    if (onLevelComplete != null) onLevelComplete.run();
+                } else {
+                    if (input != null) {
+                        input.moveX = Integer.signum(dx);
+                        input.moveY = Integer.signum(dy);
+                        input.actionPressed = false;
+                    }
+                    var buttons = GameInput.get(gameScreen.player);
+                    if (buttons != null) buttons.clearFrameEvents();
                 }
             }
+            return;
         }
 
-        // Execute smooth camera updates every frame
-        updateCameraBounds(dt);
+        // 3. NORMAL PLAYING STATE
+        if (sequenceState == SequenceState.PLAYING) {
+
+            // Check win condition
+            if (bossSpawned && bossFamily.entities().isEmpty()) {
+                stageClear = true;
+                sequenceState = SequenceState.BOSS_DIALOGUE;
+                Log.info(TAG, "Boss defeated! Starting dialogue sequence.");
+                return;
+            }
+
+            // Normal stage clearing
+            if (!stageClear && enemyFamily.entities().isEmpty()) {
+                stageClear = true;
+                if (unspawnedEnemies.isEmpty() && !bossSpawned) {
+                    // Fallback if the map has no boss
+                    sequenceState = SequenceState.BOSS_DIALOGUE;
+                } else {
+                    Log.info(TAG, "Stage %d clear! Move forward.", currentStage);
+                }
+            }
+
+            // Clamp player within stage bounds
+            if (gameScreen.player != null) {
+                Position pos = Position.get(gameScreen.player);
+                if (pos != null) {
+                    if (pos.x >= currentStageStartX && activeLeftBound < currentStageStartX) {
+                        activeLeftBound = Math.min(pos.x, currentStageStartX);
+                    }
+
+                    if (stageClear && pos.x >= currentStageEndX) {
+                        currentStage++;
+                        stageClear = false;
+                        Log.info(TAG, "Entering stage %d", currentStage);
+                        loadStageBounds(currentStage);
+                        spawnEnemiesForStage(currentStage);
+                    }
+
+                    if (pos.x < activeLeftBound) {
+                        pos.x = (int) activeLeftBound;
+                    }
+
+                    float mapEndX = tilemap != null ? tilemap.width() : Float.MAX_VALUE;
+                    float playerRightConstraint = stageClear ? mapEndX : currentStageEndX;
+                    if (pos.x > playerRightConstraint) {
+                        pos.x = (int) playerRightConstraint;
+                    }
+                }
+            }
+        }
     }
 }

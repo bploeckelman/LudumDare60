@@ -34,6 +34,7 @@ import lando.systems.ld60.game.systems.LevelControlSystem;
 import lando.systems.ld60.particles.effects.BloodSprayEffect;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
+import lando.systems.ld60.ui.BossHealthWidget;
 import lando.systems.ld60.ui.PlayerHealthWidget;
 
 /**
@@ -72,7 +73,9 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         this.televisions.clearColor.set(worldView.clearColor);
 
         // Initialize the control system to route map objects to the correct Factory method
-        this.levelControl = new LevelControlSystem(this, factory::enemy);
+        this.levelControl = new LevelControlSystem(this, factory::enemy, () -> {
+            game.setScreen(new GameScreen(game, level.next()), ScreenTransitionEffectType.random());
+        });
 
         world.addSystem(new BrawlerPresentSystem());
         world.addSystem(hitSystem);
@@ -110,6 +113,13 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         // Position it 20 pixels from the left and 20 pixels down from the top of the UI camera
         healthWidget.setPosition(20f, uiStage.getHeight() - healthWidget.getHeight() - 30f);
         uiStage.addActor(healthWidget);
+
+        // --- NEW: Add the Boss HUD ---
+        BossHealthWidget bossWidget = new BossHealthWidget(levelControl);
+        bossWidget.setSize(300f, 25f);
+        // Position it 20 pixels from the right and 20 pixels down from the top of the UI camera
+        bossWidget.setPosition(uiStage.getWidth() - bossWidget.getWidth() - 20f, uiStage.getHeight() - bossWidget.getHeight() - 30f);
+        uiStage.addActor(bossWidget);
     }
 
     interface EnemyMotionAction { void run(Entity e, Mover mover, BrawlerMotion motion); }
