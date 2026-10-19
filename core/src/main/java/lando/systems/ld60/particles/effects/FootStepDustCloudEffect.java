@@ -42,6 +42,8 @@ public class FootStepDustCloudEffect implements ParticleEffect {
     @Override
     public List<ParticleData> spawn(ParticleEffectParams parameters, Pool<ParticleData> pool) {
         var params = (Params) parameters;
+        if (!params.target.isAlive()) return List.of();
+
         var position = Position.get(params.target);
         var mover = Mover.get(params.target);
 

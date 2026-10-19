@@ -23,10 +23,16 @@ public final class GameHitboxes {
             .window("shoot", 0.03f, 0.2f, Hitbox.hit("shot", Hitbox.rect(4, -6, 40, 12), SHOT).on("muzzle"));
 
     public static final Hitbox.Attack AWOL_PUNCH = new Hitbox.Attack(/*dmg*/ 1, /*knockback*/ 4, /*height*/ 3);
+
+    /**
+     * The awol rig at 0.35 scale (about 85 px tall): the disc is a circle on the {@code body} bone;
+     * the glove rides the {@code front-fist} anchor (the glove's center) while the punch is extended
+     * and held (frames 4 to 8 of 12 at 30 fps: 0.13 to 0.28 s), not during the wind-up before it.
+     */
     public static final HitboxSet AWOL = new HitboxSet()
             .base(Hitbox.hurt("body", Hitbox.circ(0, 0, 25)).on("body"))
-            .window("punch", /*start*/ 0.03f, /*end*/ 0.2f,
-                    Hitbox.hit("punch", Hitbox.rect(-10, -6, 25, 12), AWOL_PUNCH).on("front-hand"));
+            .window("punch", /*start*/ 0.13f, /*end*/ 0.28f,
+                    Hitbox.hit("punch", Hitbox.circ(0, 0, 9), AWOL_PUNCH).on("front-fist"));
 
     private GameHitboxes() {}
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.assets.ZenAnimHero;
 import com.zendogames.zenlib.collision.CollisionMask;
 import com.zendogames.zenlib.collision.shapes.CollisionCaps;
@@ -25,6 +26,8 @@ import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.tilemap.TiledProps;
 import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.GameSpine;
+import lando.systems.ld60.assets.SoundType;
+import lando.systems.ld60.events.AudioEvent;
 import lando.systems.ld60.game.anim.AnimClip;
 import lando.systems.ld60.game.combat.Weapon;
 import lando.systems.ld60.game.combat.Weapons;
@@ -37,6 +40,7 @@ import lando.systems.ld60.game.state.BrawlerState;
 import lando.systems.ld60.game.state.ExampleEnemyState;
 import lando.systems.ld60.game.state.ExamplePlayerState;
 import lando.systems.ld60.particles.ParticleEffectParams;
+import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
 import java.util.List;
 
@@ -344,6 +348,7 @@ public class Factory {
                 .dead(AnimClip.spine("death"));
     }
 
+    /** The awol rig's clips: 'knockback' while thrown through the air, 'death' once and hold; no run-to-idle clip, so no stop. */
     static BrawlerAnimClips awolClips() {
         return new BrawlerAnimClips(
                 AnimClip.spine("idle"),
@@ -351,9 +356,12 @@ public class Factory {
                 AnimClip.spine("run"),
                 AnimClip.spine("jump"),
                 BRAWLER_THUG_TUNING.maxSpeedX())
-                .stop(AnimClip.spine("idle"))
+                .hurt(AnimClip.spine("knockback"))
                 .dead(AnimClip.spine("death"));
     }
+
+    /** The awol rig's flinch-in-place for a hit that keeps it on the floor (a lift plays {@code knockback} from the present system instead). */
+    static final AnimClip AWOL_FLINCH = AnimClip.spine("hurt");
 
     static SpineAnimator awolAnimator(int facing) {
         var anim = new SpineAnimator(GameSpine.AWOL, "idle");
@@ -459,8 +467,10 @@ public class Factory {
         motion.facing = facing;
         var hurtable = new Hurtable()
                 .despawnAfter(1.5f)
+                .onHurt((e, strike) -> { if (motion.grounded) AWOL_FLINCH.start(e, false); }) // shoved along the floor: flinch; the present system leaves a clip it doesn't own alone until it completes
                 .onDeath((e, strike) -> { timers.cancel("think"); Input.get(e).reset(); });
 
+        var anim = awolAnimator(facing);
         var entity = world.createEntity()
                 .tag(GameTags.ENEMY)
                 .add(new Name("awol"))
@@ -474,12 +484,24 @@ public class Factory {
                         .blockedBy(GameMask.SOLID)
                         .detects(GameMask.PICKUP))
                 .add(new Hitboxes(GameWeapons.AWOL_FIST.set(), GameMask.ENEMY, GameMask.PLAYER))
-                .add(awolAnimator(facing))
+                .add(anim)
                 .add(awolClips())
                 .add(hurtable)
                 .add(timers);
 
         entity.add(new FloatingHealthBar(entity, 90f));
+
+        // The rig's events: "footstep" goes to a dust emitter; the rest are logged and play stand-in sounds until there are real ones
+        emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(entity));
+        anim.onEvent(event -> {
+            var name = event.getData().getName();
+            Log.info("awol", "event '%s' at %.2fs of '%s'", name, event.getTime(), AnimClip.current(entity));
+            switch (name) {
+                case "swing" -> AudioEvent.playSound(SoundType.BELL_HIGH);
+                case "thud"  -> AudioEvent.playSound(SoundType.BELL_LOW);
+                default -> {} // "jump", "hurt": a landed hit is better heard from CombatEvent, which knows whether a glove connected
+            }
+        });
 
         timers.every("think", 0.25f, think -> {
             var e      = think.entity();

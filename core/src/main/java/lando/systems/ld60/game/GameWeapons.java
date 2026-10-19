@@ -24,8 +24,8 @@ public final class GameWeapons {
     public static final Weapon BLASTER = Weapon.fixed("blaster", GameHitboxes.SPINEBOY,
             new Move(AnimClip.spine("shoot"), e -> GameSpine.aim(SpineAnimator.get(e))));
 
-    public static final Weapon AWOL_FIST = Weapon.fixed("fist", GameHitboxes.AWOL,
-            new Move(AnimClip.spine("punch"), e -> SpineAnimator.get(e).start("punch")));
+    /** The awol rig's gloves: the 'punch' clip is the whole move ({@code Move.start} plays it; no second track to set up). */
+    public static final Weapon AWOL_FIST = Weapon.fixed("fist", GameHitboxes.AWOL, Move.of(AnimClip.spine("punch")));
 
     /** A length of pipe: a bigger, harder shot window on the same clip (spineboy has no swing), two damage, a tile of lift; thrown it flies six tiles. Breaks after five hits. */
     public static final Weapon PIPE = new Weapon("pipe",

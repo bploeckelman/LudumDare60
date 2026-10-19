@@ -9,6 +9,7 @@ import com.zendogames.zenlib.ZenGame;
 import com.zendogames.zenlib.collision.ContactResponder;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.Family;
+import com.zendogames.zenlib.ecs.components.Mover;
 import com.zendogames.zenlib.ecs.components.Position;
 import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import com.zendogames.zenlib.render.RenderLayer;
@@ -22,6 +23,7 @@ import lando.systems.ld60.events.Signal;
 import lando.systems.ld60.events.SignalListener;
 import lando.systems.ld60.game.*;
 import lando.systems.ld60.game.combat.HitboxDraw;
+import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.systems.BrawlerPresentSystem;
 import lando.systems.ld60.game.systems.HealthBarSystem;
 import lando.systems.ld60.game.systems.HitSystem;
@@ -41,6 +43,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
 
     final GameLevel level;
     final Family skeletons;
+    final Family enemies;
     final SkeletonRendererDebug skeletonDebug;
     final HitSystem hitSystem;
     final TelevisionFeed televisions;
@@ -53,6 +56,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         this.level = level;
 
         this.skeletons = world.family(Family.all(SpineAnimator.TYPE));
+        this.enemies   = world.family(Family.all(GameTags.ENEMY, Mover.TYPE));
         this.skeletonDebug = new SkeletonRendererDebug();
         this.skeletonDebug.setBoundingBoxes(false);
         this.skeletonDebug.setRegionAttachments(false);
@@ -84,7 +88,29 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
                 .arm("spawn pipe",          Input.Keys.K, (x, y) -> factory.pickup(GameWeapons.PIPE, x, y))
                 .add("next level",          Input.Keys.RIGHT_BRACKET, () -> game.setScreen(new GameScreen(game, level.next()), ScreenTransitionEffectType.random()))
                 .add("toggle debug render", Input.Keys.B, () -> debugRender  = !debugRender)
-                .add("toggle hitboxes",     Input.Keys.H, () -> showHitboxes = !showHitboxes);
+                .add("toggle hitboxes",     Input.Keys.H, () -> showHitboxes = !showHitboxes)
+                // TEMP: the clips a thug's brain never triggers on its own (jump; knockback without a weapon that lifts)
+                .add("enemies hop",         Input.Keys.J, () -> eachEnemy((e, mover, motion) -> motion.jump(mover)))
+                .add("enemies knocked back",Input.Keys.L, () -> eachEnemy((e, mover, motion) -> motion.launch(mover, awayFromPlayer(e), /*dist*/ 3f, /*height*/ 2f)));
+    }
+
+    interface EnemyMotionAction { void run(Entity e, Mover mover, BrawlerMotion motion); }
+
+    /** TEMP: drives every grounded enemy brawler's motion directly (no strike, so no flash, health or facing change). */
+    private void eachEnemy(EnemyMotionAction action) {
+        var entities = enemies.entities();
+        for (int i = 0; i < entities.size; i++) {
+            var e     = entities.get(i);
+            var mover = Mover.get(e);
+            if (mover.motion instanceof BrawlerMotion motion && motion.grounded && !motion.launched) {
+                action.run(e, mover, motion);
+            }
+        }
+    }
+
+    /** -1/+1 pointing from the player to {@code e}; +1 when there is no player. */
+    private int awayFromPlayer(Entity e) {
+        return (player != null && Position.get(player).x > Position.get(e).x) ? -1 : 1;
     }
 
     /** In a brawler only hits hurt; contacts are for pickups and triggers. */
