@@ -90,10 +90,10 @@
     <property name="kind" value="spineboy"/>
    </properties>
   </object>
-  <object id="26" name="n64Boss" type="enemy" gid="52" x="4708" y="289.667" width="32" height="32">
+  <object id="26" name="atari" type="enemy" gid="52" x="4708" y="289.667" width="32" height="32">
    <properties>
     <property name="boss" type="bool" value="true"/>
-    <property name="kind" value="n64"/>
+    <property name="kind" value="atari"/>
    </properties>
   </object>
   <object id="27" name="spineboy" type="enemy" gid="52" x="4594.67" y="270.667" width="16" height="16">

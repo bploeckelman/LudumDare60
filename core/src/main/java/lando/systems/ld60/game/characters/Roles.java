@@ -19,7 +19,6 @@ public final class Roles {
 
     private Roles() {}
 
-
     /** The player's movement tuning. */
     public static final BrawlerTuning PLAYER_TUNING = new BrawlerTuning(
             Factory.UNIT, // authoring unit -> pixels
@@ -52,12 +51,12 @@ public final class Roles {
     /** Rank and file: slower than the player, a {@link ThugMind} brain, flashes, flies, dies and vanishes. */
     public static final Role THUG = thug(new ThugMind(/*reach*/ 3 * Factory.UNIT, /*cooldown*/ 1.2f));
 
-    /** A thug with the given brain (a kind that fights differently, a test dummy with {@link Minds#none()}). */
+    /** A thug with the given brain (a kind that fights differently, a test dummy with {@link Minds#none()}); each kind walks at its own pace. */
     public static Role thug(Mind mind) {
         return new Role("thug", GameTags.ENEMY,
                 GameMask.ENEMY, masks(GameMask.PICKUP),
                 GameMask.ENEMY, masks(GameMask.PLAYER),
-                THUG_TUNING,
+                /*tuning*/ null,
                 () -> new Hurtable().despawnAfter(1.5f).onHurt(ThugMind::cut).onDeath(Drops::health),
                 mind,
                 true);

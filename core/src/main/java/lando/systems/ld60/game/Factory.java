@@ -122,6 +122,11 @@ public class Factory {
         return fighter(N64.KIND, N64.ROLE, x, y, facing);
     }
 
+    /** The Atari joystick boss: its own states ({@code AtariBossState}), stomps, pokes with the stick, whips the cord. */
+    public Entity atariBoss(int x, int y, int facing) {
+        return fighter(Atari.KIND, Atari.ROLE, x, y, facing);
+    }
+
     public Entity awol(int x, int y, int facing) {
         return fighter(Awol.KIND, Roles.THUG, x, y, facing);
     }

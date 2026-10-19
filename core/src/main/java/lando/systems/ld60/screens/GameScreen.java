@@ -110,6 +110,7 @@ public class GameScreen extends MapScreen {
         actions .arm("spawn thug",          Input.Keys.N, (x, y) -> factory.thug(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
                 .arm("spawn pipe",          Input.Keys.K, (x, y) -> factory.pickup(GameWeapons.PIPE, x, y))
                 .arm("spawn n64 boss",      Input.Keys.V, (x, y) -> factory.n64Boss(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
+                .arm("spawn atari boss",    Input.Keys.T, (x, y) -> factory.atariBoss(x, y, (player != null && Position.get(player).x < x) ? -1 : 1))
                 .add("next level",          Input.Keys.RIGHT_BRACKET, () -> game.setScreen(new GameScreen(game, level.next()), ScreenTransitionEffectType.random()))
                 .add("toggle debug render", Input.Keys.Y, () -> debugRender  = !debugRender)
                 .add("toggle hitboxes",     Input.Keys.H, () -> showHitboxes = !showHitboxes)

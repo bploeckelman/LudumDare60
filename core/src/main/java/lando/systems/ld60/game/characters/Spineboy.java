@@ -29,8 +29,8 @@ public final class Spineboy {
     /** The player's pace (the {@code player} builder's numbers); a thug role is slower. */
     static final BrawlerTuning TUNING = new BrawlerTuning(
             Factory.UNIT, // authoring unit -> pixels
-            12,           // x-axis speed (tiles/sec)
-            6,            // y-axis speed (tiles/sec)
+            5,            // x-axis speed (tiles/sec)
+            2,            // y-axis speed (tiles/sec)
             0.1f,         // accel time
             0.08f,        // stop time
             2.5f,         // 'jump' height (tiles)

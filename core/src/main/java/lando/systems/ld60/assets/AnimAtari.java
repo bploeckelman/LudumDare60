@@ -7,11 +7,11 @@ import com.zendogames.zenlib.assets.Asset;
 import com.zendogames.zenlib.assets.AtlasType;
 
 public enum AnimAtari implements AnimType {
-      ATTACK ("characters/atari-joystick/atari-joystick-attack/atari-joystick-attack")
+      ATTACK ("characters/atari-joystick/atari-joystick-attack/atari-joystick-attack", DEFAULT_FRAME_DURATION, Animation.PlayMode.NORMAL)
     , IDLE   ("characters/atari-joystick/atari-joystick-idle/atari-joystick-idle")
-    , SPIN   ("characters/atari-joystick/atari-joystick-spin/atari-joystick-spin")
+    , SPIN   ("characters/atari-joystick/atari-joystick-spin/atari-joystick-spin",     DEFAULT_FRAME_DURATION, Animation.PlayMode.NORMAL)
     , WALK   ("characters/atari-joystick/atari-joystick-walk/atari-joystick-walk")
-    ;
+    ; // the two moves hold their last frame (a Move ends on it); idle and walk loop
 
     private final Asset<Animation<TextureRegion>> asset;
     private final String regionName;

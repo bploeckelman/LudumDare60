@@ -10,7 +10,8 @@ public final class Kinds {
     private Kinds() {}
 
     public static final List<Kind> ALL = List.of(
-              Awol.KIND
+              Atari.KIND
+            , Awol.KIND
             , Bendy.kind(Bendy.BLACKBERRY)
             , Bendy.kind(Bendy.BRICKPHONE)
             , Bendy.kind(Bendy.CASSETTE)
@@ -33,6 +34,8 @@ public final class Kinds {
 
     /** The role a Tiled {@code boss: true} of {@code kind} spawns in: its own state machine when it has one, else a thug's brain with a boss's armor. */
     public static Role bossRole(Kind kind) {
-        return (kind == N64.KIND) ? N64.ROLE : Roles.boss(Roles.THUG.mind());
+        if (kind == N64.KIND)   return N64.ROLE;
+        if (kind == Atari.KIND) return Atari.ROLE;
+        return Roles.boss(Roles.THUG.mind());
     }
 }
