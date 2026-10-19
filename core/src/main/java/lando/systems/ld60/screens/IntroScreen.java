@@ -37,7 +37,7 @@ public class IntroScreen extends BaseScreen {
         var play     = buttonWithOnClick("Play",     () -> start(() -> new GameScreen(game, GameLevel.LEVEL_1)));
         var dialog   = buttonWithOnClick("Dialog",   () -> start(() -> new DialogScreenIntro(game)));
         var settings = buttonWithOnClick("Settings", settingsUI::toggle);
-        var credits  = new VisTextButton("Credits");
+        var credits  = buttonWithOnClick("Credits",  () -> start(() -> new CreditsScreen(game)));
 
         var table = new VisTable();
         table.setFillParent(true);
