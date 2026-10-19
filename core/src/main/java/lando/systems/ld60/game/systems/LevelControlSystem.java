@@ -58,6 +58,9 @@ public class LevelControlSystem extends EntitySystem {
     private boolean bossSpawned = false;
     private SequenceState sequenceState = SequenceState.PLAYING;
 
+    private float exitTimer = 0f;
+    private static final float EXIT_DELAY = 1.5f; // Wait 1.5 seconds after boss dies
+
     public interface EnemySpawner {
         Entity spawn(MapObject obj);
     }
@@ -256,16 +259,16 @@ public class LevelControlSystem extends EntitySystem {
             return;
         }
 
-        // 1. BOSS DIALOGUE STATE
+// 1. BOSS DEFEATED WAIT STATE
         if (sequenceState == SequenceState.BOSS_DIALOGUE) {
             if (gameScreen.player != null) {
                 hold(gameScreen.player);
             }
 
-            // TODO: Render your boss text bubble here
-            // Listen for dismissal (mouse click, enter key, button press, etc.)
-            if (Gdx.input.justTouched()) {
-                Log.info(TAG, "Dialogue dismissed. Auto-walking player out.");
+            // Automatically count down instead of waiting for input
+            exitTimer -= dt;
+            if (exitTimer <= 0f) {
+                Log.info(TAG, "Delay finished. Auto-walking player out.");
                 sequenceState = SequenceState.PLAYER_EXIT;
             }
             return;
@@ -334,6 +337,7 @@ public class LevelControlSystem extends EntitySystem {
             if (bossSpawned && bossFamily.entities().isEmpty() && enemyFamily.entities().isEmpty()) {
                 stageClear = true;
                 sequenceState = SequenceState.BOSS_DIALOGUE;
+                exitTimer = EXIT_DELAY; // Start the delay timer
                 Log.info(TAG, "Boss defeated! Starting dialogue sequence.");
                 return;
             }
