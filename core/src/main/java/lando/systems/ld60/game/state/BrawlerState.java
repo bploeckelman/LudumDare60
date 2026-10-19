@@ -1,10 +1,7 @@
 package lando.systems.ld60.game.state;
 
 import com.zendogames.zenlib.ecs.Entity;
-import com.zendogames.zenlib.ecs.components.Animator;
-import com.zendogames.zenlib.ecs.components.Input;
-import com.zendogames.zenlib.ecs.components.Mover;
-import com.zendogames.zenlib.ecs.components.SpineAnimator;
+import com.zendogames.zenlib.ecs.components.*;
 import com.zendogames.zenlib.state.State;
 import com.zendogames.zenlib.state.StateMachine;
 import lando.systems.ld60.game.anim.AnimClip;
@@ -34,22 +31,29 @@ public enum BrawlerState implements State<Entity> {
             if (motion.launched) return HURT; // thrown by something that did not ask (eg. a Hurtable without hurtState)
 
             var buttons = GameInput.get(e);
-            if (buttons.attack.pressed) {
+            var wield   = Fighter.wieldOf(e);
+            var charges = wield != null && wield.power() != null; // this wield has a hold move, so a tap acts on the release
+            var tap     = charges ? buttons.attack.released && buttons.attack.heldTime < POWER_HOLD : buttons.attack.pressed;
+            if (tap) {
                 var item = Weapons.under(e); // attack over an item: pick it up instead of swinging
                 if (item != null && Weapons.pickUp(e, item)) {
                     return this;
                 }
-                if (Input.get(e).moveY < 0) { // down + attack: the low move (a kick) if this wield has one
-                    var wield = Fighter.wieldOf(e);
-                    if (wield != null && wield.low() != null) {
-                        return begin(e, wield.low());
-                    }
+                if (Input.get(e).moveY < 0 && wield != null && wield.low() != null) { // down + attack: the low move (a kick) if this wield has one
+                    return begin(e, wield.low());
                 }
                 var move = attackOf(e);
                 return (move != null) ? begin(e, move) : this;
             }
             if (buttons.special.pressed && Weapons.throwHeld(e) != null) {
                 return THROW;
+            }
+            if (charges && buttons.attack.held && buttons.attack.heldTime >= POWER_HOLD) { // held past a tap: the power move, once per cooldown
+                var timers = Timers.get(e);
+                if (timers != null && !timers.has(POWER_COOLDOWN)) {
+                    timers.after(POWER_COOLDOWN, wield.powerCooldown(), rest -> {});
+                    return begin(e, wield.power());
+                }
             }
             return this;
         }
@@ -136,6 +140,12 @@ public enum BrawlerState implements State<Entity> {
     public State<Entity> update(StateMachine<Entity> m, Entity e, float dt) {
         return this;
     }
+
+    /** Attack held this long starts the wield's power move (after the press's own punch has played through). */
+    public static final float POWER_HOLD = 0.3f;
+
+    /** The {@code Timers} name that holds the power move's cooldown. */
+    static final String POWER_COOLDOWN = "power";
 
     /** Records {@code move} as the one {@link #ATTACK} plays. */
     static State<Entity> begin(Entity e, Move move) {

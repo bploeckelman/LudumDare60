@@ -28,11 +28,20 @@ public class GameInput implements Component {
         public int key = UNBOUND;
         public boolean held, pressed, released;
 
+        /** Seconds held so far this press, 0 while up: a state reads it for a hold move (the power attack). */
+        public float heldTime;
+
         /** Sets the held state and derives the pressed / released edges for this tick. */
         public void setHeld(boolean h) {
             pressed  = !held &&  h;
             released =  held && !h;
             held     =  h;
+        }
+
+        /** {@link #setHeld} plus the hold clock: {@code dt} more while held, back to 0 when up. */
+        public void setHeld(boolean h, float dt) {
+            setHeld(h);
+            heldTime = h ? heldTime + dt : 0;
         }
 
         void clearFrameEvents() {
@@ -69,6 +78,7 @@ public class GameInput implements Component {
             button.held     = false;
             button.pressed  = false;
             button.released = false;
+            button.heldTime = 0;
         }
     }
 }

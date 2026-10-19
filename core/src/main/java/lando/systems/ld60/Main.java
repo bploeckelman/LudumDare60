@@ -51,8 +51,12 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
             VisUI.load(VisUI.SkinScale.X2);
         }
 
-        assets.register(GameMap.values());
         assets.register(GameAtlas.values());
+        assets.register(AnimAtari.values());
+        assets.register(AnimCassette.values());
+        assets.register(AnimFootball.values());
+        assets.register(AnimN64.values());
+        assets.register(GameMap.values());
         assets.register(GameSpine.values());
         assets.register(GameFont.values());
         assets.register(GameShader.values());

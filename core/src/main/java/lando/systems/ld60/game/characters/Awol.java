@@ -62,14 +62,21 @@ public final class Awol {
         public static final Hitbox.Attack attackPunch = Hitbox.attack(/*damage*/ 1, /*knockback*/ 4, /*height*/ 3);
         public static final Hitbox.Attack attackKick  = Hitbox.attack(/*damage*/ 2, /*knockback*/ 5, /*height*/ 2);
         public static final Hitbox.Attack attackPipe  = Hitbox.attack(/*damage*/ 2, /*knockback*/ 2, /*height*/ 1);
-        public static final Hitbox hitboxPunch = Hitbox.hit("punch", Hitbox.circ(0,  0,  9),    attackPunch).on("front-fist");
-        public static final Hitbox hitboxKick  = Hitbox.hit("kick",  Hitbox.circ(0,  0, 10),    attackKick) .on("front-toe");
+        public static final Hitbox.Attack attackPower = Hitbox.attack(/*damage*/ 3, /*knockback*/ 9, /*height*/ 3);
+        // Strike boxes reach back from the striking bone to the body, so nothing fits between the chest and the fist
+        public static final Hitbox hitboxPunch = Hitbox.hit("punch", Hitbox.capsule(-30,  -8, 40, 16), attackPunch).on("front-fist");
+        public static final Hitbox hitboxKick  = Hitbox.hit("kick",  Hitbox.capsule(-36, -10, 56, 20), attackKick) .on("front-toe");
+        public static final Hitbox hitboxPower = Hitbox.hit("power", Hitbox.capsule(-34, -12, 50, 24), attackPower).on("front-fist").depth(1.5f * Hitbox.DEPTH);
         public static final Hitbox hitboxSwing = Hitbox.hit("swing", Hitbox.rect(0, -4, 24, 8), attackPipe) .on("weapon");
         public static final Hitbox hurtboxBody = Hitbox.hurt("body", Hitbox.circ(0,  0, 25)).on("body");
-        /** Bare hands: the jab and the kick, held extended (frames 7 to 11 of 16). */
+        /** Hold attack this long for the power move; it is allowed again this long after it starts. */
+        public static final float powerHold = 0.3f;
+        public static final float powerCooldown = 1.5f;
+        /** Bare hands: the jab, the kick and the haymaker, out from the snap (frame 5 / 6) to the end of the hold (frame 11 / 12). */
         public static final HitboxSet fistsSet = new HitboxSet().base(hurtboxBody)
-                .window(punchAnim, /*start*/ 0.23f, /*end*/ 0.37f, hitboxPunch)
-                .window(kickAnim,  /*start*/ 0.23f, /*end*/ 0.37f, hitboxKick);
+                .window(punchAnim, /*start*/ 0.17f, /*end*/ 0.37f, hitboxPunch)
+                .window(kickAnim,  /*start*/ 0.17f, /*end*/ 0.37f, hitboxKick)
+                .window(swingAnim, /*start*/ 0.20f, /*end*/ 0.40f, hitboxPower);
         /** The pipe: the chop, held at the bottom (frames 8 to 12.5 of 18). */
         public static final HitboxSet pipeSet = new HitboxSet().base(hurtboxBody)
                 .window(swingAnim, /*start*/ 0.27f, /*end*/ 0.42f, hitboxSwing);
@@ -137,7 +144,11 @@ public final class Awol {
             Awol::animClips,
             GameWeapons.FISTS,
             Map.of(
-                    GameWeapons.FISTS.name(), new Wield(Props.fistsSet, Move.of(AnimClip.spine(Props.punchAnim)), /*low*/ Move.of(AnimClip.spine(Props.kickAnim))),
+                    GameWeapons.FISTS.name(), new Wield(Props.fistsSet,
+                            /*attack*/ Move.of(AnimClip.spine(Props.punchAnim)),
+                            /*low*/    Move.of(AnimClip.spine(Props.kickAnim)),
+                            /*power*/  Move.of(AnimClip.spine(Props.swingAnim)),
+                            Props.powerCooldown),
                     GameWeapons.PIPE.name(),  Wield.of(Props.pipeSet, Move.of(AnimClip.spine(Props.swingAnim)))),
             Awol::dress);
 }

@@ -30,7 +30,7 @@ public class GameInputSystem extends IteratingSystem {
         input.clearFrameEvents();
         for (var button : input.buttons) {
             if (button.key == GameInput.UNBOUND) continue; // written by something else this tick
-            button.setHeld(keys.isHeld(button.key));
+            button.setHeld(keys.isHeld(button.key), dt);
         }
     }
 }
