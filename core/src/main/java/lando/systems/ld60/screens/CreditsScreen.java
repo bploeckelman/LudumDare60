@@ -22,7 +22,9 @@ import com.zendogames.zenlib.ecs.components.SpineAnimator;
 import com.zendogames.zenlib.screens.transition.ScreenTransitionEffectType;
 import lando.systems.ld60.assets.GameFont;
 import lando.systems.ld60.assets.GameSpine;
+import lando.systems.ld60.assets.MusicType;
 import lando.systems.ld60.assets.PetAnim;
+import lando.systems.ld60.events.AudioEvent;
 
 public class CreditsScreen extends BaseScreen {
 
@@ -74,6 +76,9 @@ public class CreditsScreen extends BaseScreen {
         root.add(label("{FADE}Thanks for playing!{ENDFADE}\n{SIZE=50%}Quote of the day: Don't get old.{SIZE=100%}")).colspan(2).row();
         root.add(back).colspan(2).size(240f, 48f).padTop(PANEL_PAD).padBottom(PANEL_PAD);
         uiStage.addActor(root);
+
+        AudioEvent.stopAllMusic();
+        AudioEvent.playMusic(MusicType.READING_RAINBOW);
     }
 
     private VisTable header() {
