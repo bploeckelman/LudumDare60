@@ -54,7 +54,7 @@ public class IntroScreen extends BaseScreen {
 
         menu.focus(play, dialog, settings, credits); // 'Play' is highlighted; keys or gamepad move from there
 
-        AudioEvent.playMusic(MusicType.MAIN_THEME);
+        AudioEvent.playMusic(MusicType.TITLE_THEME  );
 
         addSettingButton();
     }

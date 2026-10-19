@@ -34,7 +34,7 @@ offsets:1,1,16,38
 right-shin
 bounds:129,53,14,36
 offsets:1,1,16,38
-left-shoe
+left-shoe-teal
 bounds:2,2,59,59
 offsets:1,1,61,61
 left-thigh
@@ -51,7 +51,7 @@ offsets:1,1,12,38
 right-hand
 bounds:92,90,33,46
 offsets:1,1,35,48
-right-shoe
+right-shoe-teal
 bounds:2,63,73,53
 offsets:1,1,75,55
 rotate:90

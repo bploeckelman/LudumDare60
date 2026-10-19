@@ -8,6 +8,8 @@ import com.zendogames.zenlib.assets.MapType;
 
 public enum GameMap implements MapType {
       LEVEL_1            ("maps/01-level.tmx")
+    ,  LEVEL_2            ("maps/02-level.tmx")
+    ,  LEVEL_3            ("maps/03-level.tmx")
     , EXAMPLE_PLATFORMER ("maps/00-example-platformer.tmx")
     , EXAMPLE_TOP_DOWN   ("maps/00-example-top-down.tmx")
     , EXAMPLE_SCROLLER   ("maps/00-example-tmnt.tmx")
