@@ -265,8 +265,7 @@ public class LevelControlSystem extends EntitySystem {
             }
 
             // Normal stage clearing
-            if (!stageClear && enemyFamily.entities().isEmpty()) {
-                stageClear = true;
+            if (!stageClear && enemyFamily.entities().isEmpty() && bossFamily.entities().isEmpty()) {                stageClear = true;
                 if (unspawnedEnemies.isEmpty() && !bossSpawned) {
                     // Fallback if the map has no boss
                     sequenceState = SequenceState.BOSS_DIALOGUE;
