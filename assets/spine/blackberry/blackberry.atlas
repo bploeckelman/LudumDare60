@@ -1,7 +1,7 @@
 blackberry.png
-size:240,366
+size:241,366
 filter:Linear,Linear
 pma:true
 blackberry-body
-bounds:2,2,236,362
-offsets:1,1,238,364
+bounds:2,2,237,362
+offsets:0,1,238,364

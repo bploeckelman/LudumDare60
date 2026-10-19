@@ -9,6 +9,7 @@ import com.zendogames.zenlib.assets.AtlasType;
 public enum AnimAtari implements AnimType {
       ATTACK ("characters/atari-joystick/atari-joystick-attack/atari-joystick-attack")
     , IDLE   ("characters/atari-joystick/atari-joystick-idle/atari-joystick-idle")
+    , SPIN   ("characters/atari-joystick/atari-joystick-spin/atari-joystick-spin")
     , WALK   ("characters/atari-joystick/atari-joystick-walk/atari-joystick-walk")
     ;
 

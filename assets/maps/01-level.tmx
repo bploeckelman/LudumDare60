@@ -50,14 +50,14 @@
    <polyline points="0,0 979,-2"/>
   </object>
   <object id="1" name="player" type="player" gid="49" x="48" y="400" width="16" height="16"/>
-  <object id="2" name="spineboy" type="enemy" gid="52" x="256" y="288" width="16" height="16">
+  <object id="2" name="blackberry" type="enemy" gid="52" x="256" y="288" width="16" height="16">
    <properties>
-    <property name="kind" value="spineboy"/>
+    <property name="kind" value="blackberry"/>
    </properties>
   </object>
-  <object id="4" name="spineboy" type="enemy" gid="52" x="896" y="384" width="16" height="16">
+  <object id="4" name="brickphone" type="enemy" gid="52" x="896" y="384" width="16" height="16">
    <properties>
-    <property name="kind" value="spineboy"/>
+    <property name="kind" value="brickphone"/>
    </properties>
   </object>
   <object id="5" name="wall" type="wall" gid="161" x="0" y="448" width="4" height="112"/>

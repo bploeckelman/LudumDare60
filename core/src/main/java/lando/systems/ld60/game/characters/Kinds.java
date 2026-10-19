@@ -9,7 +9,13 @@ public final class Kinds {
 
     private Kinds() {}
 
-    public static final List<Kind> ALL = List.of(Spineboy.KIND, Awol.KIND, N64.KIND);
+    public static final List<Kind> ALL = List.of(
+              Awol.KIND
+            , Bendy.kind(Bendy.BLACKBERRY)
+            , Bendy.kind(Bendy.BRICKPHONE)
+            , N64.KIND
+            , Spineboy.KIND
+    );
 
     /** The kind named in Tiled, case-insensitive; throws listing the names so a typo fails at load. */
     public static Kind byName(String name) {
