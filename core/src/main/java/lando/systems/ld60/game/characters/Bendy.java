@@ -44,6 +44,10 @@ public final class Bendy {
 
     public static final Props BLACKBERRY = new Props("blackberry", GameSpine.BLACKBERRY, 0.5f,  107, 164, 4);   // 53 x 82 px
     public static final Props BRICKPHONE = new Props("brickphone", GameSpine.BRICKPHONE, 0.3f,   82, 293, 5);   // 25 x 88 px
+    public static final Props CASSETTE   = new Props("cassette",   GameSpine.CASSETTE,   0.3f,   82, 293, 5);   // TODO: author
+    public static final Props FOOTBALL   = new Props("football",   GameSpine.FOOTBALL,   0.3f,   82, 293, 5);   // TODO: author
+    public static final Props PROF       = new Props("prof",       GameSpine.PROF,       0.3f,   82, 293, 5);   // TODO: author
+    public static final Props SPEAK      = new Props("speak",      GameSpine.SPEAK,      0.3f,   82, 293, 5);   // TODO: author
 
     /** The clip names in the rig (the same set the AWOL rig has, so the game treats both alike). */
     static final String IDLE = "idle", WALK = "walk", RUN = "run", JUMP = "jump", PUNCH = "punch", KICK = "kick",

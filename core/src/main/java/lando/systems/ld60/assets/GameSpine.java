@@ -82,6 +82,42 @@ public enum GameSpine implements SpineType {
             mixes.setMix("run", "swing", 0.05f);
         }
     },
+    CASSETTE ("spine/cassette/cassette.json", "spine/cassette/cassette.atlas", 1f) {
+        @Override public void mixes(AnimationStateData mixes) {
+            mixes.setMix("run", "jump", 0.2f);
+            mixes.setMix("jump", "run", 0.2f);
+            mixes.setMix("run", "punch", 0.05f);
+            mixes.setMix("run", "kick",  0.05f);
+            mixes.setMix("run", "swing", 0.05f);
+        }
+    },
+    FOOTBALL ("spine/football/football.json", "spine/football/football.atlas", 1f) {
+        @Override public void mixes(AnimationStateData mixes) {
+            mixes.setMix("run", "jump", 0.2f);
+            mixes.setMix("jump", "run", 0.2f);
+            mixes.setMix("run", "punch", 0.05f);
+            mixes.setMix("run", "kick",  0.05f);
+            mixes.setMix("run", "swing", 0.05f);
+        }
+    },
+    PROF ("spine/prof/prof.json", "spine/prof/prof.atlas", 1f) {
+        @Override public void mixes(AnimationStateData mixes) {
+            mixes.setMix("run", "jump", 0.2f);
+            mixes.setMix("jump", "run", 0.2f);
+            mixes.setMix("run", "punch", 0.05f);
+            mixes.setMix("run", "kick",  0.05f);
+            mixes.setMix("run", "swing", 0.05f);
+        }
+    },
+    SPEAK ("spine/speak/speak.json", "spine/speak/speak.atlas", 1f) {
+        @Override public void mixes(AnimationStateData mixes) {
+            mixes.setMix("run", "jump", 0.2f);
+            mixes.setMix("jump", "run", 0.2f);
+            mixes.setMix("run", "punch", 0.05f);
+            mixes.setMix("run", "kick",  0.05f);
+            mixes.setMix("run", "swing", 0.05f);
+        }
+    }
     ;
 
     /** Where spineboy's 'aim' IK points the gun: the crosshair bone's position from the feet, in skeleton units (x is always ahead, facing flips the skeleton. */

@@ -1,0 +1,7 @@
+speak.png
+size:253,388
+filter:Linear,Linear
+pma:true
+speak-body
+bounds:2,2,249,384
+offsets:72,0,384,384

@@ -13,6 +13,10 @@ public final class Kinds {
               Awol.KIND
             , Bendy.kind(Bendy.BLACKBERRY)
             , Bendy.kind(Bendy.BRICKPHONE)
+            , Bendy.kind(Bendy.CASSETTE)
+            , Bendy.kind(Bendy.FOOTBALL)
+            , Bendy.kind(Bendy.PROF)
+            , Bendy.kind(Bendy.SPEAK)
             , N64.KIND
             , Spineboy.KIND
     );
