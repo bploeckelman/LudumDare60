@@ -421,6 +421,7 @@ public class Factory {
                 .add(new Name("thug"))
                 .add(new Position(x, y))
                 .add(new Health(5))
+                .add(new FloatingHealthBar(/*yOffset*/ 90f))
                 .add(new Contacts())
                 .add(new Input())
                 .add(spineboyAnimator(facing))
@@ -433,8 +434,6 @@ public class Factory {
                         .detects(GameMask.PICKUP))
                 .add(new Hitboxes(GameWeapons.BLASTER.set(), GameMask.ENEMY, GameMask.PLAYER))
                 .add(timers);
-
-        thug.add(new FloatingHealthBar(thug, 90f));
 
         timers.every("think", 0.25f, think -> {
             var e      = think.entity();
@@ -479,6 +478,7 @@ public class Factory {
             .add(new Name("awol"))
             .add(new Position(x, y))
             .add(new Health(3))
+            .add(new FloatingHealthBar(/*yOffset*/ 90f))
             .add(new Contacts())
             .add(new Input())
             .add(new Held(GameWeapons.AWOL_FIST))
@@ -491,8 +491,6 @@ public class Factory {
             .add(awolClips())
             .add(hurtable)
             .add(timers);
-
-        entity.add(new FloatingHealthBar(entity, 90f));
 
         // The rig's events: "footstep" goes to a dust emitter; the rest are logged and play stand-in sounds until there are real ones
         emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(entity));
@@ -547,6 +545,7 @@ public class Factory {
                 .add(new Input())
                 .add(new Contacts())
                 .add(new Held(Awol.Props.unarmedWeapon))
+                .add(new FloatingHealthBar(/*yOffset*/ 90f))
                 .add(new Mover(motion))
                 .add(Awol.collider())
                 .add(Awol.animClips())
@@ -554,9 +553,6 @@ public class Factory {
                 .add(Awol.hitboxes())
                 .add(animator)
                 .add(timers);
-
-        // TODO: don't need entity in FloatingHealthBar, instead skip processing in HealthBarSystem if appropriate
-        entity.add(new FloatingHealthBar(entity, 90f));
 
         // The rig's events: "footstep" goes to a dust emitter; the rest are logged and play stand-in sounds until there are real ones
         emitter(EmitterType.DUST, new FootStepDustCloudEffect.Params(entity));
@@ -789,6 +785,7 @@ public class Factory {
         entity  .add(new Name("dummy"))
                 .add(new Position(x, y))
                 .add(new Health(5))
+                .add(new FloatingHealthBar(90f))
                 .add(new Input(noneControls))
                 .add(GameControls.none())
                 .add(new Held(GameWeapons.BLASTER))
@@ -798,7 +795,6 @@ public class Factory {
                 .add(new Hurtable().despawnAfter(1.5f).onDeath((e, strike) -> Timers.get(e).cancel("attack")))
                 .add(timers)
                 .add(anim)
-                .add(new FloatingHealthBar(entity, 90f))
         ;
 
         timers.every("attack", 2f, attack -> Behavior.get(attack.entity()).request(BrawlerState.ATTACK));

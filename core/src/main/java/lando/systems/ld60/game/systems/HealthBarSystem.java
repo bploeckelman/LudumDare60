@@ -27,9 +27,17 @@ public class HealthBarSystem extends IteratingSystem  {
 
     @Override
     protected void process(Entity entity, float dt) {
-        FloatingHealthBar bar = FloatingHealthBar.get(entity);
-        Health health = Health.get(entity);
-        Position pos = Position.get(entity);
+        var bar = FloatingHealthBar.get(entity);
+        var pos = Position.get(entity);
+
+        var health = Health.get(entity);
+        if (health == null || health.isDead()) {
+            return;
+        }
+
+        if (health.current >= health.max && !bar.isLerping) {
+            return;
+        }
 
         bar.justFinishedLerping = false;
 
