@@ -177,7 +177,7 @@
    </properties>
   </object>
  </objectgroup>
- <layer id="1" name="collision" width="304" height="28">
+ <layer id="1" name="collision" width="304" height="28" visible="0">
   <properties>
    <property name="collision" value="tagged"/>
   </properties>
