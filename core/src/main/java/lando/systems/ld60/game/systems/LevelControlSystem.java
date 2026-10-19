@@ -31,6 +31,7 @@ public class LevelControlSystem extends EntitySystem {
     private float currentStageStartX;
     private float currentStageEndX;
     private float activeLeftBound;
+    private float currentCameraRightBound; // NEW: tracks the smoothed camera boundary
     private boolean stageClear = false;
     private boolean bossSpawned = false;
     private boolean levelComplete = false;
@@ -58,6 +59,7 @@ public class LevelControlSystem extends EntitySystem {
         this.bossSpawned = false;
         this.levelComplete = false;
         this.activeLeftBound = 0f;
+        this.currentCameraRightBound = 0f;
         this.unspawnedEnemies.clear();
 
         // Find all "stage" polylines and sort them from left to right based on their X coordinate
@@ -122,7 +124,8 @@ public class LevelControlSystem extends EntitySystem {
             }
         }
 
-        updateCameraBounds();
+        // Force a camera bound snap when loading a new stage so the right side locks immediately
+        currentCameraRightBound = currentStageEndX;
     }
 
     private void spawnEnemiesForStage(int stageNum) {
@@ -148,35 +151,46 @@ public class LevelControlSystem extends EntitySystem {
 
         if (spawnedThisStage.isEmpty()) {
             stageClear = true;
-            updateCameraBounds();
         }
     }
 
-    private void updateCameraBounds() {
+    // Pass delta time in to smoothly expand the camera constraint
+    private void updateCameraBounds(float dt) {
         if (gameScreen.cameraFollow != null && tilemap != null) {
             float mapEndX = tilemap.width();
-            float rightBound = stageClear ? mapEndX : currentStageEndX;
-            float width = Math.max(0, rightBound - activeLeftBound);
+            float targetRightBound = stageClear ? mapEndX : currentStageEndX;
 
+            if (currentCameraRightBound == 0f || currentCameraRightBound > targetRightBound) {
+                // Snap bound instantly if shrinking (e.g. entering a new stage)
+                currentCameraRightBound = targetRightBound;
+            } else if (currentCameraRightBound < targetRightBound) {
+                // Smoothly pan the bound open at 400 pixels per second to prevent instant camera jump
+                currentCameraRightBound += 400f * dt;
+                if (currentCameraRightBound > targetRightBound) {
+                    currentCameraRightBound = targetRightBound;
+                }
+            }
+
+            float width = Math.max(0, currentCameraRightBound - activeLeftBound);
             gameScreen.cameraFollow.bounds.set(activeLeftBound, 0, width, tilemap.height());
         }
     }
 
     @Override
     public void update(float dt) {
-        if (levelComplete) return;
+        if (levelComplete) {
+            updateCameraBounds(dt);
+            return;
+        }
 
         if (bossSpawned && bossFamily.entities().isEmpty()) {
             levelComplete = true;
             stageClear = true;
-            updateCameraBounds();
             Log.info(TAG, "Boss defeated! Level Complete.");
-            return;
         }
 
         if (!stageClear && enemyFamily.entities().isEmpty()) {
             stageClear = true;
-            updateCameraBounds();
 
             if (unspawnedEnemies.isEmpty() && !bossSpawned) {
                 levelComplete = true;
@@ -192,7 +206,6 @@ public class LevelControlSystem extends EntitySystem {
 
                 if (pos.x >= currentStageStartX && activeLeftBound < currentStageStartX) {
                     activeLeftBound = Math.min(pos.x, currentStageStartX);
-                    updateCameraBounds();
                 }
 
                 if (stageClear && pos.x >= currentStageEndX && !levelComplete) {
@@ -203,17 +216,21 @@ public class LevelControlSystem extends EntitySystem {
                     spawnEnemiesForStage(currentStage);
                 }
 
+                // Player constraints remain rigid so they can't walk out of bounds
                 if (pos.x < activeLeftBound) {
                     pos.x = (int) activeLeftBound;
                 }
 
                 float mapEndX = tilemap != null ? tilemap.width() : Float.MAX_VALUE;
-                float activeRightBound = stageClear ? mapEndX : currentStageEndX;
+                float playerRightConstraint = stageClear ? mapEndX : currentStageEndX;
 
-                if (pos.x > activeRightBound) {
-                    pos.x = (int) activeRightBound;
+                if (pos.x > playerRightConstraint) {
+                    pos.x = (int) playerRightConstraint;
                 }
             }
         }
+
+        // Execute smooth camera updates every frame
+        updateCameraBounds(dt);
     }
 }

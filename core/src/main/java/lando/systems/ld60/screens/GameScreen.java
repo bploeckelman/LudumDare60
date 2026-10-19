@@ -34,6 +34,7 @@ import lando.systems.ld60.game.systems.LevelControlSystem;
 import lando.systems.ld60.particles.effects.BloodSprayEffect;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
+import lando.systems.ld60.ui.PlayerHealthWidget;
 
 /**
  * The game: one {@link GameLevel} at a time on the brawler's systems (presentation, hits,
@@ -103,6 +104,12 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
                 // TEMP: the clips a thug's brain never triggers on its own (jump; knockback without a weapon that lifts)
                 .add("enemies hop",         Input.Keys.J, () -> eachEnemy((_, mover, motion) -> motion.jump(mover)))
                 .add("enemies knocked back",Input.Keys.L, () -> eachEnemy((e, mover, motion) -> motion.launch(mover, awayFromPlayer(e), /*dist*/ 3f, /*height*/ 2f)));
+
+        PlayerHealthWidget healthWidget = new PlayerHealthWidget(this);
+        healthWidget.setSize(300f, 25f);
+        // Position it 20 pixels from the left and 20 pixels down from the top of the UI camera
+        healthWidget.setPosition(20f, uiStage.getHeight() - healthWidget.getHeight() - 30f);
+        uiStage.addActor(healthWidget);
     }
 
     interface EnemyMotionAction { void run(Entity e, Mover mover, BrawlerMotion motion); }

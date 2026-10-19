@@ -386,7 +386,7 @@ public class Factory {
                 .add(new Name("hero"))
                 .add(new Position(x, y))
                 .add(new Timers())
-                .add(new Health(30))
+                .add(new Health(10))
                 .add(new Contacts())
                 .add(new Input(GameControls.PLAYER))
                 .add(GameControls.playerButtons())
