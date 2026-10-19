@@ -3,10 +3,13 @@ package lando.systems.ld60.game.state;
 import com.badlogic.gdx.math.MathUtils;
 import com.zendogames.zenlib.ecs.Entity;
 import com.zendogames.zenlib.ecs.components.*;
+import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.state.State;
 import com.zendogames.zenlib.state.StateMachine;
+import lando.systems.ld60.assets.EmitterType;
 import lando.systems.ld60.assets.SoundType;
 import lando.systems.ld60.events.AudioEvent;
+import lando.systems.ld60.events.ParticleEvent;
 import lando.systems.ld60.game.ai.Senses;
 import lando.systems.ld60.game.anim.Move;
 import lando.systems.ld60.game.characters.N64;
@@ -17,6 +20,7 @@ import lando.systems.ld60.game.components.Fighter;
 import lando.systems.ld60.game.components.Hover;
 import lando.systems.ld60.game.components.Hurtable;
 import lando.systems.ld60.game.movement.BrawlerMotion;
+import lando.systems.ld60.particles.effects.FireExplosionEffect;
 
 /**
  * The N64 controller boss ({@link N64}): floats about the street facing the player, jabs with
@@ -220,6 +224,8 @@ public enum N64BossState implements State<Entity> {
             motion(e).grounded = false; // falls from its hover under the motion's gravity
             var clips = BrawlerAnimClips.get(e);
             if (clips != null) clips.deadOrHurt().start(e, false); // now, not after the move it was in plays out
+            var pos = Position.get(e);
+            ParticleEvent.spawn(EmitterType.FIRE_EXPLOSION, new FireExplosionEffect.Params(pos.x, pos.y + motion(e).z, 80f, 80f), RenderLayer.OVERLAY);
         }
 
         @Override

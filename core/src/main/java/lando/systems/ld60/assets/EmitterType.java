@@ -16,6 +16,7 @@ public enum EmitterType {
     , KICK(new KickEffect())
     , THROW_TRAIL(new ThrowTrailEffect())
     , WEAPON_PICKUP(new WeaponPickupEffect())
+    , FIRE_EXPLOSION(new FireExplosionEffect())
     ;
 
     public final ParticleEffect effect;

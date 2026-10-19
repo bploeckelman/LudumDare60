@@ -22,6 +22,7 @@ import lando.systems.ld60.game.movement.BrawlerMotion;
 import lando.systems.ld60.game.movement.BrawlerTuning;
 import lando.systems.ld60.game.state.N64BossState;
 import lando.systems.ld60.game.state.RumblePakState;
+import lando.systems.ld60.particles.effects.FireExplosionEffect;
 import lando.systems.ld60.particles.effects.SpawnCloudEffect;
 
 import java.util.Map;
@@ -205,8 +206,8 @@ public final class N64 {
         var rp    = RumblePak.get(pak);
         var boxes = Hitboxes.get(pak);
         AudioEvent.playSound(SoundType.DEGAUSS); // TODO: an explosion sound
-        ParticleEvent.spawn(EmitterType.SPAWN_CLOUD, new SpawnCloudEffect.Params(new Position(rp.targetX, rp.targetY)), RenderLayer.OVERLAY); // TODO: an explosion effect
-
+        ParticleEvent.spawn(EmitterType.SPAWN_CLOUD, new SpawnCloudEffect.Params(new Position(rp.targetX, rp.targetY)), RenderLayer.OVERLAY);
+        ParticleEvent.spawn(EmitterType.FIRE_EXPLOSION, new FireExplosionEffect.Params(rp.targetX, rp.targetY, 20f, 20f), RenderLayer.OVERLAY);
         var responder = new GameStrikes();
         var fighters  = Senses.fightersIn(pak.world());
         for (int i = 0; i < fighters.size; i++) {
