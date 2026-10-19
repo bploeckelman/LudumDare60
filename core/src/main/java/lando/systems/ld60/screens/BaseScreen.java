@@ -30,6 +30,10 @@ import com.zendogames.zenlib.ui.DebugActions;
 import com.zendogames.zenlib.ui.DebugViews;
 import lando.systems.ld60.GameFlags;
 import lando.systems.ld60.assets.GameUIAnim;
+import lando.systems.ld60.events.CombatEvent;
+import lando.systems.ld60.events.ShakeEvent;
+import lando.systems.ld60.events.Signal;
+import lando.systems.ld60.events.SignalListener;
 import lando.systems.ld60.game.Factory;
 import lando.systems.ld60.game.components.Emitter;
 import lando.systems.ld60.game.components.FloatingHealthBar;
@@ -40,8 +44,10 @@ import lando.systems.ld60.game.input.KeyEvents;
 import lando.systems.ld60.game.systems.ParticleSystem;
 import lando.systems.ld60.ui.MenuStage;
 import lando.systems.ld60.ui.SettingsUI;
+import lando.systems.ld60.utils.screenshake.ScreenShakeCameraController;
+import lombok.Builder;
 
-public class BaseScreen extends ZenScreen {
+public class BaseScreen extends ZenScreen implements SignalListener<ShakeEvent> {
 
     /** Camera zoom steps for seeing more of a level; 1 is the screen's own view size. */
     static final float[] ZOOMS = { 1f, 1.5f, 2f, 3f, 4f, 6f };
@@ -55,6 +61,7 @@ public class BaseScreen extends ZenScreen {
     final CollisionWorld collision; // null when withCollision is false
     final TextureRegion pixel;
     final DebugActions actions;
+    public ScreenShakeCameraController shakeController;
 
     public final SettingsUI settingsUI = new SettingsUI();
 
@@ -71,6 +78,9 @@ public class BaseScreen extends ZenScreen {
 
     protected BaseScreen(ZenGame game, boolean withCollision) {
         super(game);
+
+        shakeController = new ScreenShakeCameraController(worldCamera);
+        ShakeEvent.signal.register(this);
         this.pixel = new TextureRegion(game.pixel);
         this.world = new World();
         this.factory = new Factory(world);
@@ -142,6 +152,11 @@ public class BaseScreen extends ZenScreen {
         };
     }
 
+    @Override
+    public void alwaysUpdate(float delta) {
+        shakeController.update(delta);
+    }
+
     @Override public void update(float dt) {
         padKeys.update();
         world.update(dt);
@@ -154,6 +169,7 @@ public class BaseScreen extends ZenScreen {
 
     @Override
     protected void renderWorld(Batch batch) {
+        batch.setProjectionMatrix(shakeController.getCombinedMatrix());
         batch.begin();
         world.render(Time.delta);
         if (collision != null && ZenFlag.DEBUG_RENDER.on()) {
@@ -163,7 +179,14 @@ public class BaseScreen extends ZenScreen {
         batch.end();
     }
 
+    @Override
+    public void receive(Signal<ShakeEvent> signal, ShakeEvent event) {
+        // Add the requested trauma to the controller
+        shakeController.addTrauma(event.trauma);
+    }
+
     @Override public void dispose() {
+        ShakeEvent.signal.remove(this);
         world.dispose();
         super.dispose();
     }

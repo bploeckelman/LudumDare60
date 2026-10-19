@@ -78,4 +78,35 @@ public record AnimClip(String spine, AnimType sprite) {
         return a == null || a.isComplete();
     }
 
+    /**
+     * Spine: parks track 0 {@code time} seconds into its clip and stops its clock until {@link #resume};
+     * the clip neither completes nor opens later hit windows while parked. A sprite animator has no
+     * per-clip clock to stop, so this is a no-op there (the clip plays through as usual).
+     */
+    public static void freeze(Entity e, float time) {
+        var s = SpineAnimator.get(e);
+        if (s == null) return;
+        var track = s.state.getTrack(0);
+        if (track == null) return;
+        track.setTrackTime(time);
+        track.setTimeScale(0);
+    }
+
+    /** Spine: restarts the clock of a {@link #freeze}d track 0 entry. */
+    public static void resume(Entity e) {
+        var s = SpineAnimator.get(e);
+        if (s == null) return;
+        var track = s.state.getTrack(0);
+        if (track != null) track.setTimeScale(1);
+    }
+
+    /**
+     * Drops whatever track 0 plays (a {@link #freeze}d clip included): Spine crossfades to the setup
+     * pose over {@code mix} seconds and reads as {@link #complete} at once, so whoever picks the
+     * everyday clips takes over. A sprite animator plays its clip through; nothing to drop.
+     */
+    public static void clear(Entity e, float mix) {
+        var s = SpineAnimator.get(e);
+        if (s != null) s.stop(mix);
+    }
 }

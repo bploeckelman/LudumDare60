@@ -28,7 +28,7 @@ import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.CloneEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 
-public class ExampleScroller extends MapScreen implements SignalListener<CombatEvent> {
+public class ExampleScroller extends MapScreen {
 
     private static final String TAG = ExampleScroller.class.getSimpleName();
 
@@ -53,7 +53,7 @@ public class ExampleScroller extends MapScreen implements SignalListener<CombatE
         world.addSystem(new BrawlerPresentSystem());
         world.addSystem(hitSystem);
         world.addSystem(new HealthBarSystem());
-        CombatEvent.signal.register(this);
+        CombatEvent.signal.register(this::onCombatEvent);
 
         spawner .on(Factory.PLAYER, this::spawnPlayer)
                 .on(FactoryExample.DUMMY,  this::spawnDummy)
@@ -113,8 +113,8 @@ public class ExampleScroller extends MapScreen implements SignalListener<CombatE
         factoryExample.dummy(x, y, facing);
     }
 
-    @Override
-    public void receive(Signal<CombatEvent> signal, CombatEvent event) {
+
+    public void onCombatEvent(Signal<CombatEvent> signal, CombatEvent event) {
         switch (event) {
             case CombatEvent.Died d:
                 var pos = Position.get(d.entity);
@@ -131,7 +131,7 @@ public class ExampleScroller extends MapScreen implements SignalListener<CombatE
 
     @Override
     public void dispose() {
-        CombatEvent.signal.remove(this);
+        CombatEvent.signal.remove(this::onCombatEvent);
         super.dispose();
     }
 }

@@ -69,9 +69,8 @@ public final class Awol {
         public static final Hitbox hitboxPower = Hitbox.hit("power", Hitbox.capsule(-34, -12, 50, 24), attackPower).on("front-fist").depth(1.5f * Hitbox.DEPTH);
         public static final Hitbox hitboxSwing = Hitbox.hit("swing", Hitbox.rect(0, -4, 24, 8), attackPipe) .on("weapon");
         public static final Hitbox hurtboxBody = Hitbox.hurt("body", Hitbox.circ(0,  0, 25)).on("body");
-        /** Hold attack this long for the power move; it is allowed again this long after it starts. */
-        public static final float powerHold = 0.3f;
-        public static final float powerCooldown = 1.5f;
+        /** The power move parks this far into the swing (frame 5, wound up, before the window at 0.20) while attack is held. */
+        public static final float powerWindup = 0.17f;
         /** Bare hands: the jab, the kick and the haymaker, out from the snap (frame 5 / 6) to the end of the hold (frame 11 / 12). */
         public static final HitboxSet fistsSet = new HitboxSet().base(hurtboxBody)
                 .window(punchAnim, /*start*/ 0.17f, /*end*/ 0.37f, hitboxPunch)
@@ -147,8 +146,7 @@ public final class Awol {
                     GameWeapons.FISTS.name(), new Wield(Props.fistsSet,
                             /*attack*/ Move.of(AnimClip.spine(Props.punchAnim)),
                             /*low*/    Move.of(AnimClip.spine(Props.kickAnim)),
-                            /*power*/  Move.of(AnimClip.spine(Props.swingAnim)),
-                            Props.powerCooldown),
+                            /*power*/  new Wield.Power(Move.of(AnimClip.spine(Props.swingAnim)), Props.powerWindup)),
                     GameWeapons.PIPE.name(),  Wield.of(Props.pipeSet, Move.of(AnimClip.spine(Props.swingAnim)))),
             Awol::dress);
 }
