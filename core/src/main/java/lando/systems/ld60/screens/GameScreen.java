@@ -161,7 +161,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
                 String rawName = (nameComp != null) ? nameComp.name : "UNKNOWN BOSS";
 
                 // Set the text with the red color and black outline
-                bossLabel.restart("{COLOR=RED}{OUTLINECOLOR=BLACK}{OUTLINE=2}{SPEED=2.5}" + rawName.toUpperCase());
+                bossLabel.restart("{COLOR=YELLOW}{OUTLINECOLOR=BLACK}{OUTLINE=2}{SPEED=2.5}" + rawName.toUpperCase());
 
                 // Re-align the label to match the right-aligned health bar since text length changed
                 bossLabel.pack(); // forces it to compute its width immediately
