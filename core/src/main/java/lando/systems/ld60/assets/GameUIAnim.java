@@ -10,6 +10,7 @@ public enum GameUIAnim implements AnimType {
     GEAR ("gear")
     , SETTINGS ("ui/settings-modal")
     , DIALOG ("ui/dialog-box")
+    , GO_ARROW("ui/go")
     ;
 
     private final Asset<Animation<TextureRegion>> asset;

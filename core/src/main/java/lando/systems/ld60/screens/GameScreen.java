@@ -34,6 +34,7 @@ import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 import lando.systems.ld60.particles.effects.BloodSprayEffect;
 import lando.systems.ld60.particles.effects.FootStepDustCloudEffect;
 import lando.systems.ld60.ui.HUDHealthWidget;
+import lando.systems.ld60.ui.KeepMovingWidget;
 
 /**
  * The game: one {@link GameLevel} at a time on the brawler's systems (presentation, hits,
@@ -55,6 +56,7 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
 
     private HUDHealthWidget bossWidget;
     private TypingLabel bossLabel;
+    public KeepMovingWidget keepMovingWidget;
 
     public boolean debugRender  = false;
     public boolean showHitboxes = false;
@@ -128,6 +130,10 @@ public class GameScreen extends MapScreen implements SignalListener<CombatEvent>
         bossLabel = new TypingLabel("", GameFont.DOS_FONT.get());
         bossLabel.setVisible(false);
         uiStage.addActor(bossLabel);
+
+        keepMovingWidget = new KeepMovingWidget();
+        keepMovingWidget.setVisible(false);
+        uiStage.addActor(keepMovingWidget);
     }
 
     interface EnemyMotionAction { void run(Entity e, Mover mover, BrawlerMotion motion); }

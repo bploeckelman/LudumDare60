@@ -307,6 +307,7 @@ public class LevelControlSystem extends EntitySystem {
                     sequenceState = SequenceState.BOSS_DIALOGUE;
                 } else {
                     Log.info(TAG, "Stage %d clear! Move forward.", currentStage);
+                    gameScreen.keepMovingWidget.setVisible(true);
                 }
             }
 
@@ -330,6 +331,7 @@ public class LevelControlSystem extends EntitySystem {
                     }
 
                     if (stageClear && pos.x >= currentStageEndX) {
+                        gameScreen.keepMovingWidget.setVisible(false);
                         currentStage++;
                         stageClear = false;
                         Log.info(TAG, "Entering stage %d", currentStage);
