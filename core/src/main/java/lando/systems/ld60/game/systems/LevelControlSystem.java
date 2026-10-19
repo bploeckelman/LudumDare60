@@ -8,9 +8,13 @@ import com.badlogic.gdx.utils.Array;
 import com.zendogames.zenlib.Log;
 import com.zendogames.zenlib.ecs.*;
 import com.zendogames.zenlib.ecs.components.*;
+import com.zendogames.zenlib.render.RenderLayer;
 import com.zendogames.zenlib.tilemap.TiledProps;
+import lando.systems.ld60.assets.EmitterType;
+import lando.systems.ld60.events.ParticleEvent;
 import lando.systems.ld60.game.GameTags;
 import lando.systems.ld60.game.components.GameInput;
+import lando.systems.ld60.particles.effects.SpawnCloudEffect;
 import lando.systems.ld60.screens.GameScreen;
 
 public class LevelControlSystem extends EntitySystem {
@@ -146,6 +150,11 @@ public class LevelControlSystem extends EntitySystem {
                 Entity e = enemySpawner.spawn(obj);
                 if (e != null && e.hasTag(GameTags.BOSS)) {
                     bossSpawned = true;
+                }
+                if (e != null) {
+                    var pos = Position.get(e);
+                    SpawnCloudEffect.Params params = new SpawnCloudEffect.Params(pos);
+                    ParticleEvent.spawn(EmitterType.SPAWN_CLOUD, params, RenderLayer.OVERLAY);
                 }
                 spawnedThisStage.add(obj);
             }
