@@ -90,6 +90,20 @@ public abstract class MapScreen extends BaseScreen {
                     var animSystem = world.getSystem(AnimationSystem.class);
                     animSystem.enabled = !animSystem.enabled;
                 });
+
+        addSettingButton();
+    }
+
+    @Override public void update(float dt) {
+        if (!settingsUI.isVisible) {
+            world.update(dt);
+            afterWorldUpdate(dt);
+        }
+        else { // pause during settings
+
+        }
+        uiStage.act(dt);
+
     }
 
     /** The rules for this screen's contacts; called from the constructor, so read no subclass fields. The examples' by default. */
