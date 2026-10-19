@@ -23,7 +23,7 @@ import com.zendogames.zenlib.ecs.components.SpineAnimator;
  * {@link #mixes} sets per-pair crossfade times on the shared {@code AnimationStateData}.
  */
 public enum GameSpine implements SpineType {
-    SPINEBOY ("spine/spineboy/spineboy-pro.json", "spine/spineboy/0.25/spineboy-pro.atlas", 0.25f) {
+    SPINEBOY ("spine/spineboy/spineboy-pro.skel", "spine/spineboy/0.25/spineboy-pro.atlas", 0.25f) {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
@@ -46,7 +46,7 @@ public enum GameSpine implements SpineType {
             jump.setTimelines(timelines, jump.getBones()); // recomputes the property ids the mixer checks
         }
     },
-    AWOL ("spine/awol/awol.json", "spine/awol/awol.atlas", 1f) {
+    AWOL ("spine/awol/awol.skel", "spine/awol/awol.atlas", 1f) {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
@@ -55,7 +55,7 @@ public enum GameSpine implements SpineType {
             mixes.setMix("run", "swing", 0.05f);
         }
     },
-    FLOPPYD ("spine/floppyd/floppyd.json", "spine/floppyd/floppyd.atlas", 1f) {
+    FLOPPYD ("spine/floppyd/floppyd.skel", "spine/floppyd/floppyd.atlas", 1f) {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
@@ -64,7 +64,7 @@ public enum GameSpine implements SpineType {
             mixes.setMix("run", "swing", 0.05f);
         }
     },
-    BLACKBERRY ("spine/blackberry/blackberry.json", "spine/blackberry/blackberry.atlas", 1f) {
+    BLACKBERRY ("spine/blackberry/blackberry.skel", "spine/blackberry/blackberry.atlas", 1f) {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
@@ -73,7 +73,7 @@ public enum GameSpine implements SpineType {
             mixes.setMix("run", "swing", 0.05f);
         }
     },
-    BRICKPHONE ("spine/brickphone/brickphone.json", "spine/brickphone/brickphone.atlas", 1f) {
+    BRICKPHONE ("spine/brickphone/brickphone.skel", "spine/brickphone/brickphone.atlas", 1f) {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
@@ -82,7 +82,7 @@ public enum GameSpine implements SpineType {
             mixes.setMix("run", "swing", 0.05f);
         }
     },
-    CASSETTE ("spine/cassette/cassette.json", "spine/cassette/cassette.atlas", 1f) {
+    CASSETTE ("spine/cassette/cassette.skel", "spine/cassette/cassette.atlas", 1f) {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
@@ -91,7 +91,7 @@ public enum GameSpine implements SpineType {
             mixes.setMix("run", "swing", 0.05f);
         }
     },
-    FOOTBALL ("spine/football/football.json", "spine/football/football.atlas", 1f) {
+    FOOTBALL ("spine/football/football.skel", "spine/football/football.atlas", 1f) {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
@@ -100,7 +100,7 @@ public enum GameSpine implements SpineType {
             mixes.setMix("run", "swing", 0.05f);
         }
     },
-    PROF ("spine/prof/prof.json", "spine/prof/prof.atlas", 1f) {
+    PROF ("spine/prof/prof.skel", "spine/prof/prof.atlas", 1f) {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
@@ -109,7 +109,7 @@ public enum GameSpine implements SpineType {
             mixes.setMix("run", "swing", 0.05f);
         }
     },
-    SPEAK ("spine/speak/speak.json", "spine/speak/speak.atlas", 1f) {
+    SPEAK ("spine/speak/speak.skel", "spine/speak/speak.atlas", 1f) {
         @Override public void mixes(AnimationStateData mixes) {
             mixes.setMix("run", "jump", 0.2f);
             mixes.setMix("jump", "run", 0.2f);
