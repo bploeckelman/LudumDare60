@@ -15,16 +15,23 @@ import lando.systems.ld60.events.AudioEvent;
 
 public class LauncherScreen extends BaseScreen {
 
-    private float deBounceTimer = 0f;
+    public static float DEBOUNCE = .5f;
     public float charWidth = 16f;
     public float charHeight = 32f;
     Color headerTextColor = new Color(0f, 0f, .8f, 1f);
     BitmapFont dosFont;
     GlyphLayout glyphLayout = new GlyphLayout();
+    float accum;
+
+    Color cgaBlue = new Color(0.0f, 0.0f, 0.67f, 1.0f);        // Classic DOS Background
+    Color cgaCyan = new Color(0.0f, 0.67f, 0.67f, 1.0f);       // Teal/Cyan
+    Color cgaMagenta = new Color(0.67f, 0.0f, 0.67f, 1.0f);    // Purple/Magenta
+    Color cgaLightGray = new Color(0.67f, 0.67f, 0.67f, 1.0f); // Standard DOS Text
+    Color cgaYellow = new Color(1.0f, 1.0f, 0.33f, 1.0f);
 
     public LauncherScreen(ZenGame game) {
         super(game, false);
-        deBounceTimer = .5f;
+        accum = 0f;
         // This needed to be a bitmap font to get that old dos terminal look,
         // Textra font was fucking with kerning and such.
         dosFont = new BitmapFont(Gdx.files.internal("fonts/dos.fnt"));
@@ -36,11 +43,11 @@ public class LauncherScreen extends BaseScreen {
     @Override
     public void update(float dt) {
         super.update(dt);
-        deBounceTimer -= dt;
+        accum += dt;
         var isEnterPressed = Gdx.input.isKeyJustPressed(Input.Keys.ENTER);
         var isJustTouched  = Gdx.input.justTouched();
         var isPadPressed   = pad.anyButton();
-        if (deBounceTimer <= 0 && (isEnterPressed || isJustTouched || isPadPressed)) {
+        if (accum >= DEBOUNCE && (isEnterPressed || isJustTouched || isPadPressed)) {
             if (!transitioning){
                 transitioning = true;
                 AudioEvent.playSound(SoundType.DEGAUSS);
@@ -56,32 +63,35 @@ public class LauncherScreen extends BaseScreen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         batch.setProjectionMatrix(windowCamera.combined);
-        batch.setColor(1f, 1f, 1f, 1f);
+        batch.setColor(cgaLightGray);
         batch.draw(Main.game.pixel, 0, windowCamera.viewportHeight - charHeight, windowCamera.viewportWidth, charHeight);
 
-        batch.setColor(.8f, .0f, .8f, 1f);
+        batch.setColor(cgaMagenta);
         batch.draw(Main.game.pixel,  charWidth * 5,  windowCamera.viewportHeight - charHeight * 9, charWidth * 40, charHeight * 5);
 
-        batch.setColor(0f, .0f, 0f, 1f);
+        // Black Drop Shadow for Cyan Box
+        batch.setColor(0f, 0f, 0f, 1f);;
         batch.draw(Main.game.pixel,  charWidth * 11,  windowCamera.viewportHeight - charHeight * 18, charWidth * 30, charHeight * 6);
 
-        batch.setColor(.0f, .8f, .8f, 1f);
+        // Cyan Box
+        batch.setColor(cgaCyan);
         batch.draw(Main.game.pixel,  charWidth * 10,  windowCamera.viewportHeight - charHeight * 17, charWidth * 30, charHeight * 6);
 
-
-        batch.setColor(0, .0f, .0f, 1f);
+        // Button/Prompt Shadows
+        batch.setColor(0f, 0f, 0f, 1f);
         batch.draw(Main.game.pixel,  charWidth * 14.5f,  windowCamera.viewportHeight - charHeight * 15.5f, charWidth * 20, charHeight * 1);
 
-        batch.setColor(1.0f, 1.0f, 1.0f, 1f);
+        // Button/Prompt Body
+        batch.setColor(cgaLightGray);
         batch.draw(Main.game.pixel,  charWidth * 14,  windowCamera.viewportHeight - charHeight * 15, charWidth * 20, charHeight * 1);
 
 
         batch.setColor(1f, 1f, 1f, 1f);
-        drawTextAt("File", 2, 0, headerTextColor);
-        drawTextAt("Edit", 8, 0, headerTextColor);
-        drawTextAt("View", 14, 0, headerTextColor);
-        drawTextAt("Play", 20, 0, headerTextColor);
-        drawTextAt("Jam!", 26, 0, headerTextColor);
+        drawTextAt("File", 2, 0, cgaBlue);
+        drawTextAt("Edit", 8, 0, cgaBlue);
+        drawTextAt("View", 14, 0, cgaBlue);
+        drawTextAt("Play", 20, 0, cgaBlue);
+        drawTextAt("Jam!", 26, 0, cgaBlue);
 
         drawTextAt("╔═══════════════════════════════════════╗", 6, 4, Color.WHITE);
         drawTextAt("║ The Coalition of Obsolete Technology  ║", 6, 5, Color.WHITE);
@@ -89,8 +99,14 @@ public class LauncherScreen extends BaseScreen {
         drawTextAt("║     Book II: Return of the Audio      ║", 6, 7, Color.WHITE);
         drawTextAt("╚═══════════════════════════════════════╝", 6, 8, Color.WHITE);
 
-        drawTextAt("► Press Enter ◄", 17, 14, Color.BLACK);
 
+        // The Terminal Prompt (Solid Yellow text with a blinking terminal cursor)
+        drawTextAt("► Press Enter", 16, 14, Color.BLACK);
+
+        // Classic DOS underscore cursor blink (toggles every 0.5s)
+        if (accum % 1.0f < 0.5f) {
+            drawTextAt("█", 29, 14, Color.BLACK); // Drawn right after "Enter"
+        }
         batch.end();
 
         renderUI();
