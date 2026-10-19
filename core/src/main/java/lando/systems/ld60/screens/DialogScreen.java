@@ -92,8 +92,7 @@ public class DialogScreen extends BaseScreen {
 
     @Override
     protected void renderWorld(Batch batch) {
-        // the dialog box lives in world space and draws first, so the spine speakers render over it;
-        // uiStage always draws after the whole world pass
+        // uiStage always draws after, so we can't use uiStage.
         dialogStage.draw();
         super.renderWorld(batch);
     }
