@@ -2,10 +2,6 @@ package lando.systems.ld60.assets;
 
 import lando.systems.ld60.particles.ParticleEffect;
 import lando.systems.ld60.particles.effects.*;
-<<<<<<< HEAD
-
-=======
->>>>>>> 1438ec1 (heart pickup)
 
 public enum EmitterType {
     TEST (new TestEffect())
