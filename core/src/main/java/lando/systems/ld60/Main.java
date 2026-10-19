@@ -44,6 +44,9 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
     protected void init() {
         prefs = Gdx.app.getPreferences(Config.preferencesName);
 
+        ZenFlag.LOG_INFO.set(false);
+        ZenFlag.GLOBAL.set(false);
+
         String vert = Gdx.files.internal("shaders/default.vert").readString();
         String frag = Gdx.files.internal("shaders/loading.frag").readString();
 
@@ -84,6 +87,8 @@ public class Main extends ZenGame implements SignalListener<DistortionEvent> {
         audioSystem = new AudioSystem();
 
         DistortionEvent.signal.register(this);
+
+
 
     }
 
