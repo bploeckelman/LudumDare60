@@ -1,0 +1,7 @@
+brickphone.png
+size:110,384
+filter:Linear,Linear
+pma:true
+brickphone-body
+bounds:2,2,106,380
+offsets:132,0,384,384

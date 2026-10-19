@@ -64,6 +64,24 @@ public enum GameSpine implements SpineType {
             mixes.setMix("run", "swing", 0.05f);
         }
     },
+    BLACKBERRY ("spine/blackberry/blackberry.json", "spine/blackberry/blackberry.atlas", 1f) {
+        @Override public void mixes(AnimationStateData mixes) {
+            mixes.setMix("run", "jump", 0.2f);
+            mixes.setMix("jump", "run", 0.2f);
+            mixes.setMix("run", "punch", 0.05f);
+            mixes.setMix("run", "kick",  0.05f);
+            mixes.setMix("run", "swing", 0.05f);
+        }
+    },
+    BRICKPHONE ("spine/brickphone/brickphone.json", "spine/brickphone/brickphone.atlas", 1f) {
+        @Override public void mixes(AnimationStateData mixes) {
+            mixes.setMix("run", "jump", 0.2f);
+            mixes.setMix("jump", "run", 0.2f);
+            mixes.setMix("run", "punch", 0.05f);
+            mixes.setMix("run", "kick",  0.05f);
+            mixes.setMix("run", "swing", 0.05f);
+        }
+    },
     ;
 
     /** Where spineboy's 'aim' IK points the gun: the crosshair bone's position from the feet, in skeleton units (x is always ahead, facing flips the skeleton. */

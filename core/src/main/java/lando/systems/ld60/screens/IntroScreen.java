@@ -35,7 +35,7 @@ public class IntroScreen extends BaseScreen {
 
         var title    = new VisLabel("Ludum Dare 60");
         var play     = buttonWithOnClick("Play",     () -> start(() -> new GameScreen(game, GameLevel.LEVEL_1)));
-        var dialog   = buttonWithOnClick("Dialog",   () -> start(() -> new DialogScreen(game)));
+        var dialog   = buttonWithOnClick("Dialog",   () -> start(() -> new DialogScreenIntro(game)));
         var settings = buttonWithOnClick("Settings", settingsUI::toggle);
         var credits  = new VisTextButton("Credits");
 

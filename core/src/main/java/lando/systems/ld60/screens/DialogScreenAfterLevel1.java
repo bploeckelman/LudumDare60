@@ -24,9 +24,9 @@ import lando.systems.ld60.assets.GameSpine;
 import lando.systems.ld60.assets.GameUIAnim;
 import lando.systems.ld60.particles.effects.BloodSplatterEffect;
 
-public class DialogScreen extends BaseScreen {
+public class DialogScreenAfterLevel1 extends BaseScreen {
 
-    private static final String TAG = DialogScreen.class.getSimpleName();
+    private static final String TAG = DialogScreenAfterLevel1.class.getSimpleName();
 
     private static final float CHARACTER_SIZE = 160f;
     private static final float BOX_WIDTH = 600f;
@@ -58,7 +58,7 @@ public class DialogScreen extends BaseScreen {
     private final Stage dialogStage = new Stage(worldView.viewport, batch);
     private int line = 0;
 
-    public DialogScreen(ZenGame game) {
+    public DialogScreenAfterLevel1(ZenGame game) {
         super(game, false);
         addCommonSystems();
         var dosFont = new BitmapFont(Gdx.files.internal("fonts/dos.fnt"));
