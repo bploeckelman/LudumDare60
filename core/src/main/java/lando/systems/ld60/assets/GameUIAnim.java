@@ -12,6 +12,7 @@ public enum GameUIAnim implements AnimType {
     , CONTROLS ("ui/controls-modal")
     , DIALOG ("ui/dialog-box")
     , GO_ARROW("ui/go")
+    , BUTTON("ui/button")
     , KEY_W ("kenny-input/keyboard-w")
     , KEY_S ("kenny-input/keyboard-s")
     , KEY_D ("kenny-input/keyboard-d")
