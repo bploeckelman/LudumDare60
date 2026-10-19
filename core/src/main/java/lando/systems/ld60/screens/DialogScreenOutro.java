@@ -59,7 +59,7 @@ public class DialogScreenOutro extends BaseScreen {
         new Line(Side.RIGHT, awol("idle"), null, "Hopefully before then, the sociopathic tech bros in charge will make things better instead of measurably worse!"),
 
 //        new Line(Side.LEFT, awol("run"), null, "The first of many to fall before me.\nOnward to victory!"),
-        new Line(Side.RIGHT, null, null, "And so it begins..."),
+        new Line(Side.RIGHT, null, null, "Thanks for playing!"),
     };
 
     private final Speaker left;
