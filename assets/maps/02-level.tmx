@@ -83,7 +83,7 @@
   <object id="26" name="atari" type="enemy" gid="52" x="4712" y="392" width="32" height="32">
    <properties>
     <property name="boss" type="bool" value="true"/>
-    <property name="kind" value="atari"/>
+    <property name="kind" value="KingPong"/>
    </properties>
   </object>
   <object id="28" name="prof" type="enemy" gid="52" x="4816" y="416" width="16" height="16">

@@ -115,7 +115,7 @@ public final class Atari {
         return new BrawlerAnimClips(idle, walk, walk, idle, Float.MAX_VALUE);
     }
 
-    public static final Kind KIND = new Kind("atari",
+    public static final Kind KIND = new Kind("KingPong",
             tuning,
             Props.maxHealth,
             Props.feet,

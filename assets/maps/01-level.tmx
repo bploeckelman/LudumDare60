@@ -68,7 +68,7 @@
   <object id="26" name="n64Boss" type="enemy" gid="52" x="4708" y="289.667" width="32" height="32">
    <properties>
     <property name="boss" type="bool" value="true"/>
-    <property name="kind" value="n64"/>
+    <property name="kind" value="When64"/>
    </properties>
   </object>
   <object id="28" name="speak" type="enemy" gid="52" x="4304" y="272" width="16" height="16">

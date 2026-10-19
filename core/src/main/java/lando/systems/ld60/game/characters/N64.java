@@ -143,7 +143,7 @@ public final class N64 {
         e.add(new Hover(Props.hoverMin, Props.hoverMax, Props.hoverPeriodMin, Props.hoverPeriodMax));
     }
 
-    public static final Kind KIND = new Kind("n64",
+    public static final Kind KIND = new Kind("When64",
             tuning,
             Props.maxHealth,
             Props.feet,
