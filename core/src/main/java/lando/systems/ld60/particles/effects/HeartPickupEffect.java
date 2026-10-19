@@ -20,14 +20,9 @@ public class HeartPickupEffect implements ParticleEffect {
         public Position playerPos;
         public boolean spawned;
 
-        public Params(float originX, float originY, float playerX, float playerY) {
-            this.origin = new Position(originX, originY);
-            this.playerPos = new Position(playerX, playerY + 70f); // 70f is how far above the player's feet the hearts fly to
-
-        }
-
         public Params(Position origin, Position playerPos) {
-            this(origin.x, origin.y, playerPos.x, playerPos.y);
+            this.origin = origin;
+            this.playerPos = playerPos;
         }
 
         @Override
@@ -45,11 +40,6 @@ public class HeartPickupEffect implements ParticleEffect {
         int count = 8;
         var particles = new ArrayList<ParticleData>(count);
         for (int i = 0; i < count; i++) {
-            float scatterAngle = MathUtils.random(0f, 360f);
-            float scatterDist = MathUtils.random(8f, 24f);
-            float startX = params.origin.x + MathUtils.cosDeg(scatterAngle) * scatterDist;
-            float startY = params.origin.y + MathUtils.sinDeg(scatterAngle) * scatterDist;
-
             float ttl = MathUtils.random(0.4f, 0.7f);
             float startSize = MathUtils.random(14f, 22f);
             float startRot = MathUtils.random(-25f, 25f);
@@ -57,8 +47,9 @@ public class HeartPickupEffect implements ParticleEffect {
             particles.add(ParticleData.initializer(pool.obtain())
                 .keyframe(GameAtlas.SPRITES.get().findRegion("pickups/health"))
                 .interpolation(Interpolation.swingIn)
-                .startPos(startX, startY)
-                .targetPos(params.playerPos.x, params.playerPos.y)
+                .startPos(params.origin.x, params.origin.y)
+                .jitter(15f)
+                .targetPos(params.playerPos, 0f, 70f)
                 .startSize(startSize)
                 .endSize(4f)
                 .startRotation(startRot)

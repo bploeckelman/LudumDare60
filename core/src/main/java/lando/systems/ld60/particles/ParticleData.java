@@ -48,6 +48,8 @@ public class ParticleData implements Pool.Poolable {
     public float xTarget;
     public float yTarget;
     public Position targetPosition;
+    public float xTargetOffset;
+    public float yTargetOffset;
 
     public final Vector2 velocity;
     public float bounceScale;
@@ -177,6 +179,8 @@ public class ParticleData implements Pool.Poolable {
         xTarget = 0f;
         yTarget = 0f;
         targetPosition = null;
+        xTargetOffset = 0f;
+        yTargetOffset = 0f;
 
         velocity.set(0f, 0f);
         bounceScale = 0.8f;
@@ -241,6 +245,8 @@ public class ParticleData implements Pool.Poolable {
         private float xTarget = 0f;
         private float yTarget = 0f;
         private Position targetPosition;
+        private float xTargetOffset = 0f;
+        private float yTargetOffset = 0f;
 
         private float xVel = 0f;
         private float yVel = 0f;
@@ -357,9 +363,16 @@ public class ParticleData implements Pool.Poolable {
         }
 
         public Initializer targetPos(Position targetPosition) {
+            return targetPos(targetPosition, 0f, 0f);
+        }
+
+        /** Tracks {@code targetPosition} each frame, aiming at it plus the given offset. */
+        public Initializer targetPos(Position targetPosition, float xOffset, float yOffset) {
             this.targetPosition = targetPosition;
-            this.xTarget = targetPosition.x;
-            this.yTarget = targetPosition.y;
+            this.xTargetOffset = xOffset;
+            this.yTargetOffset = yOffset;
+            this.xTarget = targetPosition.x + xOffset;
+            this.yTarget = targetPosition.y + yOffset;
             this.targeted = true;
             return this;
         }
@@ -527,6 +540,8 @@ public class ParticleData implements Pool.Poolable {
             particleData.xTarget = xTarget;
             particleData.yTarget = yTarget;
             particleData.targetPosition = targetPosition;
+            particleData.xTargetOffset = xTargetOffset;
+            particleData.yTargetOffset = yTargetOffset;
             if (targeted && !timed) {
                 throw new GdxRuntimeException("Particles with a target must have a time to live (call timeToLive())");
             }

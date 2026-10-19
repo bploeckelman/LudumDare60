@@ -183,8 +183,8 @@ public class ParticleSystem extends IteratingSystem implements Disposable, Signa
         else if (data.targeted) {
             // If we're tracking a position component for the target, update the target coords
             if (data.targetPosition != null) {
-                data.xTarget = data.targetPosition.x;
-                data.yTarget = data.targetPosition.y;
+                data.xTarget = data.targetPosition.x + data.xTargetOffset;
+                data.yTarget = data.targetPosition.y + data.yTargetOffset;
             }
             position.set(
                 MathUtils.lerp(data.xStart, data.xTarget, progress),
