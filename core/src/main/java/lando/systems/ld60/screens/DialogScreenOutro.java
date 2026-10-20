@@ -123,6 +123,7 @@ public class DialogScreenOutro extends BaseScreen {
     public void update(float delta) {
         super.update(delta);
         dialogStage.act(delta);
+        delay -= delta;
         if (delay <= 0 && (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY))) {
             nextLine();
             delay = .2f;
