@@ -41,7 +41,8 @@ public class ExampleScroller extends MapScreen {
     boolean showHitboxes = false;
 
     public ExampleScroller(ZenGame game) {
-        super(game, GameMap.EXAMPLE_SCROLLER);
+//        super(game, GameMap.EXAMPLE_SCROLLER);
+        super(game, GameMap.EXAMPLE_PLATFORMER); // NOTE: 00-example-tmnt.tmx disabled due to cleaning up unused art to reduce artifact size
 
         this.skeletons = world.family(Family.all(SpineAnimator.TYPE));
         this.skeletonDebug = new SkeletonRendererDebug();
